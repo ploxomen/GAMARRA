@@ -1,0 +1,88 @@
+body {
+    background-image: url('../img/usuario/fondo-login.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+body:before {
+	content:'';
+	position: absolute;
+        top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: rgba(13, 11, 114, .75);
+}
+
+.login {
+    z-index: 1;
+}
+
+.formulario {
+    background: #fff;
+    padding-top: 2rem;
+    padding: 3rem 2.5rem;
+    padding-bottom: 4rem;
+    border-radius: .3rem;
+}
+
+@media (min-width: 768px) {
+    .formulario {
+        padding: 3rem 3rem;
+    }
+}
+
+.logo {
+    margin-top: -7rem;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .logo {
+        margin-top: -8rem;
+    }
+}
+
+.logo img {
+    width: 8rem;
+    background-color: #fff;
+    padding: .5rem;
+    border-radius: 50%;
+    box-shadow: 0px 0px 5px rgba(0,0,0,.2);
+}
+
+@media (min-width: 768px) {
+    .logo img {
+        width: 10rem;
+    }
+}
+
+.btn-acceder {
+    background-color: #003297;
+    border-color: #003297;
+}
+
+.btn-acceder:hover {
+    background-color: #0D0B72;
+    border-color: #0D0B72;
+}
+
+
+.titulo {
+    font-weight: bold;
+}
+
+.enlace-olvide {
+    color: #4A4A4A;
+    text-decoration: underline;
+}
+
+.enlace-olvide:hover {
+    color: #4A4A4A;
+}
