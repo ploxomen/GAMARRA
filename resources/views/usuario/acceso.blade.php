@@ -35,7 +35,7 @@
                   </div>
                 </div>
                 <div class="mb-3">
-                  <a href="#" class="text-center d-block enlace-olvide">¿Olvidaste tu contraseña?</a>
+                  {{-- <a href="#" class="text-center d-block enlace-olvide">¿Olvidaste tu contraseña?</a> --}}
                 </div>
                 <button type="submit" class="btn btn-primary w-100 btn-lg">Acceder</button>
               </form>
