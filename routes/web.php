@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\Categoria;
+use App\Http\Controllers\Articulo;
+use App\Http\Controllers\Familia;
 use App\Http\Controllers\Clientes;
 use App\Http\Controllers\Kardex;
 use App\Http\Controllers\MisProductos;
@@ -63,13 +64,23 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
         });
     });
     Route::prefix('almacen')->group(function () {
-        Route::prefix('categoria')->group(function () {
-            Route::get('/', [Categoria::class, 'index'])->name('admin.categoria.index');
-            Route::post('listar', [Categoria::class, 'listar']);
-            Route::get('listar/{categoria}', [Categoria::class, 'show']);
-            Route::post('crear', [Categoria::class, 'store']);
-            Route::post('editar/{categoria}', [Categoria::class, 'update']);
-            Route::delete('eliminar/{categoria}', [Categoria::class, 'destroy']);
+        Route::prefix('familias')->group(function () {
+            Route::get('/', [Familia::class, 'index'])->name('admin.familia.index');
+            Route::post('listar', [Familia::class, 'listar']);
+            Route::get('listar/{familia}', [Familia::class, 'show']);
+            Route::post('crear', [Familia::class, 'store']);
+            Route::post('editar/{familia}', [Familia::class, 'update']);
+            Route::delete('eliminar/{familia}', [Familia::class, 'destroy']);
+            Route::get('subfamilia/eliminar/{subfamilia}', [Familia::class, 'eliminarSubfamilia']);
+        });
+        Route::prefix('articulos')->group(function () {
+            Route::get('/', [Articulo::class, 'index'])->name('admin.articulo.index');
+            Route::post('listar', [Articulo::class, 'listar']);
+            Route::get('listar/{articulo}', [Articulo::class, 'show']);
+            Route::post('crear', [Articulo::class, 'store']);
+            Route::post('editar/{articulo}', [Articulo::class, 'update']);
+            Route::delete('eliminar/{articulo}', [Articulo::class, 'destroy']);
+            Route::get('familia/{familia}', [Articulo::class, 'obtenerSubfamilias']);
         });
         Route::prefix('producto')->group(function () {
             Route::get('/', [MisProductos::class, 'index'])->name('admin.producto.index');

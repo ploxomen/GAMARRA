@@ -24,6 +24,13 @@ class General{
     validarVacio(dato) {
         return !dato ? "Sin Registro" : dato;
     }
+    renderSubfamilias(datos,$cbSubfamilia) {
+        let template = "<option></option>";
+        datos.forEach(sub => {
+            template += `<option value="${sub.id}">${sub.codigo + ' - ' + sub.nombre}</option>`
+        });
+        $cbSubfamilia.innerHTML = template;
+    }
     banerLoader = document.querySelector("#banerCargando")
     seleccionarCheckbox(claseSeleccionar,$selecionarTodo){
         let cantidadClase = 0;
