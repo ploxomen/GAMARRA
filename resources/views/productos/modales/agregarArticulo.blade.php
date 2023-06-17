@@ -16,12 +16,12 @@
                     </h5>
                 </div>
                 <div class="form-group col-12 form-required">
-                    <label for="idModalcodigo">Código</label>
-                    <input type="text" name="codigoArticulo" class="form-control" id="idModalcodigo" required>
+                    <label for="idModalarticuloCodigo">Código</label>
+                    <input type="text" name="codigoArticulo" class="form-control" id="idModalarticuloCodigo" required>
                 </div>
                 <div class="form-group col-12">
-                    <label for="idModalnombre">Nombre</label>
-                    <input type="text" name="nombreArticulo" class="form-control" id="idModalnombre" required>
+                    <label for="idModalarticuloNombre">Nombre</label>
+                    <input type="text" name="nombreArticulo" class="form-control" id="idModalarticuloNombre" required>
                 </div>
                 <div class="col-12">
                     <h5 class="text-primary">
@@ -30,8 +30,8 @@
                     </h5>
                 </div>
                 <div class="form-group col-12 col-md-6 form-required">
-                    <label for="idModalfamilia">Familia</label>
-                    <select name="id_familia" id="idModalfamilia" data-placeholder="Seleccione una familia" required class="select2-simple">
+                    <label for="idModalfamiliaId">Familia</label>
+                    <select name="id_familia" id="idModalfamiliaId" data-placeholder="Seleccione una familia" required class="select2-simple">
                         <option value=""></option>
                         @foreach ($familias as $familia)
                             <option value="{{$familia->id}}">{{$familia->codigo .' - ' . $familia->nombre}}</option>
@@ -39,8 +39,8 @@
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 form-required">
-                    <label for="idModalifamiliasub">Subfamilia</label>
-                    <select name="id_familia_sub" id="idModalifamiliasub" data-placeholder="Seleccione una subfamilia" required class="select2-simple">
+                    <label for="idModalfamiliaSubId">Subfamilia</label>
+                    <select name="id_familia_sub" id="idModalfamiliaSubId" data-placeholder="Seleccione una subfamilia" required class="select2-simple">
                     </select>
                 </div>
                 <div class="form-group col-12">

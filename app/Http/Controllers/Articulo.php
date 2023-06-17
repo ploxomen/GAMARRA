@@ -34,8 +34,8 @@ class Articulo extends Controller
         if(isset($accessModulo['session'])){
             return response()->json($accessModulo);
         }
-        $marca = ModelsArticulo::all();
-        return DataTables::of($marca)->toJson();
+        $articulos = ModelsArticulo::obtenerArticulos();
+        return DataTables::of($articulos)->toJson();
     }
     public function store(Request $request)
     {
@@ -46,10 +46,13 @@ class Articulo extends Controller
         if(isset($accessModulo['session'])){
             return response()->json($accessModulo);
         }
-        ModelsArticulo::create(['nombreMarca' => $request->nombreMarca, 'estado' => $request->has("activo") ? 1 : 0]);
-        return response()->json(['success' => 'marca agregada correctamente']);
+        if(ModelsArticulo::cantidadArituloCodigo($request->codigoArticulo)){
+            return response()->json(['alerta' => 'El código ' . $request->codigoArticulo . ' del artículo ya se encuentra registrado, por favor establesca otro código']);
+        }
+        ModelsArticulo::create(['id_familia_sub' => $request->id_familia_sub, 'estado' => 1,'codigo' => $request->codigoArticulo,'nombre' => $request->nombreArticulo]);
+        return response()->json(['success' => 'articulo creado correctamente']);
     }
-    public function show(ModelsArticulo $marca, Request $request)
+    public function show($articulo, Request $request)
     {
         if(!$request->ajax()){
             return response()->json($this->usuarioController->errorPeticion);
@@ -58,10 +61,10 @@ class Articulo extends Controller
         if(isset($accessModulo['session'])){
             return response()->json($accessModulo);
         }
-        $marca = $marca->makeHidden("fechaCreada","fechaActualizada")->toArray();
-        return response()->json(["success" => $marca]);
+        $articuloLista = ModelsArticulo::obtenerArticulos($articulo);
+        return response()->json(["success" => $articuloLista]);
     }
-    public function update(ModelsArticulo $marca, Request $request)
+    public function update($articulo, Request $request)
     {
         if(!$request->ajax()){
             return response()->json($this->usuarioController->errorPeticion);
@@ -70,8 +73,11 @@ class Articulo extends Controller
         if(isset($accessModulo['session'])){
             return response()->json($accessModulo);
         }
-        $marca->update(['nombreMarca' => $request->nombreMarca, 'estado' => $request->has("activo") ? 1 : 0]);
-        return response()->json(['success' => 'marca modificada correctamente']);
+        if(ModelsArticulo::cantidadArituloCodigoEditar($request->codigoArticulo,$articulo)){
+            return response()->json(['alerta' => 'El código ' . $request->codigoArticulo . ' del artículo ya se encuentra registrado, por favor establesca otro código']);
+        }
+        ModelsArticulo::find($articulo)->update(['id_familia_sub' => $request->id_familia_sub, 'estado' => $request->has("estado") ? 1 : 0,'codigo' => $request->codigoArticulo,'nombre' => $request->nombreArticulo]);
+        return response()->json(['success' => 'Artículo modificado correctamente']);
     }
     public function obtenerSubfamilias(Familia $familia, Request $request){
         if(!$request->ajax()){
@@ -83,7 +89,7 @@ class Articulo extends Controller
         }
         return response()->json(['success' => $familia->subFamila()->select("id","codigo","nombre")->where('estado',1)->get()]);
     }
-    public function destroy(ModelsArticulo $marca, Request $request)
+    public function destroy(ModelsArticulo $articulo, Request $request)
     {
         if(!$request->ajax()){
             return response()->json($this->usuarioController->errorPeticion);
@@ -92,10 +98,7 @@ class Articulo extends Controller
         if(isset($accessModulo['session'])){
             return response()->json($accessModulo);
         }
-        if($marca->productos()->count() > 0){
-            return ["alerta" => "Debes eliminar primero los productos relacionados a esta marca"];
-        }
-        $marca->delete();
-        return response()->json(['success' => 'marca eliminada correctamente']);
+        $articulo->delete();
+        return response()->json(['success' => 'artículo eliminado correctamente']);
     }
 }

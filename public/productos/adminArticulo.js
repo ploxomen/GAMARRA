@@ -14,33 +14,33 @@ function loadPage(){
             }
         },
         columns: [{
-            data: 'id',
+            data: 'articuloId',
             render: function(data,type,row, meta){
                 return meta.row + 1;
             }
         },
         {
-            data: 'codigo'
+            data: 'articuloCodigo'
         },
         {
-            data: 'nombre'
+            data: 'articuloNombre'
         }
         ,
         {
-            data: 'famila'
+            data: 'familaNombre'
         }
         ,
         {
-            data: 'subfamilia'
+            data: 'familiSubNombre'
         }
         ,{
-            data: 'estado',
+            data: 'articuloEstado',
             render:function(data){
                 return data ? `<span class="badge badge-success">Vigenta</span>` : `<span class="badge badge-danger">Descontinuado</span>`
             }
         },
         {
-            data: 'id',
+            data: 'articuloId',
             render : function(data){
                 return `<div class="d-flex justify-content-center" style="gap:5px;"><button class="btn btn-sm btn-outline-info p-1" data-articulo="${data}">
                     <small>
@@ -62,6 +62,7 @@ function loadPage(){
     const btnGuardarForm = document.querySelector("#btnGuardarFrm");
     const checkEstado = document.querySelector("#idModalestado");
     const modalTitulo = document.querySelector("#tituloArticulo");
+    const $cbSubfamilia = document.querySelector("#idModalfamiliaSubId");
     let idArticulo = null;
     $tablaArticulo.onclick = async function(e){
         if (e.target.classList.contains("btn-outline-info")){
@@ -73,23 +74,20 @@ function loadPage(){
                     return alertify.alert([...general.alertaSesion],() => {window.location.reload()});
                 }
                 if(response.success){
-                    idArticulo = response.success.id;
-                    modalTitulo.textContent = "Editar articulo";
+                    idArticulo = response.success.articuloId;
+                    modalTitulo.textContent = "Editar artículo";
                     btnGuardarForm.querySelector("span").textContent ="Editar";
                     checkEstado.disabled = false;
                     for (const key in response.success) {
                         if (Object.hasOwnProperty.call(response.success, key)) {
                             const valor = response.success[key];
                             const dom = document.querySelector("#idModal" + key);
-                            if (key == "sub_famila"){
-                                valor.forEach(c => {
-                                    listaSubarticulo.append(agregarSubarticulo(c.id,c.nombre,c.codigo));
-                                });
-                                if(listaSubarticulo.children.length){
-                                    txtSinSubarticulo.hidden = true;
-                                }
+                            if(key == "listaFamiliaSub"){
+                                general.renderSubfamilias(valor,$cbSubfamilia);
+                                $($cbSubfamilia).val(response.success.familiaSubId).trigger("change");
+                                continue;
                             }
-                            if (key == "estado"){
+                            if (key == "articuloEstado"){
                                 checkEstado.checked = valor === 1 ? true : false;
                                 checkEstado.parentElement.querySelector("label").textContent = valor === 1 ? "VIGENTE" : "DESCONTINUADO";
                                 continue;
@@ -100,13 +98,14 @@ function loadPage(){
                             dom.value = valor;
                         }
                     }
-                    $('#agregararticulos').modal("show");
+                    $('#agregarArticulo .select2-simple').trigger("change");
+                    $('#agregarArticulo').modal("show");
                 }
             } catch (error) {
                 general.cargandoPeticion(e.target, 'fas fa-pencil-alt', false);
                 idArticulo = null;
                 console.error(error);
-                alertify.error("error al obtener la área")
+                alertify.error("error al obtener el artículo")
             }
 
         }
@@ -135,14 +134,15 @@ function loadPage(){
             },() => {})
         }
     }
-    $('#agregararticulos').on("hidden.bs.modal",function(e){
+    $('#agregarArticulo').on("hidden.bs.modal",function(e){
         idArticulo = null;
-        modalTitulo.textContent = "Agregar artículo";
+        modalTitulo.textContent = "Agregar Artículo";
         checkEstado.disabled = true;
         btnGuardarForm.querySelector("span").textContent = "Guardar";
         checkEstado.checked = true;
         checkEstado.parentElement.querySelector("label").textContent = "VIGENTE";
         formArticulo.reset();
+        $cbSubfamilia.innerHTML = "";
     });
 
     btnGuardarForm.onclick = e => document.querySelector("#btnFrmEnviar").click();
@@ -165,7 +165,8 @@ function loadPage(){
                 tablaArticulo.draw();
                 formArticulo.reset();
                 idArticulo = null;
-                $('#agregararticulos').modal("hide");
+                $('#agregarArticulo .select2-simple').val("").trigger("change");
+                $('#agregarArticulo').modal("hide");
             }
         } catch (error) {
             idArticulo = null;
@@ -173,10 +174,9 @@ function loadPage(){
             alertify.error(idArticulo != null ? "error al editar la articulo" : 'error al agregar la articulo')
         }
     }
-    const $cbSubfamilia = document.querySelector("#idModalifamiliasub");
-    $('#idModalfamilia').on("select2:select",async function(e){
+    $('#idModalfamiliaId').on("select2:select",async function(e){
         try {
-            const response = await general.funcfetch("articulos/familia" + $(this).val(), null, "GET");
+            const response = await general.funcfetch("articulos/familia/" + $(this).val(), null, "GET");
             if (response.session) {
                 return alertify.alert([...general.alertaSesion], () => { window.location.reload() });
             }
