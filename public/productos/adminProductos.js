@@ -7,6 +7,7 @@ function loadPage(){
         swhitchOn.addEventListener("change",gen.switchs);
     }
     const tablaProducto = document.querySelector("#tablaProductos");
+    const $cbSubfamilia = document.querySelector("#idModalfamiliaSubId");
     const tablaProductoDatatable = $(tablaProducto).DataTable({
         ajax: {
             url: 'producto/listar',
@@ -19,20 +20,25 @@ function loadPage(){
             }
         },
         columns: [{
-            data: 'id',
+            data: 'productoId',
             render: function(data,type,row, meta){
                 return meta.row + 1;
             }
         },
         {
-            data: 'nombreProducto'
+            data : 'productoCodigo'
         },
         {
-            data: 'descripcion'
+            data: 'productoNombre'
         },
         {
-            data : 'categoria.nombreCategoria',
-            name : 'categoria.nombreCategoria'
+            data: 'familiaNombre'
+        },
+        {
+            data: 'familiaSubNombre'
+        },
+        {
+            data: 'articuloNombre'
         },
         {
             data: 'precioVenta',
@@ -41,7 +47,7 @@ function loadPage(){
             }
         },
         {
-            data : 'estado',
+            data : 'productoEstado',
             render : function(data){
                 if(data === 1){
                     return '<span class="badge badge-success">Activo</span>';
@@ -53,7 +59,7 @@ function loadPage(){
             }
         },
         {
-            data: 'id',
+            data: 'productoId',
             render : function(data){
                 return `<div class="d-flex justify-content-center" style="gap:5px;"><button class="btn btn-sm btn-outline-info p-1" data-producto="${data}">
                     <small>
@@ -186,6 +192,24 @@ function loadPage(){
             
         }
     })
+
+    $('#idModalfamiliaId').on("select2:select",async function(e){
+        try {
+            const response = await gen.funcfetch("producto/familia/" + $(this).val(), null, "GET");
+            if (response.session) {
+                return alertify.alert([...gen.alertaSesion], () => { window.location.reload() });
+            }
+            if(response.alerta){
+                return alertify.alert("Alerta",response.alerta);
+            }
+            if (response.success) {
+                gen.renderSubfamilias(response.success,$cbSubfamilia);
+            }
+        } catch (error) {
+            console.error(error);
+            alertify.error("error al obtener las subfamilias");
+        }
+    });
 }
 window.addEventListener("DOMContentLoaded",loadPage);
 

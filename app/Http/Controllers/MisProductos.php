@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Usuario;
-use App\Models\Categoria;
-use App\Models\Marca;
-use App\Models\Presentacion;
+use App\Models\Familia;
 use App\Models\Productos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +12,7 @@ use Yajra\DataTables\Facades\DataTables;
 
 class MisProductos extends Controller
 {
-    private $moduloArea = "admin.producto.index";
+    private $moduloProducto = "admin.producto.index";
     private $usuarioController;
     
     function __construct()
@@ -23,26 +21,36 @@ class MisProductos extends Controller
     }
     public function index()
     {
-        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloArea);
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloProducto);
         if(isset($verif['session'])){
             return redirect()->route("home"); 
         }
         $modulos = $this->usuarioController->obtenerModulos();
-        $categorias = Categoria::all()->where('estado',1);
-        return view("productos.productos",compact("modulos","categorias"));
+        $familias = Familia::all()->where('estado',1);
+        return view("productos.productos",compact("modulos","familias"));
     }
     public function listar(Request $request)
     {
-        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloArea);
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloProducto);
         if(isset($verif['session'])){
             return response()->json(['session' => true]); 
         }
-        $productos = Productos::with(["categoria:id,nombreCategoria"])->select("id","nombreProducto","categoriaFk","descripcion","precioVenta","estado");
-        return DataTables::of($productos->get())->toJson();
+        $productos = Productos::obtenerProductos();
+        return DataTables::of($productos)->toJson();
+    }
+    public function obtenerSubfamilias(Familia $familia, Request $request){
+        if(!$request->ajax()){
+            return response()->json($this->usuarioController->errorPeticion);
+        }
+        $accessModulo = $this->usuarioController->validarXmlHttpRequest($this->moduloProducto);
+        if(isset($accessModulo['session'])){
+            return response()->json($accessModulo);
+        }
+        return response()->json(['success' => $familia->subFamila()->select("id","codigo","nombre")->where('estado',1)->get()]);
     }
     public function store(Request $request)
     {
-        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloArea);
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloProducto);
         if(isset($verif['session'])){
             return response()->json(['session' => true]); 
         }
@@ -68,7 +76,7 @@ class MisProductos extends Controller
     }
     public function show(Productos $producto)
     {
-        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloArea);
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloProducto);
         if(isset($verif['session'])){
             return response()->json(['session' => true]); 
         }
@@ -77,7 +85,7 @@ class MisProductos extends Controller
     }
     public function update(Productos $producto, Request $request)
     {
-        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloArea);
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloProducto);
         if(isset($verif['session'])){
             return response()->json(['session' => true]); 
         }
@@ -107,7 +115,7 @@ class MisProductos extends Controller
     }
     public function destroy(Productos $producto)
     {
-        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloArea);
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloProducto);
         if(isset($verif['session'])){
             return response()->json(['session' => true]); 
         }

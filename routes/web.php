@@ -89,6 +89,7 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
             Route::post('crear', [MisProductos::class, 'store']);
             Route::post('editar/{producto}', [MisProductos::class, 'update']);
             Route::delete('eliminar/{producto}', [MisProductos::class, 'destroy']);
+            Route::get('familia/{familia}', [Articulo::class, 'obtenerSubfamilias']);
         });
         Route::prefix('kardex')->group(function () {
             Route::get('/', [Kardex::class, 'index'])->name('admin.kardex.index');

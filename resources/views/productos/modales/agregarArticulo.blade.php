@@ -31,12 +31,7 @@
                 </div>
                 <div class="form-group col-12 col-md-6 form-required">
                     <label for="idModalfamiliaId">Familia</label>
-                    <select name="id_familia" id="idModalfamiliaId" data-placeholder="Seleccione una familia" required class="select2-simple">
-                        <option value=""></option>
-                        @foreach ($familias as $familia)
-                            <option value="{{$familia->id}}">{{$familia->codigo .' - ' . $familia->nombre}}</option>
-                        @endforeach
-                    </select>
+                    @include('helper.combobox.cbFamilia',['idFamilia' => 'idModalfamiliaId'])
                 </div>
                 <div class="form-group col-12 col-md-6 form-required">
                     <label for="idModalfamiliaSubId">Subfamilia</label>

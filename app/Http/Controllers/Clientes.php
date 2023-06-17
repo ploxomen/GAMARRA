@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Usuario;
 use App\Models\Clientes as ModelsClientes;
 use App\Models\ClientesContactos;
+use App\Models\Paises;
 use App\Models\Rol;
 use App\Models\TipoDocumento;
 use App\Models\User;
@@ -30,7 +31,8 @@ class Clientes extends Controller
         }
         $modulos = $this->usuarioController->obtenerModulos();
         $tiposDocumentos = TipoDocumento::where('estado',1)->get();
-        return view("ventas.clientes",compact("modulos","tiposDocumentos"));
+        $paises = Paises::all()->where('estado',1);
+        return view("ventas.clientes",compact("modulos","tiposDocumentos","paises"));
     }
     public function listar(Request $request)
     {
@@ -63,7 +65,7 @@ class Clientes extends Controller
         try {
             $usuario = User::create($datosUsuario);
             UsuarioRol::create(['rolFk' => $rolCliente->id,'usuarioFk' => $usuario->id]);
-            $cliente = ModelsClientes::create(['id_usuario' => $usuario->id,'nombreCliente' => $request->nombreCliente,'estado' => 1]);
+            $cliente = ModelsClientes::create(['id_usuario' => $usuario->id,'id_pais' => $request->id_pais,'nombreCliente' => $request->nombreCliente,'estado' => 1]);
             if(isset($request->contactoNombres)){
                 for ($i=0; $i < count($request->contactoNombres); $i++) {
                     $contactos = [
@@ -99,7 +101,7 @@ class Clientes extends Controller
         try {
             $datosUsuario = $request->only("tipoDocumento","nroDocumento","telefono","celular","direccion");
             $datosUsuario['nombres'] = $request->nombreCliente;
-            $datosCliente = $request->only("nombreCliente");
+            $datosCliente = $request->only("nombreCliente","id_pais");
             $datosCliente['estado'] = $request->has("estado") ? 1 : 0;
             User::where('id',$cliente->id_usuario)->update($datosUsuario);
             $cliente->update($datosCliente);

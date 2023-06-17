@@ -8,17 +8,24 @@ use Illuminate\Support\Facades\DB;
 class Productos extends Model
 {
     protected $table = 'productos';
+    protected $primaryKey = 'id';
     const CREATED_AT = 'fechaCreada';
     const UPDATED_AT = 'fechaActualizada';
-    protected $fillable = ['nombreProducto','descripcion','precioVenta','categoriaFk','urlImagen','estado'];
+    protected $fillable = ['nombreProducto','codigo','id_articulo','descripcion','precioVenta','urlImagen','estado'];
 
     // public function marca()
     // {
     //     return $this->belongsTo(Marca::class,'marcaFk');
     // }
-    public function categoria()
+    public function articulo()
     {
-        return $this->belongsTo(Categoria::class,'categoriaFk');
+        return $this->belongsTo(Articulo::class,'id_articulo');
+    }
+    public function scopeObtenerProductos($query) {
+        return $query->select("articulo.nombre AS articuloNombre","productos.id AS productoId","familia.nombre AS familiaNombre","familia_sub.nombre AS familiaSubNombre","productos.codigo AS productoCodigo","productos.nombreProducto AS productoNombre","productos.precioVenta","productos.estado AS productoEstado")->join("articulo","productos.id_articulo","=","articulo.id")
+        ->join("familia_sub","familia_sub.id","=","articulo.id_familia_sub")
+        ->join("familia","familia.id","=","familia_sub.id_familia")
+        ->get();
     }
     // public function presentacion()
     // {

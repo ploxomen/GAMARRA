@@ -23,6 +23,7 @@
             <thead class="text-center">
                 <tr>
                     <th>N°</th>
+                    <th>País</th>
                     <th>Tipo Documento</th>
                     <th>N° Documento</th>
                     <th>Cliente</th>

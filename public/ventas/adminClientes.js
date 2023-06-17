@@ -17,6 +17,9 @@ function loadPage(){
             }
         },
         {
+            data: 'pais_espanish'
+        },
+        {
             data: 'documento'
         },
         {

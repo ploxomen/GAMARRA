@@ -15,7 +15,16 @@
                         Datos del cliente
                     </h5>
                 </div>
-                <div class="form-group col-12 col-md-6 form-required">
+                <div class="form-group col-12 col-md-6 col-lg-4 form-required">
+                    <label for="idModalpaises">País</label>
+                    <select name="id_pais" id="idModalpaises" required class="select2-simple" data-placeholder="Seleccione un país">
+                        <option value=""></option>
+                        @foreach ($paises as $pais)
+                            <option value="{{$pais->id}}" {{$pais->id == 165 ? 'selected' : ''}}>{{$pais->pais_espanish}}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group col-12 col-md-6 col-lg-4 form-required">
                     <label for="idModaltipoDocumento">Tipo Documento</label>
                     <select name="tipoDocumento" id="idModaltipoDocumento" class="select2-simple">
                         <option value=""></option>
@@ -24,7 +33,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="form-group col-12 col-md-6 form-required">
+                <div class="form-group col-12 col-lg-4 form-required">
                     <label for="idModalnroDocumento">N° Documento</label>
                     <input type="text" name="nroDocumento" class="form-control" id="idModalnroDocumento">
                 </div>

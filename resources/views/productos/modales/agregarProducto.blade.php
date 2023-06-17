@@ -9,6 +9,16 @@
         </div>
         <div class="modal-body">
             <form class="form-row" id="formProducto">
+                <div class="col-12">
+                    <h5 class="text-primary">
+                        <i class="fas fa-caret-right"></i>
+                        Datos del producto
+                    </h5>
+                </div>
+                <div class="form-group col-12 form-required">
+                    <label for="idModalcodigoProducto">Código</label>
+                    <input type="text" name="codigoProducto" class="form-control" id="idModalcodigoProducto" required>
+                </div>
                 <div class="form-group col-12 form-required">
                     <label for="idModalnombreProducto">Producto</label>
                     <input type="text" name="nombreProducto" class="form-control" id="idModalnombreProducto" required>
@@ -33,15 +43,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group col-6 form-required">
-                    <label for="idModalcategoriaFk">Categoría</label>
-                    <select name="categoriaFk" id="idModalcategoriaFk" class="select2-simple">
-                        <option value=""></option>
-                        @foreach ($categorias as $categoria)
-                            <option value="{{$categoria->id}}">{{$categoria->nombreCategoria}}</option>
-                        @endforeach
-                    </select>
-                </div>
                 <div class="form-group col-12 col-md-8">
                     <label for="customFileLang">Imagen del Producto</label>
                     <input type="file" name="urlImagen" class="form-control-file form-control-sm" accept="image/*" id="customFileLang">
@@ -51,6 +52,26 @@
                     <div>
                         <img src="/img/imgprevproduc.png" id="imgPrevio" alt="Imagen del producto" width="80px">
                     </div>
+                </div>
+                <div class="col-12">
+                    <h5 class="text-primary">
+                        <i class="fas fa-caret-right"></i>
+                        Datos de la familia
+                    </h5>
+                </div>
+                <div class="form-group col-6 form-required">
+                    <label for="idModalfamiliaId">Familia</label>
+                    @include('helper.combobox.cbFamilia',['idFamilia' => 'idModalfamiliaId'])
+                </div>
+                <div class="form-group col-md-6 form-required">
+                    <label for="idModalfamiliaSubId">Subfamilia</label>
+                    <select name="id_familia_sub" id="idModalfamiliaSubId" data-placeholder="Seleccione una subfamilia" required class="select2-simple">
+                    </select>
+                </div>
+                <div class="form-group col-12 form-required">
+                    <label for="idModalarticulo">Artículo</label>
+                    <select name="id_articulo" id="idModalarticulo" data-placeholder="Seleccione un artículo" required class="select2-simple">
+                    </select>
                 </div>
                 <div class="form-group col-12">
                     <div class="d-flex flex-wrap" style="gap: 20px;">

@@ -23,9 +23,11 @@
             <thead class="text-center">
                 <tr>
                     <th>N°</th>
+                    <th>Código</th>
                     <th>Producto</th>
-                    <th>Descripción</th>
-                    <th>Categoría</th>
+                    <th>Familia</th>
+                    <th>Subfamilia</th>
+                    <th>Artículo</th>
                     <th>Precio</th>
                     <th>Estado</th>
                     <th>Acciones</th>
