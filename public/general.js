@@ -24,12 +24,19 @@ class General{
     validarVacio(dato) {
         return !dato ? "Sin Registro" : dato;
     }
-    renderSubfamilias(datos,$cbSubfamilia) {
+    renderSubfamilias(datos,$cbSubfamilia,valor = null) {
         let template = "<option></option>";
         datos.forEach(sub => {
-            template += `<option value="${sub.id}">${sub.codigo + ' - ' + sub.nombre}</option>`
+            template += `<option value="${sub.id}" ${valor === sub.id ? 'selected' : '' }>${sub.codigo + ' - ' + sub.nombre}</option>`
         });
         $cbSubfamilia.innerHTML = template;
+    }
+    renderArticulos(datos,$cbArticulos,valor = null) {
+        let template = "<option></option>";
+        datos.forEach((sub,key) => {
+            template += `<option value="${sub.id}" ${valor === sub.id || (!valor && !key) ? 'selected' : '' }>${sub.codigo + ' - ' + sub.nombre}</option>`
+        });
+        $cbArticulos.innerHTML = template;
     }
     banerLoader = document.querySelector("#banerCargando")
     seleccionarCheckbox(claseSeleccionar,$selecionarTodo){

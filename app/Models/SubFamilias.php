@@ -16,7 +16,10 @@ class SubFamilias extends Model
     {
         return $this->belongsTo(Familia::class,'id_familia');
     }
-
+    public function articulos()
+    {
+        return $this->hasMany(Articulo::class,'id_familia_sub');
+    }
     function scopeCanitdadSubFamilias($query,$codigo){
         return $query->where('codigo',$codigo)->count();
     }

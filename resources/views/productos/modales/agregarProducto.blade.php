@@ -16,28 +16,28 @@
                     </h5>
                 </div>
                 <div class="form-group col-12 form-required">
-                    <label for="idModalcodigoProducto">Código</label>
-                    <input type="text" name="codigoProducto" class="form-control" id="idModalcodigoProducto" required>
+                    <label for="idModalproductoCodigo">Código</label>
+                    <input type="text" name="codigo" class="form-control" id="idModalproductoCodigo" required>
                 </div>
                 <div class="form-group col-12 form-required">
-                    <label for="idModalnombreProducto">Producto</label>
-                    <input type="text" name="nombreProducto" class="form-control" id="idModalnombreProducto" required>
+                    <label for="idModalproductoNombre">Producto</label>
+                    <input type="text" name="nombreProducto" class="form-control" id="idModalproductoNombre" required>
                 </div>
                 <div class="form-group col-12">
-                    <label for="idModaldescripcion">Descripción</label>
-                    <textarea name="descripcion" id="idModaldescripcion" class="form-control" rows="2"></textarea>
+                    <label for="idModalproductoDescripcion">Descripción</label>
+                    <textarea name="descripcion" id="idModalproductoDescripcion" class="form-control" rows="2"></textarea>
                 </div>
                 <div class="form-group col-6 form-required">
                     <label for="idModalprecioVenta">Precio</label>
                     <div class="input-group">
                         <div class="input-group-prepend">
-                            <button type="button" class="btn btn-sm btn-outline-info cambiar-cantidad" data-number="#idModalprecioVenta" data-accion="disminuir">
+                            <button type="button" class="btn btn-sm btn-outline-info cambiar-cantidad" data-number="#idModalproductoPrecioVenta" data-accion="disminuir">
                                 <i class="fas fa-minus"></i>
                             </button>
                         </div>
-                        <input type="number" value="0.00" name="precioVenta" min="0" step="0.01" class="form-control" id="idModalprecioVenta">
+                        <input type="number" value="0.00" name="precioVenta" min="0" step="0.01" class="form-control" id="idModalproductoPrecioVenta">
                         <div class="input-group-prepend">
-                            <button type="button" class="btn btn-sm btn-outline-info cambiar-cantidad" data-number="#idModalprecioVenta" data-accion="aumentar">
+                            <button type="button" class="btn btn-sm btn-outline-info cambiar-cantidad" data-number="#idModalproductoPrecioVenta" data-accion="aumentar">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
@@ -74,11 +74,9 @@
                     </select>
                 </div>
                 <div class="form-group col-12">
-                    <div class="d-flex flex-wrap" style="gap: 20px;">
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" name="estado" class="custom-control-input change-switch" data-selected="VIGENTE" data-noselected="DESCONTINUADO" disabled checked id="idModalestado">
-                            <label class="custom-control-label" for="idModalestado">VIGENTE</label>
-                        </div>
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" name="estado" class="custom-control-input change-switch" data-selected="VIGENTE" data-noselected="DESCONTINUADO" disabled checked id="idModalestado">
+                        <label class="custom-control-label" for="idModalestado">VIGENTE</label>
                     </div>
                 </div>
                 <input type="submit" hidden id="btnFrmEnviar">

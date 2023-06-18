@@ -18,8 +18,13 @@ class Articulo extends Model
     public function scopeCantidadArituloCodigoEditar($query,$codigo,$idArticulo){
         return $query->where('codigo',$codigo)->where('id','!=',$idArticulo)->count();
     }
+    public function subfamilia()
+    {
+        return $this->belongsTo(SubFamilias::class,'id_familia_sub');
+    }
     public function scopeObtenerArticulos($query,$idArticulo = null){
-        $articulos = $query->select("articulo.id AS articuloId","articulo.id_familia_sub AS familiaSubId","familia_sub.nombre AS familiSubNombre","familia.id AS familiaId","familia.nombre AS familaNombre","articulo.nombre AS articuloNombre","articulo.codigo AS articuloCodigo","articulo.estado AS articuloEstado")->join("familia_sub","articulo.id_familia_sub","=","familia_sub.id")
+        $articulos = $query->select("articulo.id AS articuloId","articulo.id_familia_sub AS familiaSubId","familia_sub.nombre AS familiSubNombre","familia.id AS familiaId","familia.nombre AS familaNombre","articulo.nombre AS articuloNombre","articulo.codigo AS articuloCodigo","articulo.estado AS articuloEstado")
+        ->join("familia_sub","articulo.id_familia_sub","=","familia_sub.id")
         ->join("familia","familia.id","=","familia_sub.id_familia");
         if(!empty($idArticulo)){
             $articulo = $articulos->where('articulo.id',$idArticulo)->first();

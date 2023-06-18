@@ -8,6 +8,7 @@ function loadPage(){
     }
     const tablaProducto = document.querySelector("#tablaProductos");
     const $cbSubfamilia = document.querySelector("#idModalfamiliaSubId");
+    const $cbArticulos = document.querySelector("#idModalarticulo");
     const tablaProductoDatatable = $(tablaProducto).DataTable({
         ajax: {
             url: 'producto/listar',
@@ -97,6 +98,9 @@ function loadPage(){
             if(response.session){
                 return alertify.alert([...gen.alertaSesion],() => {window.location.reload()});
             }
+            if(response.alerta){
+                return alertify.alert("Alerta",response.alerta);
+            }
             if(response.error){
                 return alertify.alert("Error",response.error);
             }
@@ -110,22 +114,21 @@ function loadPage(){
             gen.cargandoPeticion(btnModalSave, 'fas fa-save', false);
         }
     });
+    const checkEstado = document.querySelector("#idModalestado");
     const modalTitulo = document.querySelector("#tituloProducto");
     $('#agregarProducto').on("hidden.bs.modal",function(e){
         idProducto = null;
         modalTitulo.textContent = "Crear Producto";
-        switchEstado.disabled = true;
-        switchEstado.checked = true;
-        switchEstado.parentElement.querySelector("label").textContent = "VIGENTE";
-        switchIgv.checked = true;
-        switchIgv.parentElement.querySelector("label").textContent = "CON IGV";
+        checkEstado.disabled = true;
+        checkEstado.checked = true;
+        checkEstado.parentElement.querySelector("label").textContent = "VIGENTE";
         document.querySelector("#customFileLang").value = "";
         formProducto.reset();
-        $('#agregarProducto .select2-simple').trigger("change");
-        prevImagen.src = window.origin + "/asset/img/imgprevproduc.png";
+        $('#agregarProducto .select2-simple').val("").trigger("change");
+        $cbSubfamilia.innerHTML = "";
+        $cbArticulos.innerHTML = "";
+        prevImagen.src = window.origin + "/img/imgprevproduc.png";
     });
-    const switchEstado = document.querySelector("#idModalestado");
-    const switchIgv = document.querySelector("#idModaligv");
     btnModalSave.onclick = e => document.querySelector("#btnFrmEnviar").click();
     tablaProducto.addEventListener("click",async function(e){
         if (e.target.classList.contains("btn-outline-info")){
@@ -143,12 +146,17 @@ function loadPage(){
                     if (Object.hasOwnProperty.call(response.producto, key)) {
                         const valor = response.producto[key];
                         const dom = document.querySelector("#idModal" + key);
-                        if (key == "estado"){
-                            switchEstado.checked = valor === 1 ? true : false;
+                        if(key == "listaFamiliaSub"){
+                            gen.renderSubfamilias(valor,$cbSubfamilia,response.producto.familiaSubId);
                             continue;
                         }
-                        if (key == "igv"){
-                            switchIgv.checked = valor === 1 ? true : false;
+                        if(key == "listaArticulos"){
+                            gen.renderArticulos(valor,$cbArticulos,response.producto.articuloId);
+                            continue;
+                        }
+                        if (key == "productoEstado"){
+                            checkEstado.checked = valor === 1 ? true : false;
+                            checkEstado.parentElement.querySelector("label").textContent = valor === 1 ? "VIGENTE" : "DESCONTINUADO";
                             continue;
                         }
                         if((!dom || !valor) && key != 'urlProductos'){
@@ -164,7 +172,7 @@ function loadPage(){
                     }
                 }
                 $('#agregarProducto .select2-simple').trigger("change");
-                switchEstado.disabled = false;
+                checkEstado.disabled = false;
                 $('#agregarProducto').modal("show");
             } catch (error) {
                 gen.cargandoPeticion(e.target, 'fas fa-pencil-alt', false);
@@ -195,6 +203,7 @@ function loadPage(){
 
     $('#idModalfamiliaId').on("select2:select",async function(e){
         try {
+            $cbArticulos.innerHTML = "";
             const response = await gen.funcfetch("producto/familia/" + $(this).val(), null, "GET");
             if (response.session) {
                 return alertify.alert([...gen.alertaSesion], () => { window.location.reload() });
@@ -208,6 +217,23 @@ function loadPage(){
         } catch (error) {
             console.error(error);
             alertify.error("error al obtener las subfamilias");
+        }
+    });
+    $('#idModalfamiliaSubId').on("select2:select",async function(e){
+        try {
+            const response = await gen.funcfetch("producto/subfamilia/" + $(this).val(), null, "GET");
+            if (response.session) {
+                return alertify.alert([...gen.alertaSesion], () => { window.location.reload() });
+            }
+            if(response.alerta){
+                return alertify.alert("Alerta",response.alerta);
+            }
+            if (response.success) {
+                gen.renderArticulos(response.success,$cbArticulos);
+            }
+        } catch (error) {
+            console.error(error);
+            alertify.error("error al obtener los articulos");
         }
     });
 }

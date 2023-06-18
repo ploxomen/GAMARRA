@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Usuario;
 use App\Models\Familia;
 use App\Models\Productos;
+use App\Models\SubFamilias;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -48,6 +49,17 @@ class MisProductos extends Controller
         }
         return response()->json(['success' => $familia->subFamila()->select("id","codigo","nombre")->where('estado',1)->get()]);
     }
+    public function obtenerArticulos(SubFamilias $subfamilia, Request $request) {
+        if(!$request->ajax()){
+            return response()->json($this->usuarioController->errorPeticion);
+        }
+        $accessModulo = $this->usuarioController->validarXmlHttpRequest($this->moduloProducto);
+        if(isset($accessModulo['session'])){
+            return response()->json($accessModulo);
+        }
+        return response()->json(['success' => $subfamilia->articulos()->select("id","codigo","nombre")->where('estado',1)->get()]);
+
+    }
     public function store(Request $request)
     {
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloProducto);
@@ -57,8 +69,11 @@ class MisProductos extends Controller
         $urlImage = null;
         DB::beginTransaction();
         try {
-            $datos = $request->all();
-            if($request->hasFile('urlImagen')){
+            if(Productos::cantidadProductosCodigo($request->codigo)){
+                return response()->json(['alerta' => 'El código ' . $request->codigo . ' del producto ya se encuentra registrado, por favor establesca otro código']);
+            }
+            $datos = $request->only("codigo","nombreProducto","descripcion","precioVenta","id_articulo");
+            if($request->has('urlImagen')){
                 $datos['urlImagen'] = $this->guardarArhivo($request,'urlImagen',"productos");
                 $urlImage = $datos['urlImagen'];
             }
@@ -74,14 +89,15 @@ class MisProductos extends Controller
             return response()->json(['error' => $th->getMessage()]);
         }
     }
-    public function show(Productos $producto)
+    public function show($producto)
     {
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloProducto);
         if(isset($verif['session'])){
             return response()->json(['session' => true]); 
         }
-        $producto->urlProductos = !empty($producto->urlImagen) ? route("urlImagen",["productos",$producto->urlImagen]) : null;
-        return response()->json(['producto' => $producto->makeHidden("fechaCreada","fechaActualizada")]);
+        $modelProducto = Productos::obtenerProductoEditar($producto);
+        $modelProducto->urlProductos = !empty($modelProducto->productoImagen) ? route("urlImagen",["productos",$modelProducto->productoImagen]) : null;
+        return response()->json(['producto' => $modelProducto]);
     }
     public function update(Productos $producto, Request $request)
     {
@@ -92,16 +108,18 @@ class MisProductos extends Controller
         $urlImage = null;
         DB::beginTransaction();
         try {
-            $datos = $request->all();
-            if($request->hasFile('urlImagen')){
-                if(Storage::disk('productos')->exists($producto->urlImagen)){
+            if(Productos::cantidadProductosCodigoEditar($request->codigo,$producto->id)){
+                return response()->json(['alerta' => 'El código ' . $request->codigo . ' del producto ya se encuentra registrado, por favor establesca otro código']);
+            }
+            $datos = $request->only("codigo","nombreProducto","descripcion","precioVenta","id_articulo");
+            if($request->has('urlImagen')){
+                if(!empty($producto->urlImagen) && Storage::disk('productos')->exists($producto->urlImagen)){
                     Storage::disk('productos')->delete($producto->urlImagen);
                 }
                 $datos['urlImagen'] = $this->guardarArhivo($request,'urlImagen',"productos");
-                $urlImage = $datos['urlImagen'];
+                $urlImage = $request->urlImagen;
             }
             $datos['estado'] = $request->has('estado');
-            $datos['igv'] = $request->has('igv');
             $producto->update($datos);
             DB::commit();
             return response()->json(['success' => 'producto actualizado correctamente']);
@@ -121,7 +139,7 @@ class MisProductos extends Controller
         }
         DB::beginTransaction();
         try {
-            if(Storage::disk('productos')->exists($producto->urlImagen)){
+            if(!empty($producto->urlImagen) && Storage::disk('productos')->exists($producto->urlImagen)){
                 Storage::disk('productos')->delete($producto->urlImagen);
             }
             $producto->delete();

@@ -21,6 +21,22 @@ class Productos extends Model
     {
         return $this->belongsTo(Articulo::class,'id_articulo');
     }
+    public function scopeCantidadProductosCodigo($query,$codigo){
+        return $query->where('codigo',$codigo)->count();
+    }
+    public function scopeCantidadProductosCodigoEditar($query,$codigo,$productoId){
+        return $query->where('codigo',$codigo)->where('id','!=',$productoId)->count();
+    }
+    public function scopeObtenerProductoEditar($query,$productoId){
+        $producto = $query->select("productos.id_articulo AS articuloId","productos.codigo AS productoCodigo","productos.nombreProducto AS productoNombre","productos.descripcion AS productoDescripcion","productos.precioVenta AS productoPrecioVenta","productos.urlImagen AS productoImagen","productos.estado AS productoEstado","familia_sub.id AS familiaSubId","familia_sub.id_familia AS familiaId")->join("articulo","productos.id_articulo","=","articulo.id")
+        ->join("familia_sub","articulo.id_familia_sub","=","familia_sub.id")
+        ->where('productos.id',$productoId)->first();
+        if(!empty($producto)){
+            $producto->listaFamiliaSub = SubFamilias::where(['id_familia' => $producto->familiaId,'estado' => 1])->get();
+            $producto->listaArticulos = Articulo::where(['id_familia_sub' => $producto->familiaSubId,'estado' => 1])->get();
+        }
+        return $producto;
+    }
     public function scopeObtenerProductos($query) {
         return $query->select("articulo.nombre AS articuloNombre","productos.id AS productoId","familia.nombre AS familiaNombre","familia_sub.nombre AS familiaSubNombre","productos.codigo AS productoCodigo","productos.nombreProducto AS productoNombre","productos.precioVenta","productos.estado AS productoEstado")->join("articulo","productos.id_articulo","=","articulo.id")
         ->join("familia_sub","familia_sub.id","=","articulo.id_familia_sub")
