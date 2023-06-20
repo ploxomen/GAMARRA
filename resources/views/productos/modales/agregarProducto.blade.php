@@ -65,14 +65,14 @@
                 </div>
                 <div class="form-group col-md-6 form-required">
                     <label for="idModalfamiliaSubId">Subfamilia</label>
-                    <select name="id_familia_sub" id="idModalfamiliaSubId" data-placeholder="Seleccione una subfamilia" required class="select2-simple">
+                    <select name="id_subfamilia" id="idModalfamiliaSubId" data-placeholder="Seleccione una subfamilia" required class="select2-simple">
                     </select>
                 </div>
-                <div class="form-group col-12 form-required">
+                {{-- <div class="form-group col-12 form-required">
                     <label for="idModalarticulo">Artículo</label>
                     <select name="id_articulo" id="idModalarticulo" data-placeholder="Seleccione un artículo" required class="select2-simple">
                     </select>
-                </div>
+                </div> --}}
                 <div class="form-group col-12">
                     <div class="custom-control custom-switch">
                         <input type="checkbox" name="estado" class="custom-control-input change-switch" data-selected="VIGENTE" data-noselected="DESCONTINUADO" disabled checked id="idModalestado">

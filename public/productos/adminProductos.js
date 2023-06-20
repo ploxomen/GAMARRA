@@ -8,7 +8,7 @@ function loadPage(){
     }
     const tablaProducto = document.querySelector("#tablaProductos");
     const $cbSubfamilia = document.querySelector("#idModalfamiliaSubId");
-    const $cbArticulos = document.querySelector("#idModalarticulo");
+    // const $cbArticulos = document.querySelector("#idModalarticulo");
     const tablaProductoDatatable = $(tablaProducto).DataTable({
         ajax: {
             url: 'producto/listar',
@@ -38,9 +38,9 @@ function loadPage(){
         {
             data: 'familiaSubNombre'
         },
-        {
-            data: 'articuloNombre'
-        },
+        // {
+        //     data: 'articuloNombre'
+        // },
         {
             data: 'precioVenta',
             render : function(data){
@@ -126,7 +126,7 @@ function loadPage(){
         formProducto.reset();
         $('#agregarProducto .select2-simple').val("").trigger("change");
         $cbSubfamilia.innerHTML = "";
-        $cbArticulos.innerHTML = "";
+        // $cbArticulos.innerHTML = "";
         prevImagen.src = window.origin + "/img/imgprevproduc.png";
     });
     btnModalSave.onclick = e => document.querySelector("#btnFrmEnviar").click();
@@ -150,10 +150,10 @@ function loadPage(){
                             gen.renderSubfamilias(valor,$cbSubfamilia,response.producto.familiaSubId);
                             continue;
                         }
-                        if(key == "listaArticulos"){
-                            gen.renderArticulos(valor,$cbArticulos,response.producto.articuloId);
-                            continue;
-                        }
+                        // if(key == "listaArticulos"){
+                        //     gen.renderArticulos(valor,$cbArticulos,response.producto.articuloId);
+                        //     continue;
+                        // }
                         if (key == "productoEstado"){
                             checkEstado.checked = valor === 1 ? true : false;
                             checkEstado.parentElement.querySelector("label").textContent = valor === 1 ? "VIGENTE" : "DESCONTINUADO";
@@ -203,7 +203,7 @@ function loadPage(){
 
     $('#idModalfamiliaId').on("select2:select",async function(e){
         try {
-            $cbArticulos.innerHTML = "";
+            // $cbArticulos.innerHTML = "";
             const response = await gen.funcfetch("producto/familia/" + $(this).val(), null, "GET");
             if (response.session) {
                 return alertify.alert([...gen.alertaSesion], () => { window.location.reload() });
@@ -219,23 +219,23 @@ function loadPage(){
             alertify.error("error al obtener las subfamilias");
         }
     });
-    $('#idModalfamiliaSubId').on("select2:select",async function(e){
-        try {
-            const response = await gen.funcfetch("producto/subfamilia/" + $(this).val(), null, "GET");
-            if (response.session) {
-                return alertify.alert([...gen.alertaSesion], () => { window.location.reload() });
-            }
-            if(response.alerta){
-                return alertify.alert("Alerta",response.alerta);
-            }
-            if (response.success) {
-                gen.renderArticulos(response.success,$cbArticulos);
-            }
-        } catch (error) {
-            console.error(error);
-            alertify.error("error al obtener los articulos");
-        }
-    });
+    // $('#idModalfamiliaSubId').on("select2:select",async function(e){
+    //     try {
+    //         const response = await gen.funcfetch("producto/subfamilia/" + $(this).val(), null, "GET");
+    //         if (response.session) {
+    //             return alertify.alert([...gen.alertaSesion], () => { window.location.reload() });
+    //         }
+    //         if(response.alerta){
+    //             return alertify.alert("Alerta",response.alerta);
+    //         }
+    //         if (response.success) {
+    //             gen.renderArticulos(response.success,$cbArticulos);
+    //         }
+    //     } catch (error) {
+    //         console.error(error);
+    //         alertify.error("error al obtener los articulos");
+    //     }
+    // });
 }
 window.addEventListener("DOMContentLoaded",loadPage);
 

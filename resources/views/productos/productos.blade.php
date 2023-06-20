@@ -27,7 +27,7 @@
                     <th>Producto</th>
                     <th>Familia</th>
                     <th>Subfamilia</th>
-                    <th>Artículo</th>
+                    {{-- <th>Artículo</th> --}}
                     <th>Precio</th>
                     <th>Estado</th>
                     <th>Acciones</th>

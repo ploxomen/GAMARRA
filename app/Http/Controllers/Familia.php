@@ -120,7 +120,8 @@ class Familia extends Controller
                 for ($i=0; $i < count($request->subfamiliaCodigo); $i++) {
                     $subFamilia = [
                         'codigo' => isset($request->subfamiliaCodigo[$i]) ? $request->subfamiliaCodigo[$i] : null,
-                        'nombre' => isset($request->subfamiliaNombre[$i]) ? $request->subfamiliaNombre[$i] : null
+                        'nombre' => isset($request->subfamiliaNombre[$i]) ? $request->subfamiliaNombre[$i] : null,
+                        'estado' => 1
                     ];
                     if(isset($request->idSubfamilia[$i])){
                         SubFamilias::where(['id' => $request->idSubfamilia[$i],'id_familia' => $familia])->update($subFamilia);
