@@ -7,15 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class Presentacion extends Model
 {
     public $table = "presentacion";
-    protected $fillable = ['nombrePresentacion','siglas','estado'];
+    public $incrementing = false;
+    protected $keyType = 'string';
+    protected $fillable = ['presentacion','estado'];
     const CREATED_AT = 'fechaCreada';
     const UPDATED_AT = 'fechaActualizada';
     protected function serializeDate($date)
     {
         return $date->format('d/m/Y h:i a');
     }
-    public function productos()
-    {
-        return $this->hasMany(Productos::class,'presentacionFk');
+    public static function obtenerPresentaciones(){
+        return Presentacion::where('estado',1)->orderBy("presentacion")->get();
     }
 }

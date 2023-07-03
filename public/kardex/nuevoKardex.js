@@ -1,4 +1,5 @@
 function loadPage() {
+    let kardex = new Kardex();
     let fardo = 0;
     let cantidadFilas = 0;
     const configuracion = {
@@ -77,15 +78,20 @@ function loadPage() {
         tr.innerHTML = template;
         return tr;
     }
-    document.querySelector("#agregarFardo").onclick = function(){
-        const tr = generarDetalleKardex();
-        tableDetalleKardex.append(tr);
-        for (const cb of tr.querySelectorAll("select")) {
-            $(cb).select2(configuracion);
-        }
-        $('.destruir-fardo').select2(configuracion);
-        alertify.success("detalle agregado");
-    }
+    // document.querySelector("#agregarFardo").onclick = function(){
+        
+        // kardex.agregarFardo();
+        // const tr = generarDetalleKardex();
+        // tableDetalleKardex.append(tr);
+        // for (const cb of tr.querySelectorAll("select")) {
+        //     $(cb).select2(configuracion);
+        // }
+        // $('.destruir-fardo').select2(configuracion);
+        // alertify.success("detalle agregado");
+    // }
+    $('#idCliente').on("select2:select",function(e){
+        kardex.obtenerKardexPendiente($(this).val());
+    })
     document.querySelector("#cerrarFardo").onclick = function(){
         if(!fardo){
             return alertify.error("por favor añada al menos un detalle al fardo");
@@ -100,12 +106,14 @@ function loadPage() {
     const frmKardex = document.querySelector("#frmKardex");
     frmKardex.addEventListener("submit",function(e){
         e.preventDefault();
-        if(!fardo){
-            return alertify.error("el kardex debe contener al menos un fardo");
-        }
-        alertify.alert("Mensaje","Kardex generado con éxito",()=>{
-            window.location.reload();
-        })
+        let datos = new FormData(this);
+        kardex.agregarFardo(datos);
+        // if(!fardo){
+        //     return alertify.error("el kardex debe contener al menos un fardo");
+        // }
+        // alertify.alert("Mensaje","Kardex generado con éxito",()=>{
+        //     window.location.reload();
+        // })
     })
     tableDetalleKardex.onclick = function(e){
         if(e.target.classList.contains("btn-danger")){

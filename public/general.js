@@ -1,4 +1,5 @@
 class General{
+    url = window.location.origin + '/intranet';
     token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     alertaSesion = ["Alerta","La sesión a caducado, favor inicie sesión nuevamente"];
     /*

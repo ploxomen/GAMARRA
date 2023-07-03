@@ -1,6 +1,8 @@
 @extends('helper.index')
 @section('head')
+    <script src="/kardex/generalKardex.js"></script>
     <script src="/kardex/nuevoKardex.js"></script>
+    
     <title>Generar Kardex</title>
 @endsection
 @section('body')
@@ -14,42 +16,52 @@
         <form id="frmKardex">
             <fieldset class="bg-white px-3 mb-4 border form-row">
                 <legend class="bg-white d-inline-block w-auto px-2 border shadow-sm text-left legend-add">Datos del kardex</legend>
-                    <div class="col-12 col-lg-3 form-group">
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 form-group">
                         <label for="idCliente" class="col-form-label col-form-label-sm">Cliente</label>
-                        <select name="id_cliente" required id="idCliente" class="select2-simple">
+                        <select name="cliente" required id="idCliente" class="select2-simple">
                             <option value=""></option>
                             @foreach ($clientes as $cliente)
                                 <option value="{{$cliente->id}}">{{$cliente->nombreCliente}}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-12 col-md-6 col-lg-3 form-group">
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 form-group">
                         <label for="idProveedor" class="col-form-label col-form-label-sm">Proveedor</label>
-                        <select id="idProveedor" class="select2-simple destruir-fardo">
+                        <select name="proveedor" id="idProveedor" class="select2-simple destruir-fardo" required>
                             <option value=""></option>
                             @foreach ($proveedores as $proveedor)
                                 <option value="{{$proveedor->id}}">{{$proveedor->nombre_proveedor}}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-12 col-md-6 col-lg-3 form-group">
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 form-group">
                         <label for="idProducto" class="col-form-label col-form-label-sm">Producto</label>
-                        <select id="idProducto" class="select2-simple destruir-fardo">
+                        <select name="producto" id="idProducto" class="select2-simple destruir-fardo" required>
                             <option value=""></option>
                             @foreach ($productos as $producto)
                                 <option value="{{$producto->id}}">{{$producto->nombreProducto}}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-6 col-lg-2 form-group">
-                        <label for="idCantidad" class="col-form-label col-form-label-sm">Cantidad</label>
-                        <input type="number" class="form-control" id="idCantidad">
+                    <div class="col-6 col-lg-4 col-xl-3 form-group">
+                        <label for="idPresentacion" class="col-form-label col-form-label-sm">Presentación</label>
+                        <select name="presentacion" id="idPresentacion" class="select2-simple" required>
+                            <option value=""></option>
+                            @foreach ($presentaciones as $presentacion)
+                                <option value="{{$presentacion->id}}" {{$presentacion->id == 'NIU' ? 'selected' : ''}}>{{$presentacion->presentacion}}</option>
+                            @endforeach
+                        </select>
                     </div>
-                    <div class="col-6 col-lg-1 form-group">
-                        <button type="button" id="agregarFardo" class="btn btn-sm btn-primary mb-1" data-toggle="tooltip" title="Agregar fardo"><i class="fas fa-plus"></i></button>
+                    <div class="col-6 col-lg-4 col-xl-2 form-group">
+                        <label for="idCantidad" class="col-form-label col-form-label-sm">Cantidad</label>
+                        <input name="cantidad" type="number" class="form-control" id="idCantidad" required>
+                    </div>
+                    <div class="col-6 col-lg-4 col-xl-10 form-group">
+                        <button type="submit" id="agregarFardo" class="btn btn-sm btn-primary" data-toggle="tooltip" title="Agregar fardo"><i class="fas fa-plus"></i></button>
                         <button type="button" id="cerrarFardo" class="btn btn-sm btn-danger" data-toggle="tooltip" title="Cerrar fardo"><i class="fas fa-door-closed"></i></button>
                     </div>
             </fieldset>
+        </form>
             <fieldset class="bg-white mb-3 px-3 border form-row">
                 <legend class="bg-white d-inline-block w-auto px-2 border shadow-sm text-left legend-add">Detalles del kardex</legend>
                 <div class="table-responsive">
