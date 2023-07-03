@@ -39,6 +39,62 @@ class Kardex extends Controller
         }
         return response()->json(['kardex' => ModelsKardex::verKardexPorTerminar($cliente)]);
     }
+    public function cerrarFardo(Request $request){
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);
+        if(isset($verif['session'])){
+            return response()->json(['session' => true]);
+        }
+        $kardex = ModelsKardex::where(['estado' => 1, 'id_cliente' => $request->cliente])->first();
+        if(empty($kardex)){
+            return response()->json(['alerta' => 'No existe ningún kardex asociado a este cliente']);
+        }
+        $nroFardoActual = $kardex->nroFardoActivo;
+        if(empty($nroFardoActual)){
+            return response()->json(['alerta' => 'No hay fardos pendientes por cerrar']);
+        }
+        $kardex->update(['nroFardoActivo' => null]);
+        return response()->json(['success' => 'El fardo N° ' . $nroFardoActual . ' a sido cerrado correctamente' ]);
+    }
+    public function eliminarFardo(Request $request){
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);
+        if(isset($verif['session'])){
+            return response()->json(['session' => true]);
+        }
+        $kardex = ModelsKardex::where(['estado' => 1, 'id_cliente' => $request->cliente])->first();
+        if(empty($kardex)){
+            return response()->json(['alerta' => 'No existe ningún kardex asociado a este cliente']);
+        }
+        $fardoKardex = KardexFardo::where(['estado' => 1,'id_kardex' => $kardex->id,'nro_fardo' => $request->fardo])->first();
+        if(empty($fardoKardex)){
+            return response()->json(['alerta' => 'No existe ningún fardo con el número ' . $request->fardo]);
+        }    
+        if(empty($fardoKardex)){
+            return response()->json(['alerta' => 'No existe ningún fardo con el número ' . $request->fardo]);
+        }    
+        KardexFardoDetalle::where(['id_fardo' => $fardoKardex->id,'estado' => 1])->delete();
+        KardexFardo::where(['estado' => 1,'id_kardex' => $kardex->id,'nro_fardo' => $request->fardo])->delete();
+        $kardex->update(['nroFardoActivo' => null]);
+        foreach (KardexFardo::where(['estado' => 1,'id_kardex' => $kardex->id])->get() as $k => $v) {
+            $v->update(['nro_fardo' => $k + 1]);
+        }
+        return response()->json(['success' => 'El fardo N° ' . $request->fardo . ' a sido eliminado correctamente','nroFardo' => $kardex->nroFardoActivo]);
+    }
+    public function abrirFardo(Request $request){
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);
+        if(isset($verif['session'])){
+            return response()->json(['session' => true]);
+        }
+        $kardex = ModelsKardex::where(['estado' => 1, 'id_cliente' => $request->cliente])->first();
+        if(empty($kardex)){
+            return response()->json(['alerta' => 'No existe ningún kardex asociado a este cliente']);
+        }
+        $fardoKardex = KardexFardo::where(['estado' => 1,'id_kardex' => $kardex->id,'nro_fardo' => $request->fardo])->first();
+        if(empty($fardoKardex)){
+            return response()->json(['alerta' => 'No existe ningún fardo con el número ' . $request->fardo]);
+        }    
+        $kardex->update(['nroFardoActivo' => $request->fardo]);
+        return response()->json(['success' => 'El fardo N° ' . $request->fardo . ' a sido abierto correctamente','nroFardo' => $request->fardo]);
+    }
     public function agregarFardo(Request $request){
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);
         if(isset($verif['session'])){
@@ -70,6 +126,7 @@ class Kardex extends Controller
             'id_presentacion' => $request->presentacion,
             'estado' => 1
         ]);
-        return response()->json(['success' => 'producto agregado correctamente', 'nroFardo' => $nroFardo]);
+        $cantidadProductos = KardexFardoDetalle::where(['estado'=>1,'id_fardo' => $fardoKardex->id])->count();
+        return response()->json(['success' => 'producto agregado correctamente', 'nroFardo' => $nroFardo,'cantidadProducto' => $cantidadProductos]);
     }
 }

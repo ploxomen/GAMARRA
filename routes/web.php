@@ -96,6 +96,9 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
             Route::get('/', [Kardex::class, 'index'])->name('admin.kardex.index');
             Route::get('pendiente/{cliente}', [Kardex::class, 'obtenerKardexPendiente']);
             Route::post('pendiente/guardar', [Kardex::class, 'agregarFardo']);
+            Route::post('pendiente/cerrar', [Kardex::class, 'cerrarFardo']);
+            Route::post('pendiente/eliminar', [Kardex::class, 'eliminarFardo']);
+            Route::post('pendiente/abrir', [Kardex::class, 'abrirFardo']);
             Route::post('listar', [Kardex::class, 'listar']);
             Route::get('listar/{kardex}', [Kardex::class, 'show']);
             Route::post('crear', [Kardex::class, 'store']);

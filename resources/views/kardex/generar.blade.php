@@ -1,8 +1,8 @@
 @extends('helper.index')
 @section('head')
+    <link rel="stylesheet" href="/kardex/nuevoKardex.css">
     <script src="/kardex/generalKardex.js"></script>
     <script src="/kardex/nuevoKardex.js"></script>
-    
     <title>Generar Kardex</title>
 @endsection
 @section('body')
@@ -45,10 +45,10 @@
                     </div>
                     <div class="col-6 col-lg-4 col-xl-3 form-group">
                         <label for="idPresentacion" class="col-form-label col-form-label-sm">Presentación</label>
-                        <select name="presentacion" id="idPresentacion" class="select2-simple" required>
+                        <select name="presentacion" id="idPresentacion" class="select2-simple destruir-fardo" required>
                             <option value=""></option>
                             @foreach ($presentaciones as $presentacion)
-                                <option value="{{$presentacion->id}}" {{$presentacion->id == 'NIU' ? 'selected' : ''}}>{{$presentacion->presentacion}}</option>
+                                <option value="{{$presentacion->id}}">{{$presentacion->presentacion}}</option>
                             @endforeach
                         </select>
                     </div>
@@ -56,9 +56,10 @@
                         <label for="idCantidad" class="col-form-label col-form-label-sm">Cantidad</label>
                         <input name="cantidad" type="number" class="form-control" id="idCantidad" required>
                     </div>
-                    <div class="col-6 col-lg-4 col-xl-10 form-group">
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-10 form-group">
                         <button type="submit" id="agregarFardo" class="btn btn-sm btn-primary" data-toggle="tooltip" title="Agregar fardo"><i class="fas fa-plus"></i></button>
                         <button type="button" id="cerrarFardo" class="btn btn-sm btn-danger" data-toggle="tooltip" title="Cerrar fardo"><i class="fas fa-door-closed"></i></button>
+                        <b>N° de fardo activo: <span class="text-danger" id="txtFardoActivo">Ninguno</span></b>
                     </div>
             </fieldset>
         </form>
@@ -69,12 +70,12 @@
                         <thead>
                             <tr>
                                 <th>N° DE FARDO</th>
+                                <th>PRESENTACION</th>
                                 <th>CANTIDAD</th>
                                 <th>PROVEEDOR</th>
                                 <th>DESCRIPCION</th>
-                                <th>UNIDAD</th>
                                 <th>KILAJES</th>
-                                <th>BORRAR</th>
+                                <th>ACCIONES</th>
                             </tr>
                         </thead>
                         <tbody id="tablaDetalle">

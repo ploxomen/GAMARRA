@@ -12,6 +12,7 @@ function loadPage() {
     const txtProveedor = document.querySelector("#idProveedor");
     const txtProducto = document.querySelector("#idProducto");
     const txtCantidad = document.querySelector("#idCantidad");
+    const txtPresentacion = document.querySelector("#idPresentacion");
 
     function generarDetalleKardex() {
         if(!fardo){
@@ -89,78 +90,50 @@ function loadPage() {
         // $('.destruir-fardo').select2(configuracion);
         // alertify.success("detalle agregado");
     // }
+    const txtFardoActivo = document.querySelector("#txtFardoActivo");
     $('#idCliente').on("select2:select",function(e){
-        kardex.obtenerKardexPendiente($(this).val());
+        kardex.obtenerKardexPendiente($(this).val(),tableDetalleKardex,txtProveedor,txtProducto,txtCantidad,txtPresentacion,txtFardoActivo);
     })
+    
     document.querySelector("#cerrarFardo").onclick = function(){
-        if(!fardo){
-            return alertify.error("por favor añada al menos un detalle al fardo");
-        }
-        if(fardo != 0 && !document.querySelector(`tr[data-fardo="${fardo}"]`)){
-            return alertify.error("el fardo ya a sido cerrado");
-        }
-        fardo++;
-        cantidadFilas = 0;
-        alertify.success("fardo cerrado");
+        let datos = new FormData();
+        datos.append('cliente',$('#idCliente').val())
+        kardex.cerrarFardo(datos,txtFardoActivo,tableDetalleKardex);
     }
     const frmKardex = document.querySelector("#frmKardex");
     frmKardex.addEventListener("submit",function(e){
         e.preventDefault();
         let datos = new FormData(this);
-        kardex.agregarFardo(datos);
-        // if(!fardo){
-        //     return alertify.error("el kardex debe contener al menos un fardo");
-        // }
-        // alertify.alert("Mensaje","Kardex generado con éxito",()=>{
-        //     window.location.reload();
-        // })
+        kardex.agregarFardo(datos,txtProveedor,txtProducto,txtPresentacion,txtCantidad,tableDetalleKardex,txtFardoActivo);
     })
     tableDetalleKardex.onclick = function(e){
         if(e.target.classList.contains("btn-danger")){
-            alertify.confirm("Mensaje","¿Deseas eliminar este fardo?",()=>{
+            alertify.confirm("Mensaje","¿Deseas eliminar este fardo?",async ()=>{
                 $('#tablaDetalle .select2-simple').select2("destroy");
-                const cantidadFilass = +e.target.parentElement.getAttribute("rowspan");
-                const fardos = +e.target.parentElement.parentElement.getAttribute("data-fardo");
-                for (let index = 1; index <= cantidadFilass; index++) {
-                    document.querySelector(`tr#fardoLista${fardos}${index}`).remove();
+                let datos = new FormData();
+                datos.append('cliente',$('#idCliente').val())
+                datos.append('fardo',e.target.parentElement.parentElement.parentElement.dataset.fardo);
+                const response = await kardex.eliminarFardo(datos,txtFardoActivo,tableDetalleKardex);
+                if(response.success){
+                    alertify.success(response.success);
+                    kardex.obtenerKardexPendiente($('#idCliente').val(),tableDetalleKardex,txtProveedor,txtProducto,txtCantidad,txtPresentacion,txtFardoActivo);
+                    return false
                 }
-                fardo--;
-                alertify.success("fardo eliminado");
-                if(fardo<=0 || !tableDetalleKardex.children.length){
-                    cantidadFilas = 0;
-                    fardo = 0;
-                    tableDetalleKardex.innerHTML = `
-                    <tr>
-                        <td colspan="100%" class="text-center">No se agregaron detalles</td>
-                    </tr>
-                    `
-                    return
-                }
-                let nroFila = 0;
-                let nroFardo = 0;
-                for (const tr of tableDetalleKardex.children) {
-                    if(nroFardo > fardo){
-                        break;
-                    }
-                    nroFila++;
-                    if(tr.dataset.fardo){
-                        nroFardo++;
-                        nroFila = 1;
-                        tr.dataset.fardo = nroFardo;
-                        tr.children[0].textContent = nroFardo;
-                    }
-                    tr.setAttribute("id",`fardoLista${nroFardo}${nroFila}`);
-                    tr.querySelectorAll(".select2-simple")[0].setAttribute("id",`idProveedorFardo${nroFardo}${nroFila}`);
-                    tr.querySelectorAll(".select2-simple")[1].setAttribute("id",`idProductoFardo${nroFardo}${nroFila}`);
-                    tr.querySelector("input").setAttribute("id",`idCantidadFardo${nroFardo}${nroFila}`);
-                }
-                $('#tablaDetalle .select2-simple').select2(configuracion);
-                const fardoAnterior = document.querySelector(`tr#fardoLista${fardo}1`);
-                if(fardoAnterior && cantidadFilas > 0){
-                    cantidadFilas = +fardoAnterior.children[0].getAttribute("rowspan");
-                }
+                return alertify.alert("Mensaje",response.alerta);
             },()=>{})
         }
+        if(e.target.classList.contains("btn-primary")){
+            let datos = new FormData();
+            datos.append('cliente',$('#idCliente').val())
+            kardex.cerrarFardo(datos,txtFardoActivo,tableDetalleKardex);
+        }
+        if(e.target.classList.contains("btn-success")){
+            let datos = new FormData();
+            datos.append('cliente',$('#idCliente').val())
+            datos.append('fardo',e.target.parentElement.parentElement.parentElement.dataset.fardo);
+            kardex.abrirFardo(datos,txtFardoActivo,tableDetalleKardex,e.target);
+        }
+        
     }
 }
 window.addEventListener("DOMContentLoaded",loadPage);
