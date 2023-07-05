@@ -87,7 +87,7 @@
                 </div>
             </fieldset>
             <div class="form-group text-center">
-                <button class="btn btn-primary" type="submit"><i class="fas fa-paper-plane"></i> Generar Kardex</button>
+                <button class="btn btn-primary" type="button" id="btnGenerarKardex"><i class="fas fa-paper-plane"></i> Generar Kardex</button>
             </div>
         </form>
     </section>

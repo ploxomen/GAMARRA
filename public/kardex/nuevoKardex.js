@@ -106,6 +106,13 @@ function loadPage() {
         let datos = new FormData(this);
         kardex.agregarFardo(datos,txtProveedor,txtProducto,txtPresentacion,txtCantidad,tableDetalleKardex,txtFardoActivo);
     })
+    document.querySelector("#btnGenerarKardex").onclick = function(e){
+        alertify.confirm("Mensaje","¿Estas seguro de generar el kardex?",()=>{
+            let datos = new FormData();
+            datos.append('cliente',$('#idCliente').val())
+            kardex.generarKardex(datos);
+        },()=>{})
+    }
     tableDetalleKardex.onclick = function(e){
         if(e.target.classList.contains("btn-danger")){
             alertify.confirm("Mensaje","¿Deseas eliminar este fardo?",async ()=>{

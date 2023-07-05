@@ -4,6 +4,7 @@ use App\Http\Controllers\Articulo;
 use App\Http\Controllers\Familia;
 use App\Http\Controllers\Clientes;
 use App\Http\Controllers\Kardex;
+use App\Http\Controllers\KardexProveedores;
 use App\Http\Controllers\MisProductos;
 use App\Http\Controllers\Modulos;
 use App\Http\Controllers\Proveedores;
@@ -62,6 +63,16 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
             Route::delete('eliminar/{cliente}', [Clientes::class, 'destroy']);
             Route::get('contacto/eliminar/{contacto}', [Clientes::class, 'eliminarContacto']);
         });
+        Route::prefix('proveedores')->group(function () {
+            Route::get('/', [KardexProveedores::class, 'index'])->name('admin.proveedores.index');
+            Route::post('listar', [KardexProveedores::class, 'listar']);
+            Route::get('listar/{cliente}', [KardexProveedores::class, 'show']);
+            Route::get('reporte/{kardex}/{proveedor}', [KardexProveedores::class, 'verGuiaReporte']);
+            Route::post('crear', [KardexProveedores::class, 'store']);
+            Route::post('editar/{cliente}', [KardexProveedores::class, 'update']);
+            Route::delete('eliminar/{cliente}', [KardexProveedores::class, 'destroy']);
+            Route::get('contacto/eliminar/{contacto}', [KardexProveedores::class, 'eliminarContacto']);
+        });
     });
     Route::prefix('almacen')->group(function () {
         Route::prefix('familias')->group(function () {
@@ -96,6 +107,7 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
             Route::get('/', [Kardex::class, 'index'])->name('admin.kardex.index');
             Route::get('pendiente/{cliente}', [Kardex::class, 'obtenerKardexPendiente']);
             Route::post('pendiente/guardar', [Kardex::class, 'agregarFardo']);
+            Route::post('pendiente/generar', [Kardex::class, 'generarKardex']);
             Route::post('pendiente/cerrar', [Kardex::class, 'cerrarFardo']);
             Route::post('pendiente/eliminar', [Kardex::class, 'eliminarFardo']);
             Route::post('pendiente/abrir', [Kardex::class, 'abrirFardo']);

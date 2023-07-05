@@ -6,10 +6,12 @@ use App\Models\Clientes;
 use App\Models\Kardex as ModelsKardex;
 use App\Models\KardexFardo;
 use App\Models\KardexFardoDetalle;
+use App\Models\KardexProveedor;
 use App\Models\Presentacion;
 use App\Models\Productos;
 use App\Models\Proveedores;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class Kardex extends Controller
 {
@@ -94,6 +96,39 @@ class Kardex extends Controller
         }    
         $kardex->update(['nroFardoActivo' => $request->fardo]);
         return response()->json(['success' => 'El fardo N° ' . $request->fardo . ' a sido abierto correctamente','nroFardo' => $request->fardo]);
+    }
+    public function generarKardex(Request $request){
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);
+        if(isset($verif['session'])){
+            return response()->json(['session' => true]);
+        }
+        DB::beginTransaction();
+        try{
+            $kardex = ModelsKardex::where(['estado' => 1, 'id_cliente' => $request->cliente])->first();
+            if(empty($kardex)){
+                return response()->json(['alerta' => 'No existe ningún kardex asociado a este cliente']);
+            }
+            foreach (KardexFardo::where(['estado' => 1,'id_kardex' => $kardex->id])->get() as $vFardo) {
+                KardexFardoDetalle::where(['id_fardo' => $vFardo->id])->update(['estado' => 2]);
+                $cantidad = KardexFardoDetalle::where(['id_fardo' => $vFardo->id])->sum('cantidad');
+                $vFardo->update(['cantidad' => $cantidad,'estado' => 2]);
+            }
+            foreach (KardexFardoDetalle::obtenerProveedoresKardex($kardex->id) as $p) {
+                KardexProveedor::create([
+                    'id_kardex' => $kardex->id,
+                    'id_proveedores' => $p->id_proveedor,
+                    'estado' => 1
+                ]);
+            }
+            $cantidad = KardexFardo::where(['estado' => 2,'id_kardex' => $kardex->id])->sum('cantidad');
+            $kilaje = KardexFardo::where(['estado' => 2,'id_kardex' => $kardex->id])->sum('kilaje');
+            $kardex->update(['nroFardoActivo' => null,'estado' => 2,'cantidad' => $cantidad,'kilaje' => $kilaje]);
+            DB::commit();
+            return response()->json(['success' => 'El kardex se generó correctamente']);
+        }catch(\Exception $th){
+            DB::rollBack();
+            return response()->json(['error' => $th->getMessage()]);
+        }
     }
     public function agregarFardo(Request $request){
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);

@@ -48,6 +48,18 @@ class Kardex{
             alertify.error("error al cerrar el fardo");
         }
     }
+    async generarKardex(datosKardex){
+        try {
+            const response = await this.general.funcfetch(this.general.url + "/almacen/kardex/pendiente/generar",datosKardex,"POST");
+            if(response.success){
+                alertify.alert("Mensaje",response.success,()=>{window.location.reload()})
+            }
+        }catch(error){
+            console.log(error);
+            alertify.error("error al generar el kardex");
+        }
+
+    }
     async agregarFardo(datosKardex,txtProveedor,txtProducto,txtPresentacion,txtCantidad,tablaFardos,txtFardoActivo){
         try {
             const response = await this.general.funcfetch(this.general.url + "/almacen/kardex/pendiente/guardar",datosKardex,"POST");
@@ -158,7 +170,7 @@ class Kardex{
     async obtenerKardexPendiente(idCliente,tableDetalleKardex,txtProveedor,txtProducto,txtCantidad,txtPresentacion,txtFardoActivo){
         try {
             const response = await this.general.funcfetch(this.general.url + "/almacen/kardex/pendiente/" + idCliente,null,"GET");
-            if(!response.kardex.listaFardos){
+            if(!response.kardex || !response.kardex.listaFardos){
                 tableDetalleKardex.innerHTML = this.txtSinFardos;
                 return false
             }
