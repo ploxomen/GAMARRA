@@ -63,15 +63,12 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
             Route::delete('eliminar/{cliente}', [Clientes::class, 'destroy']);
             Route::get('contacto/eliminar/{contacto}', [Clientes::class, 'eliminarContacto']);
         });
-        Route::prefix('proveedores')->group(function () {
+        Route::prefix('kardex/proveedores')->group(function () {
             Route::get('/', [KardexProveedores::class, 'index'])->name('admin.proveedores.index');
             Route::post('listar', [KardexProveedores::class, 'listar']);
-            Route::get('listar/{cliente}', [KardexProveedores::class, 'show']);
+            Route::get('listar/{proveedor}', [KardexProveedores::class, 'show']);
             Route::get('reporte/{kardex}/{proveedor}', [KardexProveedores::class, 'verGuiaReporte']);
-            Route::post('crear', [KardexProveedores::class, 'store']);
-            Route::post('editar/{cliente}', [KardexProveedores::class, 'update']);
-            Route::delete('eliminar/{cliente}', [KardexProveedores::class, 'destroy']);
-            Route::get('contacto/eliminar/{contacto}', [KardexProveedores::class, 'eliminarContacto']);
+            Route::post('actualizar', [KardexProveedores::class, 'update']);
         });
     });
     Route::prefix('almacen')->group(function () {

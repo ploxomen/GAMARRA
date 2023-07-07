@@ -27,4 +27,5 @@
         </table>
        </div>
     </section>
+    @include('kardex.modales.proveedores')
 @endsection

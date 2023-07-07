@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class KardexProveedor extends Model
 {
     public $table = "kardex_proveedores";
-    protected $fillable = ['id_kardex','id_proveedores','estado'];
+    protected $fillable = ['id_kardex','id_proveedores','observaciones','fechaRecepcion','estado'];
     const CREATED_AT = 'fechaCreada';
     const UPDATED_AT = 'fechaActualizada';
 
@@ -19,5 +19,9 @@ class KardexProveedor extends Model
         ->join('clientes','clientes.id','=','kardex.id_cliente')
         ->where('kardex.estado','>',1)->where('kardex_proveedores.estado',1)
         ->get();
+    }
+    public function proveedor()
+    {
+        return $this->belongsTo(Proveedores::class,'id_proveedores');
     }
 }

@@ -49,6 +49,7 @@ class Productos extends Model
         ->join("familia","familia.id","=","familia_sub.id_familia")
         ->get();
     }
+    
     // public function presentacion()
     // {
     //     return $this->belongsTo(Presentacion::class,'presentacionFk');

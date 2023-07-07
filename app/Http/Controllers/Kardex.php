@@ -117,7 +117,8 @@ class Kardex extends Controller
                 KardexProveedor::create([
                     'id_kardex' => $kardex->id,
                     'id_proveedores' => $p->id_proveedor,
-                    'estado' => 1
+                    'estado' => 1,
+                    'fechaRecepcion' => date('Y-m-d')
                 ]);
             }
             $cantidad = KardexFardo::where(['estado' => 2,'id_kardex' => $kardex->id])->sum('cantidad');

@@ -20,6 +20,10 @@ class Proveedores extends Model
     {
         return $this->belongsTo(TipoDocumento::class,'tipo_documento');
     }
+    public function kardex()
+    {
+        return $this->hasOne(KardexProveedor::class,'id_proveedores');
+    }
     // public function compras()
     // {
     //     return $this->hasMany(Compras::class, 'proveedorFk');
