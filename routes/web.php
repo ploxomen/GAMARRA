@@ -102,7 +102,13 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
         });
         Route::prefix('kardex')->group(function () {
             Route::get('/', [Kardex::class, 'index'])->name('admin.kardex.index');
+            Route::get('todos', [Kardex::class, 'misKardexIndex'])->name('admin.miskardex.index');
+            Route::post('todos/listar', [Kardex::class, 'misKardex']);
             Route::get('pendiente/{cliente}', [Kardex::class, 'obtenerKardexPendiente']);
+            Route::get('reportes/facturacion/{kardex}', [Kardex::class, 'generarPreFacturaCliente']);
+            Route::get('reportes/packing/{kardex}', [Kardex::class, 'generarReportesPackingList']);
+            Route::get('cliente/reporte/{kardex}', [Kardex::class, 'consultaReporteCliente']);
+            Route::get('cliente/reporte/kardex/{kardex}/{cliente}', [Kardex::class, 'reporteClienteKardex']);
             Route::post('pendiente/guardar', [Kardex::class, 'agregarFardo']);
             Route::post('pendiente/generar', [Kardex::class, 'generarKardex']);
             Route::post('pendiente/cerrar', [Kardex::class, 'cerrarFardo']);

@@ -49,7 +49,10 @@ class Productos extends Model
         ->join("familia","familia.id","=","familia_sub.id_familia")
         ->get();
     }
-    
+    public function detalleFardo()
+    {
+        return $this->hasMany(KardexFardoDetalle::class,'id_producto');
+    }
     // public function presentacion()
     // {
     //     return $this->belongsTo(Presentacion::class,'presentacionFk');

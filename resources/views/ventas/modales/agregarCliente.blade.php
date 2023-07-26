@@ -53,6 +53,15 @@
                     <label for="idModaldireccion">Dirección</label>
                     <input type="text" name="direccion" id="idModaldireccion" rows="3" class="form-control">
                 </div>
+                <div class="form-group col-12 col-md-6">
+                    <label for="idModaltasa">Tasa</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">$</div>
+                        </div>
+                        <input type="number" step="0.01" min="0" class="form-control" name="tasa" id="idModaltasa" required>
+                    </div>
+                </div>
                 <div class="form-group col-12 d-flex justify-content-between">
                     <h5 class="text-primary">
                         <i class="fas fa-caret-right"></i>

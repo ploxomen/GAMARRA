@@ -1,4 +1,4 @@
-function loadPage(params) {
+function loadPage() {
     let gen = new General();
     const tablaProveedores = document.querySelector("#tablaProveedores");
     const tablaProveedoresDatatable = $(tablaProveedores).DataTable({

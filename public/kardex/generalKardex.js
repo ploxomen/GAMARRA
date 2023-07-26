@@ -58,14 +58,19 @@ class Kardex{
             console.log(error);
             alertify.error("error al generar el kardex");
         }
-
     }
+    vacioTablaDetalle = false;
     async agregarFardo(datosKardex,txtProveedor,txtProducto,txtPresentacion,txtCantidad,tablaFardos,txtFardoActivo){
         try {
             const response = await this.general.funcfetch(this.general.url + "/almacen/kardex/pendiente/guardar",datosKardex,"POST");
             $(txtProveedor).select2("destroy");
             $(txtProducto).select2("destroy");
             $(txtPresentacion).select2("destroy");
+            console.log(this.vacioTablaDetalle);
+            if(this.vacioTablaDetalle){
+                this.vacioTablaDetalle = false;
+                tablaFardos.innerHTML = "";
+            }
             const producto = this.generarFilaFardo(response.nroFardo,response.cantidadProducto,txtProveedor,txtProducto,txtPresentacion,txtCantidad,datosKardex.get('proveedor'),datosKardex.get('producto'),datosKardex.get('presentacion'),datosKardex.get('cantidad'),tablaFardos,response.nroFardo);
             const padreFardo = document.querySelector(`#fardoLista${response.nroFardo}${response.cantidadProducto - 1}`);
             if(!padreFardo){
@@ -170,12 +175,20 @@ class Kardex{
     async obtenerKardexPendiente(idCliente,tableDetalleKardex,txtProveedor,txtProducto,txtCantidad,txtPresentacion,txtFardoActivo){
         try {
             const response = await this.general.funcfetch(this.general.url + "/almacen/kardex/pendiente/" + idCliente,null,"GET");
-            if(!response.kardex || !response.kardex.listaFardos){
+            console.log(this.vacioTablaDetalle);
+            if((response.kardex && !response.kardex.listaFardos.length) || !response.kardex ){
                 tableDetalleKardex.innerHTML = this.txtSinFardos;
+                this.vacioTablaDetalle = true;
                 return false
             }
+            this.vacioTablaDetalle = false;
+            console.log(this.vacioTablaDetalle);
             txtFardoActivo.textContent = !response.kardex.nroFardoActivo ? 'Ninguno' : response.kardex.nroFardoActivo;
             tableDetalleKardex.innerHTML = "";
+            if(response.kardex && !response.kardex.listaFardos.length){
+                tableDetalleKardex.innerHTML = this.txtSinFardos;
+                return;
+            }
             $(txtProveedor).select2("destroy");
             $(txtProducto).select2("destroy");
             $(txtPresentacion).select2("destroy");

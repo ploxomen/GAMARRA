@@ -1,0 +1,65 @@
+<?php
+
+namespace App\Exports;
+
+use Illuminate\Contracts\View\View;
+use Maatwebsite\Excel\Concerns\FromView;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+
+class PackingList implements FromView,ShouldAutoSize,WithStyles,WithTitle
+{
+    protected $kardex;
+    protected $filaInicial = 7;
+    protected $totalCantidad;
+    protected $totalKilaje;
+    protected $filaFinal;
+    public function __construct(array $kardex,float $totalCantidad, float $totalKilajes, int $filaFinal){
+        $this->kardex = $kardex;
+        $this->totalCantidad = $totalCantidad;
+        $this->totalKilaje = $totalKilajes;
+        $this->filaFinal = $filaFinal;
+    }
+    public function view(): View
+    {
+        return view('kardex.reportesExcel.packingList', [
+            'kardex' => $this->kardex,
+            'kilajes' => $this->totalKilaje,
+            'cantidades' => $this->totalCantidad
+        ]);
+    }
+    public function styles(Worksheet $sheet)
+    {
+        $rango = "A" . $this->filaInicial . ":J" . $this->filaFinal;
+        $tituloPackingList = $sheet->getStyle('A2');
+        $tituloPackingList->getFont()->setBold(true);
+        $tituloPackingList->getFont()->setUnderline(true);
+        $tituloPackingList->getAlignment()->setHorizontal('center');
+        $cabeceraTabla = $sheet->getStyle("A".$this->filaInicial . ':' . "J" . $this->filaInicial);
+        $cabeceraTabla->getFont()->setBold(true);
+        $sheet->getRowDimension(8)->setRowHeight(30);
+        $sheet->getStyle($rango)->getBorders()->getAllBorders()->setBorderStyle('thin');
+        $sheet->getStyle($rango)->getAlignment()->setHorizontal('center');
+        $sheet->getStyle($rango)->getAlignment()->setVertical('center');
+        $filaFormula = $this->filaInicial + 1;
+        foreach ($this->kardex as $key => $valor) {
+            $sheet->setCellValue('H'.$filaFormula, '=F'.$filaFormula.'*G'.$filaFormula);
+            $sheet->setCellValue('I'.$filaFormula, '=F'.$filaFormula.'*'.$valor['tasa_extranjera']);
+            $sheet->setCellValue('J'.$filaFormula, '=H'.$filaFormula.'-I'.$filaFormula);
+            $filaFormula += count($valor['detalles']);
+        }
+        $filaFormula = $this->filaInicial + 1;
+        $sheet->setCellValue('H'.$this->filaFinal, '=SUM(H'.$this->filaInicial + 1 .':H'.$this->filaFinal - 1 .')');
+        $sheet->setCellValue('I'.$this->filaFinal, '=SUM(I'.$this->filaInicial + 1 .':I'.$this->filaFinal - 1 .')');
+        $sheet->setCellValue('J'.$this->filaFinal, '=SUM(J'.$this->filaInicial + 1 .':J'.$this->filaFinal - 1 .')');
+        $sheet->getStyle("A".$this->filaFinal . ':' . "J" . $this->filaFinal)->getFont()->setBold(true);
+        $sheet->getStyle('G' . $filaFormula . ':J' .$this->filaFinal)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_CURRENCY_USD);
+    }
+    public function title(): string
+    {
+        return 'PACKING LIST CLIENTES';
+    }
+}

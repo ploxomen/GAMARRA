@@ -35,7 +35,7 @@
                                 <i class="fas fa-minus"></i>
                             </button>
                         </div>
-                        <input type="number" value="0.00" name="precioVenta" min="0" step="0.01" class="form-control" id="idModalproductoPrecioVenta">
+                        <input type="number" value="0.00" required name="precioVenta" min="0" step="0.01" class="form-control" id="idModalproductoPrecioVenta">
                         <div class="input-group-prepend">
                             <button type="button" class="btn btn-sm btn-outline-info cambiar-cantidad" data-number="#idModalproductoPrecioVenta" data-accion="aumentar">
                                 <i class="fas fa-plus"></i>
@@ -68,11 +68,6 @@
                     <select name="id_subfamilia" id="idModalfamiliaSubId" data-placeholder="Seleccione una subfamilia" required class="select2-simple">
                     </select>
                 </div>
-                {{-- <div class="form-group col-12 form-required">
-                    <label for="idModalarticulo">Artículo</label>
-                    <select name="id_articulo" id="idModalarticulo" data-placeholder="Seleccione un artículo" required class="select2-simple">
-                    </select>
-                </div> --}}
                 <div class="form-group col-12">
                     <div class="custom-control custom-switch">
                         <input type="checkbox" name="estado" class="custom-control-input change-switch" data-selected="VIGENTE" data-noselected="DESCONTINUADO" disabled checked id="idModalestado">

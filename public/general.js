@@ -80,9 +80,9 @@ class General{
     urlProductos = window.location.origin + "/intranet/storage/productos/"
     resetearMoneda(numero){
         const newNum = isNaN(parseFloat(numero)) ? 0 : parseFloat(numero);
-        return newNum.toLocaleString('es-PE',{
+        return newNum.toLocaleString('en-US',{
             style: 'currency',
-            currency: 'PEN',
+            currency: 'USD',
         })
     }
     switchs(e){
