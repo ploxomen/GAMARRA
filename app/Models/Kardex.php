@@ -12,16 +12,17 @@ class Kardex extends Model
     const CREATED_AT = 'fechaCreada';
     const UPDATED_AT = 'fechaActualizada';
 
-    public static function verKardexPorTerminar($idCliente) {
-        $kardex = Kardex::where(['estado' => 1])->first();
+    public static function verKardexPorTerminar($idCliente,$idKardex = null) {
+        $condicionKardex = !is_null($idKardex) ? ['id' => $idKardex] : ['estado' => 1];
+        $kardex = Kardex::where($condicionKardex)->first();
         if(!empty($kardex)){
             $kardex->update(['nroFardoActivo' => null]);
             $kardex->proveedores = Proveedores::where('estado',1)->get();
             $kardex->presentaciones = Presentacion::obtenerPresentaciones();
             $kardex->productos = Productos::where('estado',1)->get();
-            $kardex->listaFardos = KardexFardo::where(['id_kardex' => $kardex->id,'estado' => 1,'id_cliente' => $idCliente])->get();
+            $kardex->listaFardos = KardexFardo::where(['id_kardex' => $kardex->id,'id_cliente' => $idCliente])->where('estado',!is_null($idKardex) ? '>=' : '=',1)->get();
             foreach ($kardex->listaFardos as $fardo) {
-                $fardo->productos = KardexFardoDetalle::where(['id_fardo'=>$fardo->id,'estado' => 1])->get();
+                $fardo->productos = KardexFardoDetalle::where('id_fardo',$fardo->id)->where('estado',!is_null($idKardex) ? '>=' : '=',1)->get();
             }
         }
         return $kardex;

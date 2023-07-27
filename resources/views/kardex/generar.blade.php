@@ -69,7 +69,7 @@
                     <table class="table table-sm table-bordered" style="font-size: 0.8rem; text-align: center;">
                         <thead>
                             <tr>
-                                <th>N° DE FARDO</th>
+                                <th>N° FARDO</th>
                                 <th>PRESENTACION</th>
                                 <th>CANTIDAD</th>
                                 <th>PROVEEDOR</th>

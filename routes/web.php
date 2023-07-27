@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Aduaneros;
 use App\Http\Controllers\Articulo;
 use App\Http\Controllers\Familia;
 use App\Http\Controllers\Clientes;
@@ -81,14 +82,13 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
             Route::delete('eliminar/{familia}', [Familia::class, 'destroy']);
             Route::get('subfamilia/eliminar/{subfamilia}', [Familia::class, 'eliminarSubfamilia']);
         });
-        Route::prefix('articulos')->group(function () {
-            Route::get('/', [Articulo::class, 'index'])->name('admin.articulo.index');
-            Route::post('listar', [Articulo::class, 'listar']);
-            Route::get('listar/{articulo}', [Articulo::class, 'show']);
-            Route::post('crear', [Articulo::class, 'store']);
-            Route::post('editar/{articulo}', [Articulo::class, 'update']);
-            Route::delete('eliminar/{articulo}', [Articulo::class, 'destroy']);
-            Route::get('familia/{familia}', [Articulo::class, 'obtenerSubfamilias']);
+        Route::prefix('aduaneros')->group(function () {
+            Route::get('/', [Aduaneros::class, 'index'])->name('admin.aduaneros.index');
+            Route::post('listar', [Aduaneros::class, 'listar']);
+            Route::get('listar/{aduanero}', [Aduaneros::class, 'show']);
+            Route::post('crear', [Aduaneros::class, 'store']);
+            Route::post('editar/{aduanero}', [Aduaneros::class, 'update']);
+            Route::delete('eliminar/{aduanero}', [Aduaneros::class, 'destroy']);
         });
         Route::prefix('producto')->group(function () {
             Route::get('/', [MisProductos::class, 'index'])->name('admin.producto.index');
@@ -103,8 +103,10 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
         Route::prefix('kardex')->group(function () {
             Route::get('/', [Kardex::class, 'index'])->name('admin.kardex.index');
             Route::get('todos', [Kardex::class, 'misKardexIndex'])->name('admin.miskardex.index');
+            Route::post('actualizar/fardos', [Kardex::class, 'actualizarValoresKardex']);
             Route::post('todos/listar', [Kardex::class, 'misKardex']);
             Route::get('pendiente/{cliente}', [Kardex::class, 'obtenerKardexPendiente']);
+            Route::get('pendiente/editar/{cliente}/{kardex}', [Kardex::class, 'obtenerKardex']);
             Route::get('reportes/facturacion/{kardex}', [Kardex::class, 'generarPreFacturaCliente']);
             Route::get('reportes/packing/{kardex}', [Kardex::class, 'generarReportesPackingList']);
             Route::get('cliente/reporte/{kardex}', [Kardex::class, 'consultaReporteCliente']);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\KardexExport;
 use App\Exports\PreFacturacion;
+use App\Models\Aduanero;
 use App\Models\Clientes;
 use App\Models\Kardex as ModelsKardex;
 use App\Models\KardexFardo;
@@ -40,6 +41,34 @@ class Kardex extends Controller
         $presentaciones = Presentacion::obtenerPresentaciones();
         return view("kardex.generar",compact("modulos","clientes","productos","proveedores","presentaciones"));
     }
+    public function actualizarValoresKardex(Request $request) {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
+        $verif2 = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);
+        if(isset($verif['session']) && isset($verif2['session'])){
+            return response()->json(['session' => true]);
+        }
+        $kardex = $request->has("idKardex") ? ModelsKardex::find($request->idKardex) : ModelsKardex::where('estado', 1)->first();
+        if(empty($kardex)){
+            return response()->json(['alerta' => 'No existe ningún kardex']);
+        }
+        $fardoCliente = KardexFardo::where(['id_kardex' => $kardex->id,'id_cliente' => $request->cliente,'nro_fardo' => $request->fardo])->first();
+        if(empty($fardoCliente)){
+            return response()->json(['alerta' => 'No existe ningún número de fardo '. $request->fardo .' asociado a este cliente']);
+        }
+        $columnas = [
+            'proveedor' => 'id_proveedor',
+            'presentacion' => 'id_presentacion',
+            'producto' => 'id_producto',
+            'cantidad' => 'cantidad',
+            'kilaje' => 'kilaje',
+            'costo' => 'precio',
+            'tasa' => 'tasa',
+            'tasa_extranjera' => 'tasa_extranjera'
+        ];
+        $columnaActualizar = $columnas[$request->campo];
+        $db = $columnaActualizar == "kilaje" || $columnaActualizar == 'tasa' || $columnaActualizar == 'tasa_extranjera'  ? $fardoCliente->update([$columnaActualizar => $request->valor]) : KardexFardoDetalle::where(['id_fardo' => $fardoCliente->id,'id' => $request->idDetalle])->update([$columnaActualizar => $request->valor]);
+        return response()->json(['success' => $db ? $request->campo . ' se modifico de manera correcta' : $request->campo . ' no se a podido modificar']);
+    }
     public function generarReportesPackingList(ModelsKardex $kardex){
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
         if(isset($verif['session'])){
@@ -61,6 +90,13 @@ class Kardex extends Controller
         }
         return response()->json(['kardex' => ModelsKardex::verKardexPorTerminar($cliente)]);
     }
+    public function obtenerKardex($cliente,$kardex) {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
+        if(isset($verif['session'])){
+            return response()->json(['session' => true]);
+        }
+        return response()->json(['kardex' => ModelsKardex::verKardexPorTerminar($cliente,$kardex)]);
+    }
     public function consultaReporteCliente(ModelsKardex $kardex) {
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
         if(isset($verif['session'])){
@@ -80,12 +116,13 @@ class Kardex extends Controller
         $fardos = $kardex->fardos()->where('id_cliente',$cliente)->get();
         return Pdf::loadView("kardex.reportesPdf.kardexCliente",compact("fardos"))->stream("kardex_cliente_" . $kardex->id . '_' . $cliente .'.pdf');
     }
-    public function cerrarFardo(){
-        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);
-        if(isset($verif['session'])){
+    public function cerrarFardo(Request $request){
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
+        $verif2 = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);
+        if(isset($verif['session']) && isset($verif2['session'])){
             return response()->json(['session' => true]);
         }
-        $kardex = ModelsKardex::where(['estado' => 1])->first();
+        $kardex = $request->has("idKardex") ? ModelsKardex::findOrFail($request->idKardex)  : ModelsKardex::where(['estado' => 1])->first();
         if(empty($kardex)){
             return response()->json(['alerta' => 'No existe ningún kardex']);
         }
@@ -97,39 +134,41 @@ class Kardex extends Controller
         return response()->json(['success' => 'El fardo N° ' . $nroFardoActual . ' a sido cerrado correctamente' ]);
     }
     public function eliminarFardo(Request $request){
-        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);
-        if(isset($verif['session'])){
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
+        $verif2 = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);
+        if(isset($verif['session']) && isset($verif2['session'])){
             return response()->json(['session' => true]);
         }
-        $kardex = ModelsKardex::where(['estado' => 1])->first();
+        $kardex = $request->has("idKardex") ? ModelsKardex::findOrFail($request->idKardex)  : ModelsKardex::where(['estado' => 1])->first();
         if(empty($kardex)){
             return response()->json(['alerta' => 'No existe ningún kardex']);
         }
-        $fardoKardex = KardexFardo::where(['estado' => 1,'id_kardex' => $kardex->id,'nro_fardo' => $request->fardo,'id_cliente' => $request->cliente])->first();
+        $fardoKardex = KardexFardo::where(['id_kardex' => $kardex->id,'nro_fardo' => $request->fardo,'id_cliente' => $request->cliente])->first();
         if(empty($fardoKardex)){
             return response()->json(['alerta' => 'No existe ningún fardo con el número ' . $request->fardo]);
         }    
         if(empty($fardoKardex)){
             return response()->json(['alerta' => 'No existe ningún fardo con el número ' . $request->fardo]);
-        }    
-        KardexFardoDetalle::where(['id_fardo' => $fardoKardex->id,'estado' => 1])->delete();
-        KardexFardo::where(['estado' => 1,'id_kardex' => $kardex->id,'nro_fardo' => $request->fardo,'id_cliente' => $request->cliente])->delete();
+        }
+        KardexFardoDetalle::where(['id_fardo' => $fardoKardex->id])->delete();
+        KardexFardo::where(['id_kardex' => $kardex->id,'nro_fardo' => $request->fardo,'id_cliente' => $request->cliente])->delete();
         $kardex->update(['nroFardoActivo' => null]);
-        foreach (KardexFardo::where(['estado' => 1,'id_kardex' => $kardex->id])->get() as $k => $v) {
+        foreach (KardexFardo::where(['id_kardex' => $kardex->id])->get() as $k => $v) {
             $v->update(['nro_fardo' => $k + 1]);
         }
         return response()->json(['success' => 'El fardo N° ' . $request->fardo . ' a sido eliminado correctamente','nroFardo' => $kardex->nroFardoActivo]);
     }
     public function abrirFardo(Request $request){
-        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);
-        if(isset($verif['session'])){
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
+        $verif2 = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);
+        if(isset($verif['session']) && isset($verif2['session'])){
             return response()->json(['session' => true]);
         }
-        $kardex = ModelsKardex::where(['estado' => 1])->first();
+        $kardex = $request->has("idKardex") ? ModelsKardex::findOrFail($request->idKardex)  : ModelsKardex::where(['estado' => 1])->first();
         if(empty($kardex)){
             return response()->json(['alerta' => 'No existe ningún kardex']);
         }
-        $fardoKardex = KardexFardo::where(['estado' => 1,'id_kardex' => $kardex->id,'nro_fardo' => $request->fardo])->first();
+        $fardoKardex = KardexFardo::where(['id_kardex' => $kardex->id,'nro_fardo' => $request->fardo])->first();
         if(empty($fardoKardex)){
             return response()->json(['alerta' => 'No existe ningún fardo con el número ' . $request->fardo]);
         }    
@@ -176,14 +215,23 @@ class Kardex extends Controller
             return redirect()->route("home"); 
         }
         $modulos = $this->usuarioController->obtenerModulos();
-        return view("kardex.misKardex",compact("modulos"));
+        $productos = Productos::where('estado',1)->get();
+        $clientes = Clientes::where('estado',1)->get();
+        $proveedores = Proveedores::where('estado',1)->get();
+        $presentaciones = Presentacion::obtenerPresentaciones();
+        return view("kardex.misKardex",compact("modulos","productos","clientes","proveedores","presentaciones"));
     }
     public function agregarFardo(Request $request){
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);
-        if(isset($verif['session'])){
+        $verif2 = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
+        if(isset($verif['session']) && isset($verif2['session'])){
             return response()->json(['session' => true]);
         }
-        $kardex = ModelsKardex::where(['estado' => 1])->first();
+        $aduanero = Aduanero::where(['estado' => 1,'principal' => 1])->first();
+        if(empty($aduanero)){
+            return response()->json(['alerta' => 'No se a definido un agente de aduanas principal']);
+        }
+        $kardex = $request->has("idKardex") ? ModelsKardex::findOrFail($request->idKardex)  : ModelsKardex::where(['estado' => 1])->first();
         if(empty($kardex)){
             $kardex = ModelsKardex::create([
                 'estado' => 1
@@ -191,27 +239,28 @@ class Kardex extends Controller
         }
         $nroFardo = $kardex->nroFardoActivo;
         if(empty($nroFardo)){
-            $nroFardo = KardexFardo::where('id_kardex',$kardex->id)->count() + 1;
             $cliente = Clientes::find($request->cliente);
+            $nroFardo = KardexFardo::where('id_kardex',$kardex->id)->count() + 1;
             KardexFardo::create([
                 'id_cliente' => $cliente->id,
                 'id_kardex' => $kardex->id,
                 'nro_fardo' => $nroFardo,
                 'tasa' => $cliente->tasa,
-                'estado' => 1
+                'tasa_extranjera' => $aduanero->tasa,
+                'estado' => $request->has("idKardex") ? 2 : 1
             ]);
             $kardex->update(['nroFardoActivo' => $nroFardo]);
         }
         $fardoKardex = KardexFardo::where(['id_kardex' => $kardex->id,'nro_fardo' => $nroFardo,'id_cliente' => $request->cliente])->first();
         $producto = Productos::find($request->producto);
-        KardexFardoDetalle::create([
+        $nuevoDetalle = KardexFardoDetalle::create([
             'id_fardo' => $fardoKardex->id,
             'cantidad' => $request->cantidad,
             'id_proveedor' => $request->proveedor,
             'id_producto' => $producto->id,
             'id_presentacion' => $request->presentacion,
             'precio' => $producto->precioVenta,
-            'estado' => 1
+            'estado' => $request->has("idKardex") ? 2 : 1
         ]);
         KardexProveedor::updateOrCreate([
             'id_kardex' => $kardex->id,
@@ -220,7 +269,24 @@ class Kardex extends Controller
             'estado' => 1,
             'fechaRecepcion' => date('Y-m-d')
         ]);
-        $cantidadProductos = KardexFardoDetalle::where(['estado'=>1,'id_fardo' => $fardoKardex->id])->count();
-        return response()->json(['success' => 'producto agregado correctamente', 'nroFardo' => $nroFardo,'cantidadProducto' => $cantidadProductos]);
+        $cantidadProductos = KardexFardoDetalle::where(['id_fardo' => $fardoKardex->id])->count();
+        $response = [
+            'success' => 'producto agregado correctamente', 
+            'nroFardo' => $nroFardo,
+            'cantidadProducto' => $cantidadProductos,
+            'idDetalle' => $nuevoDetalle->id,
+            'kilaje' => $fardoKardex->kilaje,
+            'tasa' => $fardoKardex->tasa,
+            'precioProducto' => $producto->precioVenta,
+            'tasaExtranjera' => $fardoKardex->tasa_estranjera,
+            'tipo' => true
+        ];
+        if(!$request->has('idKardex')){
+            $response['tasa'] = '';
+            $response['tasaExtranjera'] = '';
+            $response['precioProducto'] = '';
+            $response['tipo'] = false;
+        }
+        return response()->json($response);
     }
 }
