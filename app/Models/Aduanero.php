@@ -13,7 +13,7 @@ class Aduanero extends Model
 
     public static function scopeObtenerDatos($query) {
         return $query->select("aduaneros.id","aduaneros.nombre_completo","td.documento","aduaneros.nro_documento","aduaneros.tasa","aduaneros.estado","aduaneros.principal","p.pais_espanish")
-        ->join("tipo_documento AS td","aduaneros.tipo_documento","=","td.id")
+        ->leftJoin("tipo_documento AS td","aduaneros.tipo_documento","=","td.id")
         ->join("paises AS p","aduaneros.id_pais","=","p.id")
         ->get();
     }

@@ -27,6 +27,7 @@
         <thead>
             <tr>
                 <th style="background: navy; color:white;">CLIENTE</th>
+                <th style="background: navy; color:white;">TELEF.</th>
                 <th style="background: navy; color:white;">N° FARDO</th>
                 <th style="background: navy; color:white;">CANTIDAD</th>
                 <th style="background: navy; color:white;">DESCRIPCION</th>
@@ -39,39 +40,49 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($kardex as $fardo)
+            @foreach ($kardex as $cliente)
                 @php
-                    $rowspan = count($fardo['detalles']);
+                    $rowspanPrincipal = $cliente['totalProductos'];
                 @endphp
                 <tr>
-                    <td rowspan="{{$rowspan}}">{{$fardo['cliente']}}</td>
-                    <td rowspan="{{$rowspan}}">{{$fardo['numero']}}</td>
-                    @foreach ($fardo['detalles'] as $key => $detalle)
+                    <td rowspan="{{$rowspanPrincipal}}">{{$cliente['cliente']}}</td>
+                    <td rowspan="{{$rowspanPrincipal}}">{{$cliente['telefono']}}</td>
+                    @foreach ($cliente['fardos'] as $key => $fardo)
+                        @php
+                            $rowspanSecundario = count($fardo['productos']);
+                        @endphp
                         @if ($key > 0)
                             <tr>
                         @endif
-                        <td>{{$detalle['cantidad']}}</td>
-                        <td>{{$detalle['nombreProducto']}}</td>
-                        <td>{{$detalle['presentacion']}}</td>
-                        @if ($key === 0)
-                            <td rowspan="{{$rowspan}}">{{$fardo['kilaje']}}</td>
-                            <td rowspan="{{$rowspan}}">{{$fardo['tasa']}}</td>
-                            <td rowspan="{{$rowspan}}"></td>
-                            <td rowspan="{{$rowspan}}"></td>
-                            <td rowspan="{{$rowspan}}"></td>
-                        @endif
-                        </tr>
+                        <td rowspan="{{$rowspanSecundario}}">{{$fardo['numero']}}</td>
+                        @foreach ($fardo['productos'] as $keyProducto => $producto)
+                            @if ($keyProducto > 0)
+                                <tr>
+                            @endif
+                            <td>{{$producto['cantidad']}}</td>
+                            <td>{{$producto['nombreProducto']}}</td>
+                            <td>{{$producto['presentacion']}}</td>
+                            @if ($key === 0 && $keyProducto === 0)
+                                <td rowspan="{{$rowspanPrincipal}}">{{$cliente['totalKilaje']}}</td>
+                                <td rowspan="{{$rowspanPrincipal}}">{{$cliente['tasa']}}</td>
+                                <td rowspan="{{$rowspanPrincipal}}"></td>
+                                <td rowspan="{{$rowspanPrincipal}}"></td>
+                                <td rowspan="{{$rowspanPrincipal}}"></td>
+                            @endif
+                            </tr>
+                        @endforeach
                     @endforeach
             @endforeach
         </tbody>
         <tfoot>
             <tr>
                 <th></th>
+                <th></th>
                 <th>CANTIDAD</th>
-                <th>{{$cantidades}}</th>
+                <th></th>
                 <th></th>
                 <th>T. KILOS</th>
-                <th>{{$kilajes}}</th>
+                <th></th>
             </tr>
         </tfoot>
     </table>

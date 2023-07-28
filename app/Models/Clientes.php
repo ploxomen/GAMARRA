@@ -11,15 +11,6 @@ class Clientes extends Model
     protected $fillable = ['nombreCliente','id_pais','tasa','id_usuario','estado'];
     const CREATED_AT = 'fechaCreada';
     const UPDATED_AT = 'fechaActualizada';
-
-    // public function tipoDocumento()
-    // {
-    //     return $this->belongsTo(TipoDocumento::class,'tipoDocumento');
-    // }
-    // public function ventas()
-    // {
-    //     return $this->hasMany(Ventas::class, 'clienteFk');
-    // }
     public function usuario()
     {
         return $this->belongsTo(User::class,'id_usuario');
@@ -61,10 +52,13 @@ class Clientes extends Model
     {
         return DB::table($this->table)->where('id',$idCliente)->first();
     }
-    
     public function contactos()
     {
         return $this->hasMany(ClientesContactos::class,'idCliente');
+    }
+    public function fardos()
+    {
+        return $this->hasMany(KardexFardo::class,'id_cliente');
     }
     
     

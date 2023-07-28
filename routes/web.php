@@ -104,6 +104,7 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
             Route::get('/', [Kardex::class, 'index'])->name('admin.kardex.index');
             Route::get('todos', [Kardex::class, 'misKardexIndex'])->name('admin.miskardex.index');
             Route::post('actualizar/fardos', [Kardex::class, 'actualizarValoresKardex']);
+            Route::post('actualizar/tasa', [Kardex::class, 'actualizarTasas']);
             Route::post('todos/listar', [Kardex::class, 'misKardex']);
             Route::get('pendiente/{cliente}', [Kardex::class, 'obtenerKardexPendiente']);
             Route::get('pendiente/editar/{cliente}/{kardex}', [Kardex::class, 'obtenerKardex']);

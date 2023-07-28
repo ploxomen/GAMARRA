@@ -8,6 +8,10 @@
           </button>
         </div>
         <div class="modal-body">
+            <h5 class="text-primary">
+                <i class="fas fa-caret-right"></i>
+                Fardo
+            </h5>
             <form id="frmDatosKardex" class="form-row">
                 <div class="col-12 col-md-6 col-lg-4 col-xl-3 form-group">
                     <label for="idCliente" class="col-form-label col-form-label-sm">Cliente</label>
@@ -55,6 +59,35 @@
                     <b>N° de fardo activo: <span class="text-danger" id="txtFardoActivo">Ninguno</span></b>
                 </div>
             </form>
+            <h5 class="text-primary">
+                <i class="fas fa-caret-right"></i>
+                Datos Excel
+            </h5>
+            <form id="formTasasKardex" class="form-row">
+                <div class="form-group col-12 col-md-5 col-lg-3">
+                    <label for="idModaltasa">Tasa</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">$</div>
+                        </div>
+                        <input type="number" step="0.01" min="0" class="form-control" name="tasa" id="idModaltasa" required>
+                    </div>
+                </div>
+                <div class="form-group col-12 col-md-5 col-lg-3">
+                    <label for="idModaltasa_extranjera">Tasa Extranjera</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">$</div>
+                        </div>
+                        <input type="number" step="0.01" min="0" class="form-control" name="tasa_extranjera" id="idModaltasa_extranjera" required>
+                    </div>
+                </div>
+                <div class="form-grop col-12 col-md-2 col-lg-6">
+                    <button type="submit" class="btn btn-sm btn-danger">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </form>
             <div class="table-responsive">
                 <table class="table table-sm table-bordered" style="font-size: 0.8rem; text-align: center;">
                     <thead>
@@ -66,8 +99,6 @@
                             <th>DESCRIPCION</th>
                             <th>COSTO</th>
                             <th>KILAJES</th>
-                            <th>TASA</th>
-                            <th>TASA EXT.</th>
                             <th>ACCIONES</th>
                         </tr>
                     </thead>

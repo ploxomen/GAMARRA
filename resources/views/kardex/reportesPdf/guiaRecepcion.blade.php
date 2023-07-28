@@ -37,7 +37,7 @@
     <table style="margin-bottom: 30px;">
         <tr>
             <td rowspan="3" style="width: 500px; height: 100px;">
-                <img src="/img/erp.png" alt="Logo de la empresa">
+                <img src="{{public_path("img/logo-fernando.jpg")}}" alt="logo de la empresa" width="100px">
             </td>
             <td class="text-center border"><strong>N° Guía - {{str_pad($kardex->id,5,'0',STR_PAD_LEFT)}}</strong></td>
         </tr>

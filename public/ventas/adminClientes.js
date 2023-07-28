@@ -242,6 +242,9 @@ function loadPage(){
                     if (response.session) {
                         return alertify.alert([...gen.alertaSesion], () => { window.location.reload() });
                     }
+                    if(response.alerta){
+                        return alertify.alert("Alerta",response.alerta);
+                    }
                     tablaClientesDatatable.draw();
                     return alertify.success(response.success);
                 } catch (error) {

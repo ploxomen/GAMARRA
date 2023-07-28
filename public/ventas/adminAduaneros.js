@@ -145,6 +145,7 @@ function loadPage(){
         checkEstado.checked = true;
         checkPrincipal.checked = false;
         formAduanero.reset();
+        $('#agregarAduanero .select2-simple').trigger("change");
     });
 
     btnGuardarForm.onclick = e => document.querySelector("#btnFrmEnviar").click();

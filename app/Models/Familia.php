@@ -23,6 +23,11 @@ class Familia extends Model
     {
         return $this->hasMany(Productos::class,'id_familia');
     }
+    function scopeCanitdadProductos($query,$idFamilia){
+        return $query->join("familia_sub AS fs",'familia.id','=','fs.id_familia')
+        ->join("productos AS p","fs.id","=","p.id_subfamilia")
+        ->where('familia.id',$idFamilia)->count();
+    }
     function scopeCanitdadFamilias($query,$codigo){
         return $query->where('codigo',$codigo)->count();
     }

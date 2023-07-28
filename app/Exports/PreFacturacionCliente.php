@@ -2,22 +2,33 @@
 
 namespace App\Exports;
 
+use App\Models\KardexFardoDetalle;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class PreFacturacionCliente implements FromView,ShouldAutoSize,WithStyles,WithTitle
+class PreFacturacionCliente implements FromView,ShouldAutoSize,WithStyles
 {
     protected $kardex;
     protected $filaInicial = 4;
     protected $filaFinal;
-    public function __construct(array $kardex, int $totalRegistros){
-        $this->kardex = $kardex;
-        $this->filaFinal = $totalRegistros + $this->filaInicial;
+    public function __construct(object $kardex){
+        $datos = [];
+        $filaFinal = $this->filaInicial;
+        $productos = KardexFardoDetalle::obtenerProductosPreFactura($kardex->id);
+        foreach ($productos as $producto) {
+            $filaFinal++;
+            $datos[] = [
+                'cantidad' => $producto->totalCantidades,
+                'descripcion' => $producto->productos->nombreProducto,
+                'precio' => $producto->precio
+            ];
+        }
+        $this->filaFinal = $filaFinal;
+        $this->kardex = $datos;
     }
     public function view(): View
     {
@@ -37,7 +48,7 @@ class PreFacturacionCliente implements FromView,ShouldAutoSize,WithStyles,WithTi
         $sheet->getStyle("B" . $this->filaInicial + 1 . ":B" .  $this->filaFinal)->getAlignment()->setHorizontal('center');
         $sheet->getStyle($rango)->getAlignment()->setVertical('center');
         $filaFormula = $this->filaInicial + 1;
-        foreach ($this->kardex['productos'] as $key => $valor) {
+        foreach ($this->kardex as $valor) {
             $sheet->setCellValue('E'.$filaFormula, '=D'.$filaFormula.'*B'.$filaFormula);
             $filaFormula++;
         }
@@ -45,9 +56,5 @@ class PreFacturacionCliente implements FromView,ShouldAutoSize,WithStyles,WithTi
         $sheet->setCellValue('B'.$this->filaFinal, '=SUM(B'.$this->filaInicial + 1 .':B'.$this->filaFinal - 1 .')');
         $sheet->setCellValue('E'.$this->filaFinal, '=SUM(E'.$this->filaInicial + 1 .':E'.$this->filaFinal - 1 .')');
         $sheet->getStyle('D' . $filaFormula . ':E' .$this->filaFinal)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_CURRENCY_USD);
-    }
-    public function title(): string
-    {
-        return $this->kardex['nombre'];
     }
 }

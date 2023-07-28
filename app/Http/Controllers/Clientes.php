@@ -144,6 +144,9 @@ class Clientes extends Controller
         }
         DB::beginTransaction();
         try {
+            if($cliente->fardos()->count() > 0){
+                return response()->json(['alerta' => 'Este cliente no puede ser eliminado debido a que está asociado con uno o varios kardex']); 
+            }
             $cliente->delete();
             DB::commit();
             return response()->json(['success' => 'cliente eliminado correctamente']);

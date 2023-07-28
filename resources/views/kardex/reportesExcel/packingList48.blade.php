@@ -35,7 +35,6 @@
                 <th style="background: navy; color:white;">DESCRIPCION</th>
                 <th style="background: navy; color:white;">UNIDAD</th>
                 <th style="background: navy; color:white;">KILAJES</th>
-                <th style="background: navy; color:white;">CLIENTES</th>
             </tr>
         </thead>
         <tbody>
@@ -54,7 +53,6 @@
                         <td>{{$detalle['presentacion']}}</td>
                         @if ($key === 0)
                             <td rowspan="{{$rowspan}}">{{$fardo['kilaje']}}</td>
-                            <td rowspan="{{$rowspan}}">{{$fardo['cliente']}}</td>
                         @endif
                         </tr>
                     @endforeach

@@ -128,6 +128,9 @@ function loadPage(){
                     if(response.session){
                         return alertify.alert([...general.alertaSesion],() => {window.location.reload()});
                     }
+                    if(response.alerta){
+                        return alertify.alert("Alerta",response.alerta);
+                    }
                     tablaProveedorDataTable.draw();
                     return alertify.success(response.success);
                 } catch (error) {

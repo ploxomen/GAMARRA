@@ -17,46 +17,46 @@ class PackingList implements FromView,ShouldAutoSize,WithStyles,WithTitle
     protected $totalCantidad;
     protected $totalKilaje;
     protected $filaFinal;
-    public function __construct(array $kardex,float $totalCantidad, float $totalKilajes, int $filaFinal){
+    public function __construct(array $kardex,int $filaFinal){
         $this->kardex = $kardex;
-        $this->totalCantidad = $totalCantidad;
-        $this->totalKilaje = $totalKilajes;
+        // dd($this->kardex);
         $this->filaFinal = $filaFinal;
     }
     public function view(): View
     {
         return view('kardex.reportesExcel.packingList', [
-            'kardex' => $this->kardex,
-            'kilajes' => $this->totalKilaje,
-            'cantidades' => $this->totalCantidad
+            'kardex' => $this->kardex
         ]);
     }
     public function styles(Worksheet $sheet)
     {
-        $rango = "A" . $this->filaInicial . ":J" . $this->filaFinal;
+        $this->filaFinal++;
+        $rango = "A" . $this->filaInicial . ":K" . $this->filaFinal;
         $tituloPackingList = $sheet->getStyle('A2');
         $tituloPackingList->getFont()->setBold(true);
         $tituloPackingList->getFont()->setUnderline(true);
         $tituloPackingList->getAlignment()->setHorizontal('center');
-        $cabeceraTabla = $sheet->getStyle("A".$this->filaInicial . ':' . "J" . $this->filaInicial);
+        $cabeceraTabla = $sheet->getStyle("A".$this->filaInicial . ':' . "K" . $this->filaInicial);
         $cabeceraTabla->getFont()->setBold(true);
         $sheet->getRowDimension(8)->setRowHeight(30);
         $sheet->getStyle($rango)->getBorders()->getAllBorders()->setBorderStyle('thin');
         $sheet->getStyle($rango)->getAlignment()->setHorizontal('center');
         $sheet->getStyle($rango)->getAlignment()->setVertical('center');
         $filaFormula = $this->filaInicial + 1;
-        foreach ($this->kardex as $key => $valor) {
-            $sheet->setCellValue('H'.$filaFormula, '=F'.$filaFormula.'*G'.$filaFormula);
-            $sheet->setCellValue('I'.$filaFormula, '=F'.$filaFormula.'*'.$valor['tasa_extranjera']);
-            $sheet->setCellValue('J'.$filaFormula, '=H'.$filaFormula.'-I'.$filaFormula);
-            $filaFormula += count($valor['detalles']);
+        foreach ($this->kardex as $valor) {
+            $sheet->setCellValue('I'.$filaFormula, '=G'.$filaFormula.'*H'.$filaFormula);
+            $sheet->setCellValue('J'.$filaFormula, '=G'.$filaFormula.'*'.$valor['tasa_extranjera']);
+            $sheet->setCellValue('K'.$filaFormula, '=I'.$filaFormula.'-J'.$filaFormula);
+            $filaFormula += $valor['totalProductos'];
         }
         $filaFormula = $this->filaInicial + 1;
-        $sheet->setCellValue('H'.$this->filaFinal, '=SUM(H'.$this->filaInicial + 1 .':H'.$this->filaFinal - 1 .')');
+        $sheet->setCellValue('D'.$this->filaFinal, '=SUM(D'.$this->filaInicial + 1 .':D'.$this->filaFinal - 1 .')');
+        $sheet->setCellValue('G'.$this->filaFinal, '=SUM(G'.$this->filaInicial + 1 .':G'.$this->filaFinal - 1 .')');
         $sheet->setCellValue('I'.$this->filaFinal, '=SUM(I'.$this->filaInicial + 1 .':I'.$this->filaFinal - 1 .')');
         $sheet->setCellValue('J'.$this->filaFinal, '=SUM(J'.$this->filaInicial + 1 .':J'.$this->filaFinal - 1 .')');
-        $sheet->getStyle("A".$this->filaFinal . ':' . "J" . $this->filaFinal)->getFont()->setBold(true);
-        $sheet->getStyle('G' . $filaFormula . ':J' .$this->filaFinal)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_CURRENCY_USD);
+        $sheet->setCellValue('K'.$this->filaFinal, '=SUM(K'.$this->filaInicial + 1 .':K'.$this->filaFinal - 1 .')');
+        $sheet->getStyle("A".$this->filaFinal . ':' . "K" . $this->filaFinal)->getFont()->setBold(true);
+        $sheet->getStyle('H' . $filaFormula . ':K' .$this->filaFinal)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_CURRENCY_USD);
     }
     public function title(): string
     {

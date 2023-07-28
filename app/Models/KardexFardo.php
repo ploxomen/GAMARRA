@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class KardexFardo extends Model
 {
     public $table = "kardex_fardos";
-    protected $fillable = ['id_kardex','id_cliente','nro_fardo','tasa','tasa_extranjera','cantidad','kilaje','estado'];
+    protected $fillable = ['id_kardex','id_cliente','nro_fardo','cantidad','kilaje','estado'];
     const CREATED_AT = 'fechaCreada';
     const UPDATED_AT = 'fechaActualizada';
 

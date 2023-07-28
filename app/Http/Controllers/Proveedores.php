@@ -111,6 +111,9 @@ class Proveedores extends Controller
         if(isset($accessModulo['session'])){
             return response()->json($accessModulo);
         }
+        if(ModelsProveedores::find($proveedor)->detalleFardo()->count() > 0){
+            return response()->json(['alerta' => 'Este proveedor no puede ser eliminado debido a que está asociado con uno o varios kardex']); 
+        }
         ProveedoresContactos::where(['proveedoresFk' => $proveedor])->delete();
         ModelsProveedores::find($proveedor)->delete();
         return response()->json(['success' => 'proveedor eliminado correctamente']);

@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{{$kardex['nombre']}}</title>
+    <title>Prefacturación</title>
 </head>
 <body>
     <table>
         <tr></tr>
         <tr>
             <td></td>
-            <td colspan="2">RUC: {{$kardex['ruc']}}</td>
+            <td colspan="2">RUC:</td>
         </tr>
         <tr>
             <td></td>
-            <td colspan="2">{{$kardex['nombre']}}</td>
+            <td colspan="2"></td>
             <td></td>
             <td></td>
             <td>Fecha</td>
@@ -30,7 +30,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($kardex['productos'] as $key => $producto)
+            @foreach ($kardex as $key => $producto)
                 <tr>
                     <td>{{$key+1}}</td>
                     <td>{{$producto['cantidad']}}</td>

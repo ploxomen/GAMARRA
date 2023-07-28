@@ -69,12 +69,14 @@ class Kardex{
             if(response.alerta){
                 return alertify.alert("Mensaje",response.alerta)
             }
-            $('.destruir-fardo').select2("destroy");
+            $(txtProveedor).select2("destroy");
+            $(txtProducto).select2("destroy");
+            $(txtPresentacion).select2("destroy");
             if(this.vacioTablaDetalle){
                 this.vacioTablaDetalle = false;
                 tablaFardos.innerHTML = "";
             }
-            const producto = this.generarFilaFardo(response.nroFardo,response.cantidadProducto,txtProveedor,txtProducto,txtPresentacion,txtCantidad,datosKardex.get('proveedor'),datosKardex.get('producto'),datosKardex.get('presentacion'),datosKardex.get('cantidad'),tablaFardos,response.nroFardo,response.idDetalle,response.kilaje,response.precioProducto,response.tasa,response.tasaExtranjera,response.tipo);
+            const producto = this.generarFilaFardo(response.nroFardo,response.cantidadProducto,txtProveedor,txtProducto,txtPresentacion,txtCantidad,datosKardex.get('proveedor'),datosKardex.get('producto'),datosKardex.get('presentacion'),datosKardex.get('cantidad'),tablaFardos,response.nroFardo,response.idDetalle,response.kilaje,response.precioProducto,response.tipo);
             const padreFardo = document.querySelector(`#fardoLista${response.nroFardo}${response.cantidadProducto - 1}`);
             if(!padreFardo){
                 tablaFardos.append(producto);
@@ -96,15 +98,13 @@ class Kardex{
         }
         
     }
-    generarFilaFardo(fardo,producto,txtProveedor,txtProducto,txtPresentacion,txtCantidad,valProveedor,valProducto,valPresentacion,valCantidad,tablaFardos,nroFardoActivo,idDetalle,valKilaje,valCostoProd,valTasa,valTasaExtr,total = false){
+    generarFilaFardo(fardo,producto,txtProveedor,txtProducto,txtPresentacion,txtCantidad,valProveedor,valProducto,valPresentacion,valCantidad,tablaFardos,nroFardoActivo,idDetalle,valKilaje,valCostoProd,total = false){
         const tr = document.createElement("tr");
         const cloneProveedor = txtProveedor.cloneNode(true);
         const cloneProducto = txtProducto.cloneNode(true);
         const cloneCantidad = txtCantidad.cloneNode(true);
         const clonePresentacion = txtPresentacion.cloneNode(true);
         let costoProducto = "";
-        let tasa = "";
-        let tasaExtranjera = "";
         if(total){
             costoProducto = document.createElement("input");
             costoProducto.type = "number";
@@ -113,15 +113,7 @@ class Kardex{
             costoProducto.className = "form-control form-control-sm";
             costoProducto.setAttribute("data-valor","costo");
             costoProducto.setAttribute("value",valCostoProd);
-            tasa = costoProducto.cloneNode();
-            tasa.setAttribute("data-valor","tasa");
-            tasa.setAttribute("value",valTasa);
-            tasaExtranjera = costoProducto.cloneNode();
-            tasaExtranjera.setAttribute("data-valor","tasa_extranjera");
-            tasaExtranjera.setAttribute("value",valTasaExtr);
-            costoProducto = "<td>" + costoProducto.outerHTML +"</td>";
-            tasa = "<td>" + tasa.outerHTML +"</td>";
-            tasaExtranjera = "<td>" + tasaExtranjera.outerHTML + "</td>";
+            costoProducto = "<td>" + costoProducto.outerHTML + "</td>";
         }
         cloneProveedor.setAttribute("id",`idProveedorFardo${idDetalle}`);
         cloneProveedor.setAttribute("class","select2-simple");
@@ -177,8 +169,6 @@ class Kardex{
             <td class="wt-cantidad">
                 <input type="number" data-valor="kilaje" step="0.01" class="form-control form-control-sm" value="${valKilaje}">
             </td>
-            ${tasa}
-            ${tasaExtranjera}
             <td rowspan="1">
                 <div class="d-flex" style="gap:3px;">
                     <button type="button" class="btn btn-sm ${fardo == nroFardoActivo ? 'btn-primary' : 'btn-success'}" title="${fardo == nroFardoActivo ? 'Cerrar fardo' : 'Abrir fardo'}">
@@ -193,7 +183,7 @@ class Kardex{
             `
         }else if(producto > 1 && trFardo){
             let inicio = !total ? 5 : 6;
-            let fin = !total ? 6 : 9;
+            let fin = !total ? 6 : 7;
             for (inicio; inicio <= fin; inicio++) {
                 trFardo.children[inicio].setAttribute("rowspan",producto);                
             }
@@ -217,6 +207,10 @@ class Kardex{
                 this.vacioTablaDetalle = true;
                 return false
             }
+            if(idKardex && response.tasas){
+                document.querySelector("#idModaltasa").value = response.tasas.tasa;
+                document.querySelector("#idModaltasa_extranjera").value = response.tasas.tasa_extranjera;
+            }
             this.vacioTablaDetalle = false;
             txtFardoActivo.textContent = !response.kardex.nroFardoActivo ? 'Ninguno' : response.kardex.nroFardoActivo;
             tableDetalleKardex.innerHTML = "";
@@ -230,7 +224,7 @@ class Kardex{
             response.kardex.listaFardos.forEach(fardo => {
                 const nroFardo = fardo.nro_fardo;
                 fardo.productos.forEach((producto,kproducto) => {
-                    tableDetalleKardex.append(this.generarFilaFardo(nroFardo,kproducto + 1,txtProveedor,txtProducto,txtPresentacion,txtCantidad,producto.id_proveedor,producto.id_producto,producto.id_presentacion,producto.cantidad,tableDetalleKardex,response.kardex.nroFardoActivo,producto.id,fardo.kilaje,producto.precio,fardo.tasa,fardo.tasa_extranjera,!idKardex ? false : true));
+                    tableDetalleKardex.append(this.generarFilaFardo(nroFardo,kproducto + 1,txtProveedor,txtProducto,txtPresentacion,txtCantidad,producto.id_proveedor,producto.id_producto,producto.id_presentacion,producto.cantidad,tableDetalleKardex,response.kardex.nroFardoActivo,producto.id,fardo.kilaje,producto.precio,!idKardex ? false : true));
                 });
             });
             for (const cb of tableDetalleKardex.querySelectorAll("select")) {

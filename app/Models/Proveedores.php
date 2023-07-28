@@ -24,6 +24,10 @@ class Proveedores extends Model
     {
         return $this->hasOne(KardexProveedor::class,'id_proveedores');
     }
+    public function detalleFardo()
+    {
+        return $this->hasMany(KardexFardoDetalle::class,'id_proveedor');
+    }
     // public function compras()
     // {
     //     return $this->hasMany(Compras::class, 'proveedorFk');

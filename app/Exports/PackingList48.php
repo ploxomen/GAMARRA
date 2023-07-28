@@ -33,18 +33,18 @@ class PackingList48 implements FromView,ShouldAutoSize,WithStyles,WithTitle
     public function styles(Worksheet $sheet)
     {
         $this->filaFinal++;
-        $rango = "A" . $this->filaInicial . ":F" . $this->filaFinal;
+        $rango = "A" . $this->filaInicial . ":E" . $this->filaFinal;
         $tituloPackingList = $sheet->getStyle('A2');
         $tituloPackingList->getFont()->setBold(true);
         $tituloPackingList->getFont()->setUnderline(true);
         $tituloPackingList->getAlignment()->setHorizontal('center');
-        $cabeceraTabla = $sheet->getStyle("A8:F8");
+        $cabeceraTabla = $sheet->getStyle("A8:E8");
         $cabeceraTabla->getFont()->setBold(true);
         $sheet->getRowDimension(8)->setRowHeight(30);
         $sheet->getStyle($rango)->getBorders()->getAllBorders()->setBorderStyle('thin');
         $sheet->getStyle($rango)->getAlignment()->setHorizontal('center');
         $sheet->getStyle($rango)->getAlignment()->setVertical('center');
-        $sheet->getStyle("A".$this->filaFinal . ':' . "F" . $this->filaFinal)->getFont()->setBold(true);
+        $sheet->getStyle("A".$this->filaFinal . ':' . "E" . $this->filaFinal)->getFont()->setBold(true);
     }
     public function title(): string
     {

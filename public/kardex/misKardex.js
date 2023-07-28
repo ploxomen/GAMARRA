@@ -115,10 +115,13 @@ function loadPage() {
             return
         }
     })
+    const frmTasas = document.querySelector("#formTasasKardex");
     $('#idCliente').on("select2:select",function(e){
+        frmTasas.reset()
         kardex.obtenerKardexPendiente($(this).val(),tableDetalleKardex,txtProveedor,txtProducto,txtCantidad,txtPresentacion,txtFardoActivo,idKardex);
     })
     $('#editarKardex').on("hidden.bs.modal",function(e){
+        frmTasas.reset()
         idKardex = null;
         frmKardex.reset();
         $('#editarKardex .select2-simple').val("").trigger("change");
@@ -132,6 +135,28 @@ function loadPage() {
         let datos = new FormData(this);
         datos.append("idKardex",idKardex);
         kardex.agregarFardo(datos,txtProveedor,txtProducto,txtPresentacion,txtCantidad,tableDetalleKardex,txtFardoActivo);
+    })
+    frmTasas.addEventListener("submit",async function(e){
+        e.preventDefault();
+        if($('#idCliente').val() == ""){
+            return alertify.error("por favor seleccione un cliente");
+        }
+        try {
+            let datos = new FormData(this);
+            datos.append("idKardex",idKardex);
+            datos.append("cliente",$('#idCliente').val());
+            const response = await gen.funcfetch("actualizar/tasa",datos,"POST");
+            if(response.session){
+                return alertify.alert([...gen.alertaSesion],() => {window.location.reload()});
+            }
+            if(response.alerta){
+                return alertify.alert("Alerta",response.alerta);
+            }
+            alertify.success(response.success);
+        } catch (error) {
+            console.error(error);
+            alertify.error("error al actualizar las tasas");
+        }
     })
     document.querySelector("#cerrarFardo").onclick = function(){
         let datos = new FormData();

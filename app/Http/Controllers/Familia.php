@@ -156,11 +156,11 @@ class Familia extends Controller
         if(isset($accessModulo['session'])){
             return response()->json($accessModulo);
         }
-        if(ModelsFamilia::find($familia)->productos()->count()){
-            return response()->json(['alerta' => 'Para eliminar la familia primero elimine los productos asociados a ella']);
+        if(ModelsFamilia::canitdadProductos($familia) > 0){
+            return response()->json(['alerta' => 'Para eliminar la familia y subfamilia primero elimine los productos asociados a ella']);
         }
         SubFamilias::where('id_familia',$familia)->delete();
         ModelsFamilia::find($familia)->delete();
-        return response()->json(['success' => 'familia eliminada correctamente']);
+        return response()->json(['success' => 'familia y subfamilia eliminada correctamente']);
     }
 }

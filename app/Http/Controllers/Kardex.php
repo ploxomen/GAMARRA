@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Exports\KardexExport;
-use App\Exports\PreFacturacion;
+use App\Exports\PreFacturacionCliente;
 use App\Models\Aduanero;
 use App\Models\Clientes;
 use App\Models\Kardex as ModelsKardex;
+use App\Models\KardexCliente;
 use App\Models\KardexFardo;
 use App\Models\KardexFardoDetalle;
 use App\Models\KardexProveedor;
@@ -35,11 +36,23 @@ class Kardex extends Controller
             return redirect()->route("home"); 
         }
         $modulos = $this->usuarioController->obtenerModulos();
-        $productos = Productos::where('estado',1)->get();
-        $clientes = Clientes::where('estado',1)->get();
-        $proveedores = Proveedores::where('estado',1)->get();
-        $presentaciones = Presentacion::obtenerPresentaciones();
+        $productos = Productos::all();
+        $clientes = Clientes::all();
+        $proveedores = Proveedores::all();
+        $presentaciones = Presentacion::orderBy("presentacion")->get();
         return view("kardex.generar",compact("modulos","clientes","productos","proveedores","presentaciones"));
+    }
+    public function actualizarTasas(Request $request) {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
+        if(isset($verif['session'])){
+            return response()->json(['session' => true]);
+        }
+        $kardexFardo = KardexFardo::where(['id_kardex' => $request->idKardex,'id_cliente' => $request->cliente])->count();
+        if(!$kardexFardo){
+            return response()->json(['alerta' => 'Debe existir al menos un fardo asociado a este cliente']);
+        }
+        KardexCliente::where(['id_kardex' => $request->idKardex,'id_cliente' => $request->cliente])->update($request->only("tasa","tasa_extranjera"));
+        return response()->json(['success' => 'tasa actualizada correctamente']);
     }
     public function actualizarValoresKardex(Request $request) {
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
@@ -67,6 +80,9 @@ class Kardex extends Controller
         ];
         $columnaActualizar = $columnas[$request->campo];
         $db = $columnaActualizar == "kilaje" || $columnaActualizar == 'tasa' || $columnaActualizar == 'tasa_extranjera'  ? $fardoCliente->update([$columnaActualizar => $request->valor]) : KardexFardoDetalle::where(['id_fardo' => $fardoCliente->id,'id' => $request->idDetalle])->update([$columnaActualizar => $request->valor]);
+        if($columnaActualizar == 'id_proveedor'){
+            $this->filtrarProveedores($kardex->id);
+        }
         return response()->json(['success' => $db ? $request->campo . ' se modifico de manera correcta' : $request->campo . ' no se a podido modificar']);
     }
     public function generarReportesPackingList(ModelsKardex $kardex){
@@ -81,7 +97,7 @@ class Kardex extends Controller
         if(isset($verif['session'])){
             return redirect()->route("home"); 
         }
-        return Excel::download(new PreFacturacion($kardex), 'prefacturacion_clientes_'. str_pad($kardex->id,5,'0',STR_PAD_LEFT). '.xlsx');
+        return Excel::download(new PreFacturacionCliente($kardex), 'prefacturacion_clientes_'. str_pad($kardex->id,5,'0',STR_PAD_LEFT). '.xlsx');
     }
     public function obtenerKardexPendiente($cliente) {
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);
@@ -95,7 +111,7 @@ class Kardex extends Controller
         if(isset($verif['session'])){
             return response()->json(['session' => true]);
         }
-        return response()->json(['kardex' => ModelsKardex::verKardexPorTerminar($cliente,$kardex)]);
+        return response()->json(['kardex' => ModelsKardex::verKardexPorTerminar($cliente,$kardex),'tasas' => KardexCliente::where(['id_cliente' => $cliente,'id_kardex' => $kardex])->first()]);
     }
     public function consultaReporteCliente(ModelsKardex $kardex) {
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
@@ -156,7 +172,20 @@ class Kardex extends Controller
         foreach (KardexFardo::where(['id_kardex' => $kardex->id])->get() as $k => $v) {
             $v->update(['nro_fardo' => $k + 1]);
         }
+        $kardexFardo = KardexFardo::where(['id_kardex' => $kardex->id,'id_cliente' => $request->cliente])->count();
+        if(!$kardexFardo){
+            KardexCliente::where(['id_kardex' => $kardex->id,'id_cliente' => $request->cliente])->delete();
+        }
+        $this->filtrarProveedores($kardex->id);
         return response()->json(['success' => 'El fardo N° ' . $request->fardo . ' a sido eliminado correctamente','nroFardo' => $kardex->nroFardoActivo]);
+    }
+    function filtrarProveedores($idKardex){
+        $proveedores = KardexFardoDetalle::obtenerProveedoresKardex($idKardex);
+        $listaProveedores = [];
+        foreach ($proveedores as $proveedor) {
+            $listaProveedores[] = $proveedor->id_proveedor; 
+        }
+        KardexProveedor::where('id_kardex',$idKardex)->whereNotIn('id_proveedores',$listaProveedores)->delete();
     }
     public function abrirFardo(Request $request){
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
@@ -215,10 +244,10 @@ class Kardex extends Controller
             return redirect()->route("home"); 
         }
         $modulos = $this->usuarioController->obtenerModulos();
-        $productos = Productos::where('estado',1)->get();
-        $clientes = Clientes::where('estado',1)->get();
-        $proveedores = Proveedores::where('estado',1)->get();
-        $presentaciones = Presentacion::obtenerPresentaciones();
+        $productos = Productos::all();
+        $clientes = Clientes::all();
+        $proveedores = Proveedores::all();
+        $presentaciones = Presentacion::orderBy("presentacion")->get();
         return view("kardex.misKardex",compact("modulos","productos","clientes","proveedores","presentaciones"));
     }
     public function agregarFardo(Request $request){
@@ -237,16 +266,18 @@ class Kardex extends Controller
                 'estado' => 1
             ]);
         }
+        $kardexCliente = KardexCliente::where(['id_kardex' => $kardex->id,'id_cliente' => $request->cliente]);
+        $cliente = Clientes::find($request->cliente);
+        if(!$kardexCliente->count()){
+            KardexCliente::create(['id_kardex' => $kardex->id,'id_cliente' => $request->cliente,'tasa' => $cliente->tasa, 'tasa_extranjera' => $aduanero->tasa]);
+        }
         $nroFardo = $kardex->nroFardoActivo;
         if(empty($nroFardo)){
-            $cliente = Clientes::find($request->cliente);
             $nroFardo = KardexFardo::where('id_kardex',$kardex->id)->count() + 1;
             KardexFardo::create([
                 'id_cliente' => $cliente->id,
                 'id_kardex' => $kardex->id,
                 'nro_fardo' => $nroFardo,
-                'tasa' => $cliente->tasa,
-                'tasa_extranjera' => $aduanero->tasa,
                 'estado' => $request->has("idKardex") ? 2 : 1
             ]);
             $kardex->update(['nroFardoActivo' => $nroFardo]);
@@ -276,14 +307,10 @@ class Kardex extends Controller
             'cantidadProducto' => $cantidadProductos,
             'idDetalle' => $nuevoDetalle->id,
             'kilaje' => $fardoKardex->kilaje,
-            'tasa' => $fardoKardex->tasa,
             'precioProducto' => $producto->precioVenta,
-            'tasaExtranjera' => $fardoKardex->tasa_estranjera,
             'tipo' => true
         ];
         if(!$request->has('idKardex')){
-            $response['tasa'] = '';
-            $response['tasaExtranjera'] = '';
             $response['precioProducto'] = '';
             $response['tipo'] = false;
         }

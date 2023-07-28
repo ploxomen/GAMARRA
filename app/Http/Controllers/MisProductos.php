@@ -139,6 +139,9 @@ class MisProductos extends Controller
         }
         DB::beginTransaction();
         try {
+            if($producto->detalleFardo()->count() > 0){
+                return response()->json(['alerta' => 'Este producto no puede ser eliminado debido a que está asociado con uno o varios kardex']); 
+            }
             if(!empty($producto->urlImagen) && Storage::disk('productos')->exists($producto->urlImagen)){
                 Storage::disk('productos')->delete($producto->urlImagen);
             }

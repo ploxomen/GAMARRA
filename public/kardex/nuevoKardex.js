@@ -8,8 +8,7 @@ function loadPage() {
     const txtFardoActivo = document.querySelector("#txtFardoActivo");
     $('#idCliente').on("select2:select",function(e){
         kardex.obtenerKardexPendiente($(this).val(),tableDetalleKardex,txtProveedor,txtProducto,txtCantidad,txtPresentacion,txtFardoActivo);
-    })
-    
+    });
     document.querySelector("#cerrarFardo").onclick = function(){
         let datos = new FormData();
         datos.append('cliente',$('#idCliente').val())
