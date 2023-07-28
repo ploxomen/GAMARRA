@@ -48,8 +48,9 @@ class KardexExport implements WithMultipleSheets
         foreach ($clientes as $cliente){
             $tasas = KardexCliente::where(['id_kardex' => $this->kardex->id,'id_cliente' => $cliente->id_cliente])->first();
             $totalProductos = 0;
+            $usuarioModelo = $cliente->clientes->usuario;
             $clientesLista = [
-                'telefono' => $cliente->clientes->usuario->telefono,
+                'telefono' => is_null($usuarioModelo) ? null : $usuarioModelo->telefono,
                 'cliente' => $cliente->clientes->nombreCliente,
                 'totalKilaje' => $cliente->totalKilaje,
                 'tasa' => $tasas->tasa,
