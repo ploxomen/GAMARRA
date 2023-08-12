@@ -52,11 +52,21 @@ class Aduaneros extends Controller
             return response()->json($accessModulo);
         }
         $datos = $request->only("tipo_documento","nro_documento","nombre_completo","id_pais","tasa");
+        if(!empty($request->nro_documento)){
+            $agente = Aduanero::where(['tipo_documento' => $request->tipo_documento, 'nro_documento' => $request->nro_documento])->first();
+            if(!empty($agente)){
+                $tipoDocumento = TipoDocumento::find($request->tipo_documento);
+                $tipoDocumento = empty($tipoDocumento) ? 'No definido' : $tipoDocumento->documento;
+                return response()->json(['alerta' => 'No se puede registrar el tipo de documento <b>' . $tipoDocumento  . '</b> con el número <b>' . $request->nro_documento . '</b> porque ya se encuentra asociado a <b>' . $agente->nombre_completo .'</b>']);
+            }
+        }
+        
         if($request->has("principal")){
             Aduanero::where('estado',1)->update(['principal' => 0]);
             $datos['principal'] = 1;
         }
         $datos['estado'] = 1;
+
         Aduanero::create($datos);
         return response()->json(['success' => 'aduanero creado correctamente']);
     }
@@ -80,6 +90,14 @@ class Aduaneros extends Controller
         $accessModulo = $this->usuarioController->validarXmlHttpRequest($this->moduloAduanero);
         if(isset($accessModulo['session'])){
             return response()->json($accessModulo);
+        }
+        if(!empty($request->nro_documento)){
+            $agente = Aduanero::where(['tipo_documento' => $request->tipo_documento, 'nro_documento' => $request->nro_documento])->where('id','!=',$aduanero)->first();
+            if(!empty($agente)){
+                $tipoDocumento = TipoDocumento::find($request->tipo_documento);
+                $tipoDocumento = empty($tipoDocumento) ? 'No definido' : $tipoDocumento->documento;
+                return response()->json(['alerta' => 'No se puede registrar el tipo de documento <b>' . $tipoDocumento  . '</b> con el número <b>' . $request->nro_documento . '</b> porque ya se encuentra asociado a <b>' . $agente->nombre_completo .'</b>']);
+            }
         }
         Aduanero::find($aduanero)->where('estado',1)->update(['principal' => 0]);
         $datos = $request->only("tipo_documento","nro_documento","nombre_completo","id_pais","tasa");

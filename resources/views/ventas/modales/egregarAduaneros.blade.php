@@ -26,7 +26,7 @@
                 </div>
                 <div class="form-group col-12 col-md-6 form-required">
                     <label for="idModalnro_documento">N° Documento</label>
-                    <input type="text" name="nro_documento" class="form-control" id="idModalnro_documento">
+                    <input type="text" maxlength="20" name="nro_documento" class="form-control" id="idModalnro_documento">
                 </div>
                 <div class="form-group col-12">
                     <label for="idModalnombre_completo">Nombres completos</label>

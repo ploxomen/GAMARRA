@@ -65,7 +65,7 @@
                             </div>
                             <div class="col-6 form-group">
                                 <label for="nroDocumentoCliente" class="col-form-label col-form-label-sm">N° Documento</label>
-                                <input type="tel" id="nroDocumentoCliente" disabled class="form-control form-control-sm">
+                                <input type="tel" maxlength="20" id="nroDocumentoCliente" disabled class="form-control form-control-sm">
                             </div>
                     </fieldset>
                 </div>

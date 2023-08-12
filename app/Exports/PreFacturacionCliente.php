@@ -13,7 +13,7 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 class PreFacturacionCliente implements FromView,ShouldAutoSize,WithStyles
 {
     protected $kardex;
-    protected $filaInicial = 4;
+    protected $filaInicial = 5;
     protected $filaFinal;
     public function __construct(object $kardex){
         $datos = [];
@@ -40,10 +40,14 @@ class PreFacturacionCliente implements FromView,ShouldAutoSize,WithStyles
     {
         $this->filaFinal++;
         $rango = "A" . $this->filaInicial . ":E" . $this->filaFinal;
+        $tituloPackingList = $sheet->getStyle('A2');
+        $tituloPackingList->getFont()->setBold(true);
+        $tituloPackingList->getFont()->setUnderline(true);
+        $tituloPackingList->getAlignment()->setHorizontal('center');
         $cabeceraTabla = $sheet->getStyle("A".$this->filaInicial . ':' . "E" . $this->filaInicial);
         $cabeceraTabla->getFont()->setBold(true);
         $cabeceraTabla->getAlignment()->setHorizontal('center');
-        $sheet->getRowDimension(4)->setRowHeight(20);
+        $sheet->getRowDimension($this->filaInicial)->setRowHeight(20);
         $sheet->getStyle($rango)->getBorders()->getAllBorders()->setBorderStyle('thin');
         $sheet->getStyle("B" . $this->filaInicial + 1 . ":B" .  $this->filaFinal)->getAlignment()->setHorizontal('center');
         $sheet->getStyle($rango)->getAlignment()->setVertical('center');

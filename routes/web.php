@@ -67,8 +67,8 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
         Route::prefix('kardex/proveedores')->group(function () {
             Route::get('/', [KardexProveedores::class, 'index'])->name('admin.proveedores.index');
             Route::post('listar', [KardexProveedores::class, 'listar']);
-            Route::get('listar/{proveedor}', [KardexProveedores::class, 'show']);
-            Route::get('reporte/{kardex}/{proveedor}', [KardexProveedores::class, 'verGuiaReporte']);
+            Route::get('listar/{kardex}/{proveedor}/{cliente}', [KardexProveedores::class, 'show']);
+            Route::get('reporte/{kardex}/{proveedor}/{cliente}', [KardexProveedores::class, 'verGuiaReporte']);
             Route::post('actualizar', [KardexProveedores::class, 'update']);
         });
     });

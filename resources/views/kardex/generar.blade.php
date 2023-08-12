@@ -48,7 +48,7 @@
                         <select name="presentacion" id="idPresentacion" class="select2-simple destruir-fardo" required>
                             <option value=""></option>
                             @foreach ($presentaciones as $presentacion)
-                                <option value="{{$presentacion->id}}">{{$presentacion->presentacion}}</option>
+                                <option value="{{$presentacion->id}}" {{$presentacion->id === 'NIU' ? 'selected' : ''}}>{{$presentacion->presentacion}}</option>
                             @endforeach
                         </select>
                     </div>

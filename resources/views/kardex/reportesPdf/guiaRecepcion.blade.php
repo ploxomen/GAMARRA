@@ -34,19 +34,19 @@
             border: 1px solid black;
         }
     </style>
-    <table style="margin-bottom: 30px;">
+    <table>
         <tr>
-            <td rowspan="3" style="width: 500px; height: 100px;">
-                <img src="{{public_path("img/logo-fernando.jpg")}}" alt="logo de la empresa" width="100px">
+            <td rowspan="3" style="width: 500px; height: 50px;">
+                <img src="{{public_path("img/logo-sin-fondo.png")}}" alt="logo de la empresa" width="100px">
             </td>
             <td class="text-center border"><strong>N° Guía - {{str_pad($kardex->id,5,'0',STR_PAD_LEFT)}}</strong></td>
         </tr>
         <tr>
             <td></td>
         </tr>
-        <tr>
+        {{-- <tr>
             <td class="text-center border">RUC: 20603897766</td>
-        </tr>
+        </tr> --}}
     </table>
     <h2 class="titulo">GUÍA DE RECEPCIÓN DE MERCADERÍA</h2>
     <p>
@@ -54,6 +54,9 @@
     </p>
     <p>
         Recibí(mos) de: <strong>{{$kardex->proveedor->nombre_proveedor}}</strong>
+    </p>
+    <p>
+        Cliente: <strong>{{$clienteModel->nombreCliente}}</strong>
     </p>
     <p>
         <b>La siguiente mercadería:</b>
@@ -67,12 +70,18 @@
             </tr>
         </thead>
         <tbody>
+            @php
+                $sumaTotal = 0;
+            @endphp
             @foreach ($listaDetalles as $detalle)
+                @php
+                    $sumaTotal += $detalle->sumaCantidad;
+                @endphp
                 <tr>
-                    <td>
-                        {{$detalle->cantidad}}
+                    <td class="text-center">
+                        {{floatval($detalle->sumaCantidad)}}
                     </td>
-                    <td>
+                    <td class="text-center">
                         {{$detalle->presentacion}}
                     </td>
                     <td>
@@ -81,6 +90,13 @@
                 </tr>
             @endforeach
         </tbody>
+        <tfoot>
+            <tr>
+                <th>{{$sumaTotal}}</th>
+                <th colspan="2"></th>
+                
+            </tr>
+        </tfoot>
     </table>
     <p>
         <b>Observaciones: </b><br>{{empty($kardex->observaciones) ? '-' : $kardex->observaciones}}

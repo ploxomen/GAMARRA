@@ -43,13 +43,14 @@ function loadPage() {
         {
             data: 'id',
             render : function(data,type,row){
-                return `<div class="d-flex justify-content-center" style="gap:5px;"><button class="btn btn-sm btn-outline-info p-1" data-kardex-proveedor="${data}">
+                return `<div class="d-flex justify-content-center" style="gap:5px;">
+                <button class="btn btn-sm btn-outline-info p-1" data-detalle="${data}" data-kardex-cliente="${row.idCliente}" data-kardex-proveedor="${row.idProveedor}" data-kardex="${row.idKardex}">
                     <small>
                         <i class="fas fa-pencil-alt"></i>
                         Editar
                     </small>
                 </button>
-                <a href="proveedores/reporte/${row.idKardex}/${row.idProveedor}" target="_blank" class="btn btn-sm btn-outline-danger p-1" data-kardex-proveedor="${data}">
+                <a href="proveedores/reporte/${row.idKardex}/${row.idProveedor}/${row.idCliente}" target="_blank" class="btn btn-sm btn-outline-danger p-1" data-kardex-proveedor="${data}">
                     <small>
                         <i class="far fa-file-pdf"></i>                        
                         Guía
@@ -64,14 +65,14 @@ function loadPage() {
     tablaProveedores.onclick = async function (e) {
         if (e.target.classList.contains("btn-outline-info")) {
             try {
-                const response = await gen.funcfetch("proveedores/listar/" + e.target.dataset.kardexProveedor, null, "GET");
+                const response = await gen.funcfetch("proveedores/listar/" + e.target.dataset.kardex + '/' + e.target.dataset.kardexProveedor + '/' + e.target.dataset.kardexCliente, null, "GET");
                 if (response.session) {
                     return alertify.alert([...gen.alertaSesion], () => { window.location.reload() });
                 }
                 if (response.alerta) {
                     return alertify.alert("Mensaje",response.alerta);
                 }
-                kardexProveedor = e.target.dataset.kardexProveedor;
+                kardexProveedor = e.target.dataset.detalle;
                 tablaDetalleProveedor.innerHTML = "";
                 for (const key in response.success) {
                     if (Object.hasOwnProperty.call(response.success, key)) {

@@ -20,14 +20,14 @@
                     <select name="id_pais" id="idModalpaises" required class="select2-simple" data-placeholder="Seleccione un país">
                         <option value=""></option>
                         @foreach ($paises as $pais)
-                            <option value="{{$pais->id}}" {{$pais->id == 165 ? 'selected' : ''}}>{{$pais->pais_espanish}}</option>
+                            <option value="{{$pais->id}}" {{$pais->id == 224 ? 'selected' : ''}}>{{$pais->pais_espanish}}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4 form-required">
                     <label for="idModaltipoDocumento">Tipo Documento</label>
-                    <select name="tipoDocumento" id="idModaltipoDocumento" class="select2-simple">
-                        <option value=""></option>
+                    <select name="tipo_documento" id="idModaltipo_documento" class="select2-simple">
+                        <option></option>
                         @foreach ($tiposDocumentos as $tipoDocumento)
                             <option value="{{$tipoDocumento->id}}">{{$tipoDocumento->documento}}</option>
                         @endforeach
@@ -35,7 +35,7 @@
                 </div>
                 <div class="form-group col-12 col-lg-4 form-required">
                     <label for="idModalnroDocumento">N° Documento</label>
-                    <input type="text" name="nroDocumento" class="form-control" id="idModalnroDocumento">
+                    <input type="text" maxlength="20" name="nro_documento" class="form-control" id="idModalnro_documento">
                 </div>
                 <div class="form-group col-12">
                     <label for="idModalnombreCliente">Nombres</label>

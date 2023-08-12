@@ -157,6 +157,9 @@ function loadPage(){
             if(response.session){
                 return alertify.alert([...general.alertaSesion],() => {window.location.reload()});
             }
+            if(response.alerta){
+                return alertify.alert("Alerta",response.alerta);
+            }
             alertify.success(response.success);
             tablaProveedorDataTable.draw();
             $('#agregarProveedorContacto').modal("hide");

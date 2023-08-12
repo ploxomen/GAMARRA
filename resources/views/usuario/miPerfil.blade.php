@@ -36,7 +36,9 @@
                     <select name="tipoDocumento" id="idTipoDocumento" class="form-control select2-simple">
                         <option value="">Ninguno</option>
                         @foreach ($tiposDocumentos as $tipoDocumento)
-                            <option value="{{$tipoDocumento->id}}" {{$tipoDocumento->id == auth()->user()->tipoDocumento ? 'selected' : ''}}>{{$tipoDocumento->documento}}</option>
+                            @if (!in_array($tipoDocumento->id,[4,5,6]))
+                                <option value="{{$tipoDocumento->id}}" {{$tipoDocumento->id == auth()->user()->tipoDocumento ? 'selected' : ''}}>{{$tipoDocumento->documento}}</option>
+                            @endif
                         @endforeach
                     </select>
                 </div>

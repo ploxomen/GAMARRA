@@ -13,13 +13,15 @@
                     <label for="idModaltipo_documento">Tipo documento</label>
                     <select name="tipo_documento" id="idModaltipo_documento" class="form-control" required>
                         @foreach ($tiposDocumentos as $tipoDocumento)
-                            <option value="{{$tipoDocumento->id}}">{{$tipoDocumento->documento}}</option>
+                            @if (!in_array($tipoDocumento->id,[4,5,6]))
+                                <option value="{{$tipoDocumento->id}}">{{$tipoDocumento->documento}}</option>
+                            @endif
                         @endforeach
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="idModalnro_documento">N° Documento</label>
-                    <input type="text" name="nro_documento" class="form-control" id="idModalnro_documento" required>
+                    <input type="text" maxlength="20" name="nro_documento" class="form-control" id="idModalnro_documento" required>
                 </div>
                 <div class="form-group col-12">
                     <label for="idModalnombre_proveedor">Proveedor</label>

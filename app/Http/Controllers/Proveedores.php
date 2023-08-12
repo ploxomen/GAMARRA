@@ -49,6 +49,15 @@ class Proveedores extends Controller
         if(isset($accessModulo['session'])){
             return response()->json($accessModulo);
         }
+        if(!empty($request->nro_documento)){
+            $consultaProveedor = ModelsProveedores::where(['tipo_documento' => $request->tipo_documento, 'nro_documento' => $request->nro_documento]);
+            $consultaProveedor = $request->has("idProveedor") ? $consultaProveedor->where('id','!=',$request->idProveedor)->first() : $consultaProveedor->first();
+            if(!empty($consultaProveedor)){
+                $tipoDocumento = TipoDocumento::find($request->tipo_documento);
+                $tipoDocumento = empty($tipoDocumento) ? 'No definido' : $tipoDocumento->documento;
+                return response()->json(['alerta' => 'No se puede registrar el tipo de documento <b>' . $tipoDocumento  . '</b> con el número <b>' . $request->nro_documento . '</b> porque ya se encuentra asociado a <b>' . $consultaProveedor->nombre_proveedor .'</b>']);
+            }
+        }
         $datosProveedores = $request->only("tipo_documento","nro_documento","nombre_proveedor","celular","telefono","correo","direccion");
         $datosProveedores['estado'] = $request->has("estado") ? 1 : 0;
         $proveedor = $request->has("idProveedor") ? ModelsProveedores::find($request->idProveedor) : ModelsProveedores::create($datosProveedores);

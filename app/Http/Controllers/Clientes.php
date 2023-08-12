@@ -57,7 +57,15 @@ class Clientes extends Controller
         if(empty($rolCliente)){
             return response()->json(['alerta' => 'Para crear una cuenta de cliente se necesita el rol Cliente por favor registre el rol']);
         }
-        $datosUsuario = $request->only("correo","password","tipoDocumento","nroDocumento","telefono","celular","direccion");
+        if(!empty($request->nro_documento)){
+            $consultaCliente = ModelsClientes::where(['tipo_documento' => $request->tipo_documento, 'nro_documento' => $request->nro_documento])->first();
+            if(!empty($consultaCliente)){
+                $tipoDocumento = TipoDocumento::find($request->tipo_documento);
+                $tipoDocumento = empty($tipoDocumento) ? 'No definido' : $tipoDocumento->documento;
+                return response()->json(['alerta' => 'No se puede registrar el tipo de documento <b>' . $tipoDocumento  . '</b> con el número <b>' . $request->nro_documento . '</b> porque ya se encuentra asociado a <b>' . $consultaCliente->nombreCliente .'</b>']);
+            }
+        }
+        $datosUsuario = $request->only("correo","password","telefono","celular","direccion");
         $datosUsuario['password'] = Hash::make($datosUsuario['password']);
         $datosUsuario['estado'] = 2;
         $datosUsuario['nombres'] = $request->nombreCliente;
@@ -65,7 +73,7 @@ class Clientes extends Controller
         try {
             $usuario = User::create($datosUsuario);
             UsuarioRol::create(['rolFk' => $rolCliente->id,'usuarioFk' => $usuario->id]);
-            $cliente = ModelsClientes::create(['id_usuario' => $usuario->id,'id_pais' => $request->id_pais,'nombreCliente' => $request->nombreCliente,'estado' => 1,'tasa' => $request->tasa]);
+            $cliente = ModelsClientes::create(['tipo_documento' => $request->tipo_documento, 'nro_documento' => $request->nro_documento,'id_usuario' => $usuario->id,'id_pais' => $request->id_pais,'nombreCliente' => $request->nombreCliente,'estado' => 1,'tasa' => $request->tasa]);
             if(isset($request->contactoNombres)){
                 for ($i=0; $i < count($request->contactoNombres); $i++) {
                     $contactos = [
@@ -99,9 +107,17 @@ class Clientes extends Controller
         }
         DB::beginTransaction();
         try {
-            $datosUsuario = $request->only("tipoDocumento","nroDocumento","telefono","celular","direccion");
+            if(!empty($request->nro_documento)){
+                $consultaCliente = ModelsClientes::where(['tipo_documento' => $request->tipo_documento, 'nro_documento' => $request->nro_documento])->where('id','!=',$cliente->id)->first();
+                if(!empty($consultaCliente)){
+                    $tipoDocumento = TipoDocumento::find($request->tipo_documento);
+                    $tipoDocumento = empty($tipoDocumento) ? 'No definido' : $tipoDocumento->documento;
+                    return response()->json(['alerta' => 'No se puede registrar el tipo de documento <b>' . $tipoDocumento  . '</b> con el número <b>' . $request->nro_documento . '</b> porque ya se encuentra asociado a <b>' . $consultaCliente->nombreCliente .'</b>']);
+                }
+            }
+            $datosUsuario = $request->only("telefono","celular","direccion");
             $datosUsuario['nombres'] = $request->nombreCliente;
-            $datosCliente = $request->only("nombreCliente","id_pais","tasa");
+            $datosCliente = $request->only('tipo_documento','nro_documento',"nombreCliente","id_pais","tasa");
             $datosCliente['estado'] = $request->has("estado") ? 1 : 0;
             User::where('id',$cliente->id_usuario)->update($datosUsuario);
             $cliente->update($datosCliente);
@@ -119,7 +135,6 @@ class Clientes extends Controller
                     }
                 }
             }
-            
             DB::commit();
             return response()->json(['success' => 'Cliente actualizado correctamente']);
         } catch (\Throwable $th) {

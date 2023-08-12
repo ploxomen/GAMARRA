@@ -41,6 +41,7 @@
             @php
                 $cantidad = 0;
                 $peso = 0;
+                $tasa = empty($kardexCliente) ? 0 : $kardexCliente->tasa;
             @endphp
             @foreach ($fardos as $fardo)
                 @php
@@ -73,6 +74,23 @@
                 <th>{{$peso}}</th>
             </tr>
         </tfoot>
+    </table>
+    <div style="height: 50px;"></div>
+    <table class="text-center">
+        <tr>
+            <td style="width: 50px;">
+                <b> Tasa: </b> 
+                <span>$ {{number_format($tasa,2)}}</span>
+            </td>
+            <td style="width: 150px;">
+                <b>Peso total: </b>
+                <span>{{$peso}}</span>
+            </td>
+            <td style="width: 100px;">
+                <b>Total a pagar: </b>
+                <span>$ {{number_format($peso * $tasa,2)}}</span> 
+            </td>
+        </tr>
     </table>
 </body>
 </html>

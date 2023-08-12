@@ -20,7 +20,9 @@
                     <select name="tipoDocumento" id="idValorModaltipoDocumento" class="form-control">
                         <option></option>
                         @foreach ($tiposDocumentos as $tipoDocumento)
-                            <option value="{{$tipoDocumento->id}}">{{$tipoDocumento->documento}}</option>
+                            @if (!in_array($tipoDocumento->id,[4,5,6]))
+                                <option value="{{$tipoDocumento->id}}">{{$tipoDocumento->documento}}</option>
+                            @endif
                         @endforeach
                     </select>
                 </div>

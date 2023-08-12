@@ -9,14 +9,15 @@
     <table>
         <tr></tr>
         <tr>
+            <th colspan="5">PRE-FACTURA</th>
+        </tr>
+        <tr>
             <td></td>
             <td colspan="2">RUC:</td>
         </tr>
         <tr>
             <td></td>
             <td colspan="2"></td>
-            <td></td>
-            <td></td>
             <td>Fecha</td>
             <td>{{date('d/m/Y')}}</td>
         </tr>

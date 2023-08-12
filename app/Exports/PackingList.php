@@ -38,7 +38,8 @@ class PackingList implements FromView,ShouldAutoSize,WithStyles,WithTitle
         $tituloPackingList->getAlignment()->setHorizontal('center');
         $cabeceraTabla = $sheet->getStyle("A".$this->filaInicial . ':' . "K" . $this->filaInicial);
         $cabeceraTabla->getFont()->setBold(true);
-        $sheet->getRowDimension(8)->setRowHeight(30);
+        $sheet->getRowDimension(1)->setRowHeight(15);
+        $sheet->getRowDimension($this->filaInicial)->setRowHeight(30);
         $sheet->getStyle($rango)->getBorders()->getAllBorders()->setBorderStyle('thin');
         $sheet->getStyle($rango)->getAlignment()->setHorizontal('center');
         $sheet->getStyle($rango)->getAlignment()->setVertical('center');

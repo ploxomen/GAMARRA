@@ -23,7 +23,7 @@ function loadPage(){
             data: 'documento'
         },
         {
-            data: 'nroDocumento',
+            data: 'nro_documento',
         },
         {
             data: 'nombreCliente',

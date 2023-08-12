@@ -59,7 +59,7 @@
                 </div>
                 <div class="col-6 col-lg-4 col-xl-3 form-group">
                     <label for="idModalnroDocumentoCliente" class="col-form-label col-form-label-sm">N° Documento</label>
-                    <input type="tel" id="idModalnroDocumentoCliente" class="form-control form-control-sm">
+                    <input type="text" maxlength="20" id="idModalnroDocumentoCliente" class="form-control form-control-sm">
                 </div>
                 <div class="col-12 form-group">
                     <label for="productoBuscar" class="col-form-label col-form-label-sm">Buscar producto</label>

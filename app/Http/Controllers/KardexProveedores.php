@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Clientes;
 use App\Models\KardexFardo;
 use App\Models\KardexFardoDetalle;
 use App\Models\KardexProveedor;
@@ -35,26 +36,27 @@ class KardexProveedores extends Controller
         $proveedores = KardexProveedor::obtenerProveedoresKardexs();
         return DataTables::of($proveedores)->toJson();
     }
-    public function verGuiaReporte($kardex,$proveedor)
+    public function verGuiaReporte($kardex,$proveedor,$cliente)
     {
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardexProveedor);
         if(isset($verif['session'])){
             return redirect()->route("home"); 
         }
-        $kardex = KardexProveedor::where(['id_kardex' => $kardex,'id_proveedores' => $proveedor])->where('estado','!=',0)->first();
+        $kardex = KardexProveedor::where(['id_kardex' => $kardex,'id_cliente' => $cliente,'id_proveedores' => $proveedor])->where('estado','!=',0)->first();
         if(empty($kardex)){
             return redirect()->route("home");
         }
-        $listaFardos = KardexFardo::select("id")->where('id_kardex',$kardex->id_kardex)->where('estado','!=',0)->get()->toArray();
+        $listaFardos = KardexFardo::select("id")->where(['id_kardex' => $kardex->id_kardex,'id_cliente' => $cliente])->where('estado','!=',0)->get()->toArray();
         if(empty($kardex)){
             return redirect()->route("home");
         }
         $listaFardo = array_map(function($v){
             return $v['id'];
         },$listaFardos);
-        $listaDetalles = KardexFardoDetalle::obtenerProductos($kardex->id_proveedores,$listaFardo);
+        $clienteModel = Clientes::find($cliente);
+        $listaDetalles = KardexFardoDetalle::obtenerProductos($kardex->id_proveedores,$listaFardo,true);
         $fechaLarga = strtoupper($this->obtenerFechasLargas($kardex->fechaRecepcion));
-        $pdf = Pdf::loadView('kardex.reportesPdf.guiaRecepcion',compact("listaDetalles","kardex","fechaLarga"));
+        $pdf = Pdf::loadView('kardex.reportesPdf.guiaRecepcion',compact("listaDetalles","kardex","fechaLarga","clienteModel"));
         return $pdf->stream("Guía de Recepción.pdf");
     }
     public function obtenerFechasLargas($fecha) {
@@ -62,17 +64,17 @@ class KardexProveedores extends Controller
         $time = strtotime($fecha);
         return date('d',$time) . ' de ' . $meses[date('n',$time) - 1] . ' del ' . date('Y',$time);
     }
-    public function show($proveedor)
+    public function show($kardex,$proveedor,$cliente)
     {
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardexProveedor);
         if(isset($verif['session'])){
             return response()->json(['session' => true]);
         }
-        $kardex = KardexProveedor::where('id', $proveedor)->where('estado','!=',0)->first();
+        $kardex = KardexProveedor::where(['id_kardex' => $kardex,'id_cliente' => $cliente,'id_proveedores' => $proveedor])->where('estado','!=',0)->first();
         if(empty($kardex)){
             return response()->json(['alerta' => 'El kardex buscado a este proveedor no existe']);
         }
-        $listaFardos = KardexFardo::select("id")->where('id_kardex',$kardex->id_kardex)->where('estado','!=',0)->get()->toArray();
+        $listaFardos = KardexFardo::select("id")->where(['id_kardex' => $kardex->id_kardex,'id_cliente' => $cliente])->where('estado','!=',0)->get()->toArray();
         if(empty($kardex)){
             return response()->json(['alerta' => 'No existen fardos asociados al kardex']);
         }

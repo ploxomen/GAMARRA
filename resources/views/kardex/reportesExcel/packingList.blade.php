@@ -7,9 +7,16 @@
 </head>
 <body>
     <table>
-        <tr></tr>
         <tr>
-            <th colspan="10">
+            @for ($i = 0; $i < 8; $i++)
+                <th></th>
+            @endfor
+            <th>
+                <img src="{{public_path("img/logo-sin-fondo.png")}}" alt="logo de la empresa" width="120px">
+            </th>
+        </tr>
+        <tr>
+            <th colspan="11">
                 <span>PACKING LIST DE CLIENTES</span>
             </th>
         </tr>
