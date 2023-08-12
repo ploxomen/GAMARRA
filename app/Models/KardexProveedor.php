@@ -16,11 +16,12 @@ class KardexProveedor extends Model
         ->selectRaw("LPAD(kardex_fardos.id_kardex,5,'0') AS nroKardex,LPAD(kardex_proveedores.id,5,'0') AS nroKardexProveedor")
         ->join('kardex_fardos','kardex_fardos.id_kardex','=','kardex_proveedores.id_kardex')
         ->join('proveedores','proveedores.id','=','kardex_proveedores.id_proveedores')
-        ->join('clientes','clientes.id','=','kardex_fardos.id_cliente')
-        ->where('kardex_fardos.estado','>=',1)->where('kardex_proveedores.estado',1)
+        ->join('clientes','clientes.id','=','kardex_proveedores.id_cliente')
+        ->where('kardex_fardos.estado','>=',1)
         ->groupBy("kardex_fardos.id_kardex")
         ->groupBy("kardex_proveedores.id_cliente")
         ->groupBy("kardex_proveedores.id_proveedores")
+        ->orderBy('kardex_proveedores.id_kardex')
         ->get();
     }
     public function proveedor()
