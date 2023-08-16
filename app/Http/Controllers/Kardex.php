@@ -318,7 +318,7 @@ class Kardex extends Controller
         $kardexCliente = KardexCliente::where(['id_kardex' => $kardex->id,'id_cliente' => $request->cliente]);
         $cliente = Clientes::find($request->cliente);
         if(!$kardexCliente->count()){
-            KardexCliente::create(['id_kardex' => $kardex->id,'id_cliente' => $request->cliente,'tasa' => $cliente->tasa, 'tasa_extranjera' => $aduanero->tasa]);
+            KardexCliente::create(['id_kardex' => $kardex->id,'id_cliente' => $request->cliente,'tasa' => $cliente->tasa]);
         }
         $nroFardo = $kardex->nroFardoActivo;
         if(empty($nroFardo)){
