@@ -47,12 +47,23 @@ class Kardex extends Controller
         if(isset($verif['session'])){
             return response()->json(['session' => true]);
         }
-        $kardexFardo = KardexFardo::where(['id_kardex' => $request->idKardex,'id_cliente' => $request->cliente])->count();
-        if(!$kardexFardo){
-            return response()->json(['alerta' => 'Debe existir al menos un fardo asociado a este cliente']);
+        ModelsKardex::find($request->idKardex)->update(['id_aduanero' => $request->aduanero, 'tasa_extranjera' => $request->tasa_extranjera]);
+        if($request->has('cliente') && !empty($request->cliente)){
+            $kardexFardo = KardexFardo::where(['id_kardex' => $request->idKardex,'id_cliente' => $request->cliente])->count();
+            if(!$kardexFardo){
+                return response()->json(['alerta' => 'Tasa extranjera y agente de aduanas modificados correctamente, para actualizar la tasa del cliente se debe asociar al menos un fardo']);
+            }
+            KardexCliente::where(['id_kardex' => $request->idKardex,'id_cliente' => $request->cliente])->update($request->only("tasa"));
         }
-        KardexCliente::where(['id_kardex' => $request->idKardex,'id_cliente' => $request->cliente])->update($request->only("tasa","tasa_extranjera"));
-        return response()->json(['success' => 'tasa actualizada correctamente']);
+        return response()->json(['success' => 'todos los datos actualizados correctamente']);
+    }
+    public function actualizarAduanero(Request $request) {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
+        if(isset($verif['session'])){
+            return response()->json(['session' => true]);
+        }
+        ModelsKardex::find($request->idKardex)->update(['id_aduanero' => $request->aduanero]);
+        return response()->json(['success' => 'agente de aduanas actualizado correctamente']);
     }
     public function actualizarValoresKardex(Request $request) {
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
@@ -118,7 +129,7 @@ class Kardex extends Controller
         if(isset($verif['session'])){
             return response()->json(['session' => true]);
         }
-        return response()->json(['kardex' => ModelsKardex::verKardexPorTerminar($cliente,$kardex),'tasas' => KardexCliente::where(['id_cliente' => $cliente,'id_kardex' => $kardex])->first()]);
+        return response()->json(['kardex' => ModelsKardex::verKardexPorTerminar($cliente,$kardex),'tasas' => KardexCliente::select("tasa")->where(['id_cliente' => $cliente,'id_kardex' => $kardex])->first()]);
     }
     public function consultaReporteCliente(ModelsKardex $kardex) {
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
@@ -283,7 +294,8 @@ class Kardex extends Controller
         $clientes = Clientes::all();
         $proveedores = Proveedores::all();
         $presentaciones = Presentacion::orderBy("presentacion")->get();
-        return view("kardex.misKardex",compact("modulos","productos","clientes","proveedores","presentaciones"));
+        $aduaneros = Aduanero::where('estado',1)->get();
+        return view("kardex.misKardex",compact("modulos","productos","clientes","proveedores","presentaciones","aduaneros"));
     }
     public function agregarFardo(Request $request){
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);
@@ -298,7 +310,9 @@ class Kardex extends Controller
         $kardex = $request->has("idKardex") ? ModelsKardex::findOrFail($request->idKardex)  : ModelsKardex::where(['estado' => 1])->first();
         if(empty($kardex)){
             $kardex = ModelsKardex::create([
-                'estado' => 1
+                'estado' => 1,
+                'id_aduanero' => $aduanero->id,
+                'tasa_extranjera' => $aduanero->tasa
             ]);
         }
         $kardexCliente = KardexCliente::where(['id_kardex' => $kardex->id,'id_cliente' => $request->cliente]);

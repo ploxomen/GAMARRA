@@ -9,6 +9,7 @@ use App\Http\Controllers\KardexProveedores;
 use App\Http\Controllers\MisProductos;
 use App\Http\Controllers\Modulos;
 use App\Http\Controllers\Proveedores;
+use App\Http\Controllers\Ranking;
 use App\Http\Controllers\Rol;
 use App\Http\Controllers\Usuario;
 use Illuminate\Support\Facades\File;
@@ -105,6 +106,7 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
             Route::get('todos', [Kardex::class, 'misKardexIndex'])->name('admin.miskardex.index');
             Route::post('actualizar/fardos', [Kardex::class, 'actualizarValoresKardex']);
             Route::post('actualizar/tasa', [Kardex::class, 'actualizarTasas']);
+            Route::post('actualizar/aduanero', [Kardex::class, 'actualizarAduanero']);
             Route::post('todos/listar', [Kardex::class, 'misKardex']);
             Route::get('pendiente/{cliente}', [Kardex::class, 'obtenerKardexPendiente']);
             Route::get('pendiente/editar/{cliente}/{kardex}', [Kardex::class, 'obtenerKardex']);
@@ -123,6 +125,18 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
             Route::post('editar/{kardex}', [Kardex::class, 'update']);
             Route::delete('eliminar/{kardex}', [Kardex::class, 'destroy']);
         });
+    });
+    Route::prefix('ranking')->group(function () {
+        Route::get('clientes', [Ranking::class, 'indexClientes'])->name('admin.ranking.clientes');
+        Route::post('clientes/listar', [Ranking::class, 'listarClientes']);
+        Route::post('clientes/reportes/excel', [Ranking::class, 'listarClientesExcel'])->name('reportesRankingCliente');
+        Route::get('proveedores', [Ranking::class, 'indexProveedores'])->name('admin.ranking.proveedores');
+        Route::post('proveedores/listar', [Ranking::class, 'listarProveedores']);
+        Route::post('proveedores/reportes/excel', [Ranking::class, 'listarProveedoresExcel'])->name('reportesRankingProveedor');
+        Route::get('aduaneros', [Ranking::class, 'indexAduaneros'])->name('admin.ranking.aduaneros');
+        Route::post('aduaneros/listar', [Ranking::class, 'precioRankingAduanero']);
+        Route::post('aduaneros/reportes/excel', [Ranking::class, 'listarAduanerosExcel'])->name('reportesRankingAduanero');
+
     });
 });
 

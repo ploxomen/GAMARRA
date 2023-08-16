@@ -44,7 +44,7 @@ function loadPage() {
             data: 'id',
             render : function(data,type,row){
                 return `<div class="d-flex justify-content-center" style="gap:5px;">
-                <button class="btn btn-sm btn-outline-info editar-kardex p-1" data-kardex="${data}">
+                <button class="btn btn-sm btn-outline-info editar-kardex p-1" data-kardex="${data}" data-tasa="${row.tasa_extranjera}" data-aduanero="${row.id_aduanero}">
                     <small>
                         <i class="fas fa-pencil-alt"></i>
                         Editar
@@ -82,6 +82,7 @@ function loadPage() {
     const txtPresentacion = document.querySelector("#idPresentacion");
     const txtFardoActivo = document.querySelector("#txtFardoActivo");
     const frmKardex = document.querySelector("#frmDatosKardex");
+    const txtTasaExtranjera = document.querySelector("#idModaltasa_extranjera");
     let idKardex = null;
     tablaKardex.addEventListener("click",async function(e){
         if(e.target.classList.contains("reporte-clientes")){
@@ -111,19 +112,23 @@ function loadPage() {
         }
         if(e.target.classList.contains("editar-kardex")){
             idKardex = e.target.dataset.kardex;
+            $('#idModaladuanero').val(e.target.dataset.aduanero).trigger("change");
             $('#editarKardex').modal("show");
+            txtTasaExtranjera.value = e.target.dataset.tasa;
             return
         }
     })
+
     const frmTasas = document.querySelector("#formTasasKardex");
     $('#idCliente').on("select2:select",function(e){
-        frmTasas.reset()
+        document.querySelector("#idModaltasa").value = "";
         kardex.obtenerKardexPendiente($(this).val(),tableDetalleKardex,txtProveedor,txtProducto,txtCantidad,txtPresentacion,txtFardoActivo,idKardex);
     })
     $('#editarKardex').on("hidden.bs.modal",function(e){
         frmTasas.reset()
         idKardex = null;
         frmKardex.reset();
+        $('#idModaladuanero').val("").trigger("change");
         $('#editarKardex .select2-simple').val("").trigger("change");
         txtFardoActivo.textContent = "Ninguno";
         tableDetalleKardex.innerHTML = `<tr>
@@ -136,11 +141,29 @@ function loadPage() {
         datos.append("idKardex",idKardex);
         kardex.agregarFardo(datos,txtProveedor,txtProducto,txtPresentacion,txtCantidad,tableDetalleKardex,txtFardoActivo);
     })
+    // $('#idModaladuanero').on("select2:selecting",async function(e){
+    //     try {
+    //         let datos = new FormData();
+    //         datos.append("idKardex",idKardex);
+    //         datos.append("aduanero",$(this).val());
+    //         const response = await gen.funcfetch("actualizar/aduanero",datos,"POST");
+    //         if(response.session){
+    //             return alertify.alert([...gen.alertaSesion],() => {window.location.reload()});
+    //         }
+    //         if(response.alerta){
+    //             return alertify.alert("Alerta",response.alerta);
+    //         }
+    //         alertify.success(response.success);
+    //     } catch (error) {
+    //         console.error(error);
+    //         alertify.error("error al actualizar el agente de aduanas");
+    //     }
+    // });
     frmTasas.addEventListener("submit",async function(e){
         e.preventDefault();
-        if($('#idCliente').val() == ""){
-            return alertify.error("por favor seleccione un cliente");
-        }
+        // if($('#idCliente').val() == ""){
+        //     return alertify.error("por favor seleccione un cliente");
+        // }
         try {
             let datos = new FormData(this);
             datos.append("idKardex",idKardex);
@@ -153,6 +176,7 @@ function loadPage() {
                 return alertify.alert("Alerta",response.alerta);
             }
             alertify.success(response.success);
+            tablaKardexDatatable.draw();
         } catch (error) {
             console.error(error);
             alertify.error("error al actualizar las tasas");

@@ -204,12 +204,12 @@ class Kardex{
             if((response.kardex && !response.kardex.listaFardos.length) || !response.kardex ){
                 txtFardoActivo.textContent = 'Ninguno';
                 tableDetalleKardex.innerHTML = this.txtSinFardos;
+                alertify.success("no se encontraron fardos");
                 this.vacioTablaDetalle = true;
                 return false
             }
             if(idKardex && response.tasas){
                 document.querySelector("#idModaltasa").value = response.tasas.tasa;
-                document.querySelector("#idModaltasa_extranjera").value = response.tasas.tasa_extranjera;
             }
             this.vacioTablaDetalle = false;
             txtFardoActivo.textContent = !response.kardex.nroFardoActivo ? 'Ninguno' : response.kardex.nroFardoActivo;

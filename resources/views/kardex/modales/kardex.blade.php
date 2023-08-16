@@ -64,14 +64,23 @@
                 Datos Excel
             </h5>
             <form id="formTasasKardex" class="form-row">
-                <div class="form-group col-12 col-md-5 col-lg-3">
+                <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="idModaltasa">Tasa</label>
                     <div class="input-group">
                         <div class="input-group-prepend">
                             <div class="input-group-text">$</div>
                         </div>
-                        <input type="number" step="0.01" min="0" class="form-control" name="tasa" id="idModaltasa" required>
+                        <input type="number" step="0.01" min="0" class="form-control" name="tasa" id="idModaltasa">
                     </div>
+                </div>
+                <div class="form-group col-12 col-md-6 col-lg-3">
+                    <label for="idModaladuanero">Agente aduanas</label>
+                    <select name="aduanero" id="idModaladuanero" class="select2-simple">
+                        <option value=""></option>
+                        @foreach ($aduaneros as $aduanero)
+                            <option value="{{$aduanero->id}}">{{$aduanero->nombre_completo}}</option>
+                        @endforeach
+                    </select>
                 </div>
                 <div class="form-group col-12 col-md-5 col-lg-3">
                     <label for="idModaltasa_extranjera">Tasa Extranjera</label>
@@ -82,7 +91,7 @@
                         <input type="number" step="0.01" min="0" class="form-control" name="tasa_extranjera" id="idModaltasa_extranjera" required>
                     </div>
                 </div>
-                <div class="form-grop col-12 col-md-2 col-lg-6">
+                <div class="form-grop col-12 col-md-6 col-lg-3">
                     <button type="submit" class="btn btn-sm btn-danger">
                         <i class="fas fa-sync-alt"></i>
                     </button>

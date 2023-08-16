@@ -54,7 +54,7 @@ class KardexExport implements WithMultipleSheets
                 'cliente' => $cliente->clientes->nombreCliente,
                 'totalKilaje' => $cliente->totalKilaje,
                 'tasa' => $tasas->tasa,
-                'tasa_extranjera' => $tasas->tasa_extranjera
+                'tasa_extranjera' => $this->kardex->tasa_extranjera
             ];
             foreach (KardexFardo::where(['id_kardex' => $this->kardex->id,'id_cliente' => $cliente->id_cliente])->get() as $fardo){
                 $fardos = [

@@ -9,7 +9,7 @@ class Paises extends Model
 {
     protected $table = 'paises';
     protected $primaryKey = 'id';
-    protected $fillable = ['pais_espanich','pais_english','estado'];
+    protected $fillable = ['pais_espanish','pais_english','estado'];
     public $timestamps = false;
 
     public function cliente()
