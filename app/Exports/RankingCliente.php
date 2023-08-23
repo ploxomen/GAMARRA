@@ -40,6 +40,7 @@ class RankingCliente implements FromView,WithStyles,ShouldAutoSize
         $this->fin++;
         $rango = "B" . $this->inicio . ":E" . $this->fin;
         $tituloPackingList = $sheet->getStyle('B2');
+        $sheet->getRowDimension(1)->setRowHeight(20);
         $tituloPackingList->getFont()->setBold(true);
         $tituloPackingList->getFont()->setUnderline(true);
         $tituloPackingList->getFont()->setSize(14);

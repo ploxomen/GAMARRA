@@ -44,9 +44,6 @@
         <tr>
             <td></td>
         </tr>
-        {{-- <tr>
-            <td class="text-center border">RUC: 20603897766</td>
-        </tr> --}}
     </table>
     <h2 class="titulo">GUÍA DE RECEPCIÓN DE MERCADERÍA</h2>
     <p>

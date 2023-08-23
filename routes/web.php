@@ -129,13 +129,13 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
     Route::prefix('ranking')->group(function () {
         Route::get('clientes', [Ranking::class, 'indexClientes'])->name('admin.ranking.clientes');
         Route::post('clientes/listar', [Ranking::class, 'listarClientes']);
-        Route::post('clientes/reportes/excel', [Ranking::class, 'listarClientesExcel'])->name('reportesRankingCliente');
+        Route::get('clientes/reportes/{tipo}', [Ranking::class, 'listarClientesExcel']);
         Route::get('proveedores', [Ranking::class, 'indexProveedores'])->name('admin.ranking.proveedores');
         Route::post('proveedores/listar', [Ranking::class, 'listarProveedores']);
-        Route::post('proveedores/reportes/excel', [Ranking::class, 'listarProveedoresExcel'])->name('reportesRankingProveedor');
+        Route::get('proveedores/reportes/{tipo}', [Ranking::class, 'listarProveedoresExcel']);
         Route::get('aduaneros', [Ranking::class, 'indexAduaneros'])->name('admin.ranking.aduaneros');
         Route::post('aduaneros/listar', [Ranking::class, 'precioRankingAduanero']);
-        Route::post('aduaneros/reportes/excel', [Ranking::class, 'listarAduanerosExcel'])->name('reportesRankingAduanero');
+        Route::get('aduaneros/reportes/{tipo}', [Ranking::class, 'listarAduanerosExcel']);
 
     });
 });

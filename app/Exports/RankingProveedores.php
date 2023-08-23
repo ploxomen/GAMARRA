@@ -38,19 +38,20 @@ class RankingProveedores implements FromView,WithStyles,ShouldAutoSize
     public function styles(Worksheet $sheet)
     {
         $this->fin++;
-        $rango = "B" . $this->inicio . ":D" . $this->fin;
+        $rango = "B" . $this->inicio . ":E" . $this->fin;
         $tituloPackingList = $sheet->getStyle('B2');
+        $sheet->getRowDimension(1)->setRowHeight(20);
         $tituloPackingList->getFont()->setBold(true);
         $tituloPackingList->getFont()->setUnderline(true);
         $tituloPackingList->getFont()->setSize(14);
         $tituloPackingList->getAlignment()->setHorizontal('center');
-        $cabeceraTabla = $sheet->getStyle("B2:D2");
+        $cabeceraTabla = $sheet->getStyle("B2:E2");
         $cabeceraTabla->getFont()->setBold(true);
         $sheet->getRowDimension($this->inicio)->setRowHeight(30);
         $sheet->getStyle($rango)->getBorders()->getAllBorders()->setBorderStyle('thin');
         $sheet->getStyle($rango)->getAlignment()->setHorizontal('center');
         $sheet->getStyle($rango)->getAlignment()->setVertical('center');
-        $sheet->setCellValue('D'.$this->fin, '=SUM(E'. ($this->inicio + 1).':D'.($this->fin - 1) . ')');
-        $sheet->getStyle("B".$this->fin . ':' . "D" . $this->fin)->getFont()->setBold(true);
+        $sheet->setCellValue('E'.$this->fin, '=SUM(E'. ($this->inicio + 1).':E'.($this->fin - 1) . ')');
+        $sheet->getStyle("B".$this->fin . ':' . "E" . $this->fin)->getFont()->setBold(true);
     }
 }
