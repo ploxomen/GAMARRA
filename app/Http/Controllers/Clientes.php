@@ -67,7 +67,7 @@ class Clientes extends Controller
         }
         $datosUsuario = $request->only("correo","password","telefono","celular","direccion");
         $datosUsuario['password'] = Hash::make($datosUsuario['password']);
-        $datosUsuario['estado'] = 2;
+        $datosUsuario['estado'] = 0;
         $datosUsuario['nombres'] = $request->nombreCliente;
         DB::beginTransaction();
         try {
