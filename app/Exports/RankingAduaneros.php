@@ -42,6 +42,7 @@ class RankingAduaneros implements FromView,WithStyles,ShouldAutoSize
         $rango = "B" . $this->inicio . ":E" . $this->fin;
         $tituloPackingList = $sheet->getStyle('B2');
         $tituloPackingList->getFont()->setBold(true);
+        $sheet->getRowDimension(1)->setRowHeight(20);
         $tituloPackingList->getFont()->setUnderline(true);
         $tituloPackingList->getFont()->setSize(14);
         $tituloPackingList->getAlignment()->setHorizontal('center');

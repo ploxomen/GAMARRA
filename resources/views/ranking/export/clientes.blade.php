@@ -1,8 +1,16 @@
 <table>
-    <tr></tr>
+    <tr>
+        @for ($i = 0; $i < 6; $i++)
+            <th></th>
+        @endfor
+        <th>
+            <img src="{{public_path("img/logo-sin-fondo.png")}}" alt="logo de la empresa" width="120px">
+        </th>
+    </tr>
     <tr>
         <th></th>
         <th colspan="4">RANKING CLIENTES DESDE {{$fechaInicio . ' HASTA '. $fechaFin}}</th>
+        
     </tr>
     <tr></tr>
     <thead>
@@ -21,7 +29,7 @@
                 <td>{{$k + 1}}</td>
                 <td>{{$dato->pais_espanish}}</td>
                 <td>{{$dato->nombreCliente}}</td>
-                <td>{{$dato->kilajes}}</td>{}
+                <td>{{$dato->kilajes}}</td>
             </tr>
         @endforeach
     </tbody>

@@ -1,5 +1,12 @@
 <table>
-    <tr></tr>
+    <tr>
+        @for ($i = 0; $i < 6; $i++)
+            <th></th>
+        @endfor
+        <th>
+            <img src="{{public_path("img/logo-sin-fondo.png")}}" alt="logo de la empresa" width="120px">
+        </th>
+    </tr>
     <tr>
         <th></th>
         <th colspan="4">RANKING AGENTES DE ADUANAS DESDE {{$fechaInicio . ' HASTA '. $fechaFin}}</th>
@@ -21,7 +28,7 @@
                 <td>{{$k + 1}}</td>
                 <td>{{$dato->pais_espanish}}</td>
                 <td>{{$dato->nombre_completo}}</td>
-                <td>{{$dato->costos}}</td>{}
+                <td>{{$dato->costos}}</td>
             </tr>
         @endforeach
     </tbody>

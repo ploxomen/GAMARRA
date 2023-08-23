@@ -15,7 +15,7 @@ function loadPage(){
             }
         },
         order: [
-            [2, 'desc']
+            [3, 'desc']
         ],
         columns: [
             {
@@ -26,6 +26,9 @@ function loadPage(){
             },
             {
                 data: 'nombre_proveedor'
+            },
+            {
+                data: 'nombreProducto'
             },
             {
                 data: 'cantidades'
