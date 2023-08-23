@@ -186,10 +186,6 @@ class Usuario extends Controller
                     foreach($datos['roles'] as $rol){
                         UsuarioRol::create(['rolFk' => $rol,'usuarioFk' => $usuario->id]);
                     }
-                    $validarTecnico = User::validarTecnico($datos['roles']);
-                    if($validarTecnico){
-                        Tecnico::create(['idUsuario' => $usuario->id]);
-                    }
                     DB::commit();
                     return response()->json(['success' => 'Usuario creado correctamente, recuerde que su contraseña temporal es ' . $request->password]);
                 } catch (\Throwable $th) {
@@ -204,7 +200,7 @@ class Usuario extends Controller
                 }else{
                     $usuarios = User::select("nombres","apellidos","celular","estado","correo","usuarios.id");
                 }
-                return DataTables::of($usuarios->get())->addColumn('apellidosNombres',function(User $usuario){
+                return DataTables::of($usuarios->where('estado','!=',0)->get())->addColumn('apellidosNombres',function(User $usuario){
                     return $usuario->nombres . ' ' . $usuario->apellidos;
                 })->toJson();
             break;
