@@ -2,6 +2,7 @@
     @page{
         font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
         font-size: 14px;
+        margin-top: 10px; 
     }
     table{
         border-collapse: collapse;

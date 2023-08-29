@@ -256,6 +256,17 @@ function loadPage(){
             
         }
     })
+    const btnExportarDatos = document.querySelectorAll('.exportar-datos');
+    for (const btn of btnExportarDatos) {
+        btn.addEventListener("click",function (e) {
+            const enlace = document.createElement("a");
+            enlace.href = gen.url + '/ventas/clientes/reportes/' + e.target.dataset.type;
+            enlace.target = "_blank";
+            document.body.appendChild(enlace);
+            enlace.click();
+            enlace.remove();             
+        })
+    }
 }
 window.addEventListener("DOMContentLoaded",loadPage);
 

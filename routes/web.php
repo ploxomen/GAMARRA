@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Aduaneros;
-use App\Http\Controllers\Articulo;
 use App\Http\Controllers\Familia;
 use App\Http\Controllers\Clientes;
 use App\Http\Controllers\Kardex;
@@ -58,6 +57,8 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
     Route::prefix('ventas')->group(function () {
         Route::prefix('clientes')->group(function () {
             Route::get('/', [Clientes::class, 'index'])->name('admin.ventas.clientes.index');
+            Route::get('reportes/excel', [Clientes::class, 'reporteExcel']);
+            Route::get('reportes/pdf', [Clientes::class, 'reportePdf']);
             Route::post('listar', [Clientes::class, 'listar']);
             Route::get('listar/{cliente}', [Clientes::class, 'show']);
             Route::post('crear', [Clientes::class, 'store']);
