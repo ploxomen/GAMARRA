@@ -9,7 +9,7 @@
     <table>
         <tr></tr>
         <tr>
-            <th colspan="6">
+            <th colspan="5">
                 <span>PACKING LIST</span>
             </th>
         </tr>

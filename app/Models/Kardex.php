@@ -30,7 +30,7 @@ class Kardex extends Model
     public static function scopeMisKardex($query) {
         return $query->select("kardex.id","kardex.cantidad","kardex.tasa_extranjera","kardex.kilaje","kardex.estado","kardex.id_aduanero")
         ->selectRaw("LPAD(kardex.id,5,'0') AS nroKardex,DATE_FORMAT(kardex.fechaCreada,'%d/%m/%Y') AS fechaKardex")
-        ->where('estado','!=',1)->where('estado','!=',0)->get();
+        ->where('estado','!=',0)->get();
     }
     public function fardos()
     {

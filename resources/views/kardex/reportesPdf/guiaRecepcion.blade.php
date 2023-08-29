@@ -50,10 +50,7 @@
         <strong>EL SIGUIENTE DOCUMENTO ES UNA GUÍA INTERNA DE RECEPCIÓN DE MERCADERÍA:</strong>
     </p>
     <p>
-        Recibí(mos) de: <strong>{{$kardex->proveedor->nombre_proveedor}}</strong>
-    </p>
-    <p>
-        Cliente: <strong>{{$clienteModel->nombreCliente}}</strong>
+        Recibí(mos) del cliente: <strong>{{$clienteModel->nombreCliente}}</strong>
     </p>
     <p>
         <b>La siguiente mercadería:</b>

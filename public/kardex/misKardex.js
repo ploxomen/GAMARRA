@@ -68,6 +68,12 @@ function loadPage() {
                         Packing List
                     </small>
                 </a>
+                <button class="btn btn-sm eliminar-kardex btn-outline-danger p-1" data-kardex="${data}">
+                    <small>
+                        <i class="fas fa-trash"></i>
+                        Eliminar
+                    </small>
+                </button>
                 </div>`
             }
         },
@@ -109,6 +115,25 @@ function loadPage() {
                 console.error(error);
                 alertify.error("error al obtener los clientes del kardex");
             }
+        }
+        if(e.target.classList.contains("eliminar-kardex")){
+            alertify.confirm("Alerta",'¿Desea eliminar el kardex?',async ()=>{
+                try {
+                    const datos = new FormData();
+                    const response = await gen.funcfetch("eliminar/" + e.target.dataset.kardex,datos,"PUT");
+                    if (response.session) {
+                        return alertify.alert([...gen.alertaSesion], () => { window.location.reload() });
+                    }
+                    if (response.success) {
+                        alertify.success(response.success);
+                        tablaKardexDatatable.draw();
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alertify.error("no se pudo eliminar el kardex, por favor intentelo nuevamente dentro de unos minutos");
+                }
+            },()=>{})
+            
         }
         if(e.target.classList.contains("editar-kardex")){
             idKardex = e.target.dataset.kardex;

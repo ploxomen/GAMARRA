@@ -103,6 +103,7 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
         });
         Route::prefix('kardex')->group(function () {
             Route::get('/', [Kardex::class, 'index'])->name('admin.kardex.index');
+            Route::put('eliminar/{id}', [Kardex::class, 'eliminarKardex']);
             Route::get('todos', [Kardex::class, 'misKardexIndex'])->name('admin.miskardex.index');
             Route::post('actualizar/fardos', [Kardex::class, 'actualizarValoresKardex']);
             Route::post('actualizar/tasa', [Kardex::class, 'actualizarTasas']);

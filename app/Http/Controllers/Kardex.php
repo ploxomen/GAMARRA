@@ -284,6 +284,14 @@ class Kardex extends Controller
         $kardex = ModelsKardex::misKardex();
         return DataTables::of($kardex)->toJson();
     }
+    public function eliminarKardex(Request $request,$id) {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
+        if(isset($verif['session'])){
+            return response()->json(['session' => true]);
+        }
+        ModelsKardex::find($id)->update(['estado' => 0]);
+        return response()->json(['success' => 'Kardex eliminado correctamente']);
+    }
     public function misKardexIndex()  {
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
         if(isset($verif['session'])){
