@@ -44,7 +44,7 @@ function loadPage(){
             data : 'estado',
             render : function(data){
                 if(data === 1){
-                    return '<span class="badge badge-success">Activo</span>';
+                    return '<span class="badge badge-success">Vigente</span>';
                 }else if(data === 0){
                     return '<span class="badge badge-danger">Descontinuado</span>';
                 }else{
@@ -256,6 +256,17 @@ function loadPage(){
             
         }
     })
+    const btnExportarDatos = document.querySelectorAll('.exportar-datos');
+    for (const btn of btnExportarDatos) {
+        btn.addEventListener("click",function (e) {
+            const enlace = document.createElement("a");
+            enlace.href = gen.url + '/ventas/clientes/reportes/' + e.target.dataset.type;
+            enlace.target = "_blank";
+            document.body.appendChild(enlace);
+            enlace.click();
+            enlace.remove();             
+        })
+    }
 }
 window.addEventListener("DOMContentLoaded",loadPage);
 

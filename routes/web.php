@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Aduaneros;
-use App\Http\Controllers\Articulo;
 use App\Http\Controllers\Familia;
 use App\Http\Controllers\Clientes;
 use App\Http\Controllers\Kardex;
@@ -48,6 +47,8 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
     Route::prefix('compras')->group(function () {
         Route::prefix('proveedores')->group(function () {
             Route::get('/', [Proveedores::class, 'index'])->name("admin.compras.proveedores");
+            Route::get('reportes/excel', [Proveedores::class, 'reporteExcel']);
+            Route::get('reportes/pdf', [Proveedores::class, 'reportePdf']);
             Route::post('contacto/eliminar', [Proveedores::class, 'eliminarContacto']);
             Route::post('listar', [Proveedores::class, 'listar']);
             Route::get('listar/{proveedor}', [Proveedores::class, 'show']);
@@ -58,6 +59,8 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
     Route::prefix('ventas')->group(function () {
         Route::prefix('clientes')->group(function () {
             Route::get('/', [Clientes::class, 'index'])->name('admin.ventas.clientes.index');
+            Route::get('reportes/excel', [Clientes::class, 'reporteExcel']);
+            Route::get('reportes/pdf', [Clientes::class, 'reportePdf']);
             Route::post('listar', [Clientes::class, 'listar']);
             Route::get('listar/{cliente}', [Clientes::class, 'show']);
             Route::post('crear', [Clientes::class, 'store']);
@@ -76,6 +79,8 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
     Route::prefix('almacen')->group(function () {
         Route::prefix('familias')->group(function () {
             Route::get('/', [Familia::class, 'index'])->name('admin.familia.index');
+            Route::get('reportes/excel', [Familia::class, 'reporteExcel']);
+            Route::get('reportes/pdf', [Familia::class, 'reportePdf']);
             Route::post('listar', [Familia::class, 'listar']);
             Route::get('listar/{familia}', [Familia::class, 'show']);
             Route::post('crear', [Familia::class, 'store']);
@@ -85,6 +90,8 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
         });
         Route::prefix('aduaneros')->group(function () {
             Route::get('/', [Aduaneros::class, 'index'])->name('admin.aduaneros.index');
+            Route::get('reportes/excel', [Aduaneros::class, 'reporteExcel']);
+            Route::get('reportes/pdf', [Aduaneros::class, 'reportePdf']);
             Route::post('listar', [Aduaneros::class, 'listar']);
             Route::get('listar/{aduanero}', [Aduaneros::class, 'show']);
             Route::post('crear', [Aduaneros::class, 'store']);
@@ -93,6 +100,8 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
         });
         Route::prefix('producto')->group(function () {
             Route::get('/', [MisProductos::class, 'index'])->name('admin.producto.index');
+            Route::get('reportes/excel', [MisProductos::class, 'reporteExcel']);
+            Route::get('reportes/pdf', [MisProductos::class, 'reportePdf']);
             Route::post('listar', [MisProductos::class, 'listar']);
             Route::get('listar/{producto}', [MisProductos::class, 'show']);
             Route::post('crear', [MisProductos::class, 'store']);
@@ -103,6 +112,7 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
         });
         Route::prefix('kardex')->group(function () {
             Route::get('/', [Kardex::class, 'index'])->name('admin.kardex.index');
+            Route::put('eliminar/{id}', [Kardex::class, 'eliminarKardex']);
             Route::get('todos', [Kardex::class, 'misKardexIndex'])->name('admin.miskardex.index');
             Route::post('actualizar/fardos', [Kardex::class, 'actualizarValoresKardex']);
             Route::post('actualizar/tasa', [Kardex::class, 'actualizarTasas']);

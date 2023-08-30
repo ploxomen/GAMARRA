@@ -13,6 +13,11 @@
     .text-end{
         text-align: right;
     }
+    header{
+        position: absolute;
+        top: -40px;
+        width: 100%;
+    }
 </style>
 <header class="text-end">
     <img src="{{public_path("img/logo-sin-fondo.png")}}" alt="logo de la empresa" width="100px">

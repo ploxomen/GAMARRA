@@ -1,7 +1,7 @@
 @extends('helper.index')
 @section('head')
     @include('helper.headDatatable')
-    <script src="/productos/adminProductos.js"></script>
+    <script src="/productos/adminProductos.js?v1.5"></script>
     <title>Productos</title>
 @endsection
 @section('body')
@@ -13,9 +13,17 @@
             </div>
         </div>
         <div class="form-group text-right">
-            <button class="btn btn-outline-primary" data-toggle="modal" data-target="#agregarProducto">
+            <button class="btn btn-primary" data-toggle="modal" data-target="#agregarProducto">
                 <i class="fas fa-plus"></i>
-                <span>Agregar</span>
+                <span>AGREGAR</span>
+            </button>
+            <button class="btn btn-danger exportar-datos" data-type="pdf">
+                <i class="fas fa-file-pdf"></i>                
+                <span>PDF</span>
+            </button>
+            <button class="btn btn-success exportar-datos" data-type="excel">
+                <i class="fas fa-file-excel"></i>
+                <span>EXCEL</span>
             </button>
         </div>
        <div class="bg-white p-3 border">
@@ -27,7 +35,6 @@
                     <th>Producto</th>
                     <th>Familia</th>
                     <th>Subfamilia</th>
-                    {{-- <th>Artículo</th> --}}
                     <th>Precio</th>
                     <th>Estado</th>
                     <th>Acciones</th>

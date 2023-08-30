@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AdministradorAduaneros;
 use App\Models\Aduanero;
 use App\Models\Articulo as ModelsArticulo;
 use App\Models\Familia;
 use App\Models\Paises;
 use App\Models\TipoDocumento;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class Aduaneros extends Controller
@@ -41,6 +44,22 @@ class Aduaneros extends Controller
         }
         $aduaneros = Aduanero::obtenerDatos();
         return DataTables::of($aduaneros)->toJson();
+    }
+    public function reporteExcel() {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloAduanero);
+        if(isset($verif['session'])){
+            return redirect()->route("home"); 
+        }
+        $aduaneros = Aduanero::obtenerDatos(true);
+        return Excel::download(new AdministradorAduaneros($aduaneros,$aduaneros->count()),'reporte_agentes_aduanas.xlsx');
+    }
+    public function reportePdf() {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloAduanero);
+        if(isset($verif['session'])){
+            return redirect()->route("home"); 
+        }
+        $aduaneros = Aduanero::obtenerDatos(true);
+        return Pdf::loadView('ventas.reportes.aduaneroPdf',compact("aduaneros"))->setPaper('A4','landscape')->stream("reporte_agentes_aduanas.pdf");
     }
     public function store(Request $request)
     {

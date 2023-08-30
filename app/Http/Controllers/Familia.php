@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AdministradorFamiliaSub;
 use App\Http\Controllers\Usuario;
 use App\Models\Familia as ModelsFamilia;
 use App\Models\SubFamilias;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class Familia extends Controller
 {
-    private $moduloArea = "admin.familia.index";
+    private $moduloFamilia = "admin.familia.index";
     private $usuarioController;
     
     function __construct()
@@ -20,7 +23,7 @@ class Familia extends Controller
     }
     public function index()
     {
-        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloArea);
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloFamilia);
         if(isset($verif['session'])){
             return redirect()->route("home"); 
         }
@@ -32,7 +35,7 @@ class Familia extends Controller
         if(!$request->ajax()){
             return response()->json($this->usuarioController->errorPeticion);
         }
-        $accessModulo = $this->usuarioController->validarXmlHttpRequest($this->moduloArea);
+        $accessModulo = $this->usuarioController->validarXmlHttpRequest($this->moduloFamilia);
         if(isset($accessModulo['session'])){
             return response()->json($accessModulo);
         }
@@ -44,7 +47,7 @@ class Familia extends Controller
         if(!$request->ajax()){
             return response()->json($this->usuarioController->errorPeticion);
         }
-        $accessModulo = $this->usuarioController->validarXmlHttpRequest($this->moduloArea);
+        $accessModulo = $this->usuarioController->validarXmlHttpRequest($this->moduloFamilia);
         if(isset($accessModulo['session'])){
             return response()->json($accessModulo);
         }
@@ -79,12 +82,28 @@ class Familia extends Controller
             return response()->json(['error' => $th->getMessage(),'codigo' => $th->getCode()]);
         }
     }
+    public function reporteExcel() {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloFamilia);
+        if(isset($verif['session'])){
+            return redirect()->route("home"); 
+        }
+        $familias = ModelsFamilia::orderBy('codigo')->get();
+        return Excel::download(new AdministradorFamiliaSub($familias,$familias->count()),'reporte_familias.xlsx');
+    }
+    public function reportePdf() {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloFamilia);
+        if(isset($verif['session'])){
+            return redirect()->route("home");
+        }
+        $familias = ModelsFamilia::orderBy('codigo')->get();
+        return Pdf::loadView('productos.reportes.familiaPdf',compact("familias"))->stream("reporte_familias.pdf");
+    }
     public function show($familia, Request $request)
     {
         if(!$request->ajax()){
             return response()->json($this->usuarioController->errorPeticion);
         }
-        $accessModulo = $this->usuarioController->validarXmlHttpRequest($this->moduloArea);
+        $accessModulo = $this->usuarioController->validarXmlHttpRequest($this->moduloFamilia);
         if(isset($accessModulo['session'])){
             return response()->json($accessModulo);
         }
@@ -96,7 +115,7 @@ class Familia extends Controller
         if(!$request->ajax()){
             return response()->json($this->usuarioController->errorPeticion);
         }
-        $accessModulo = $this->usuarioController->validarXmlHttpRequest($this->moduloArea);
+        $accessModulo = $this->usuarioController->validarXmlHttpRequest($this->moduloFamilia);
         if(isset($accessModulo['session'])){
             return response()->json($accessModulo);
         }
@@ -140,7 +159,7 @@ class Familia extends Controller
     }
     public function eliminarSubfamilia(SubFamilias $subfamilia)
     {
-        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloArea);
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloFamilia);
         if(isset($verif['session'])){
             return response()->json(['session' => true]); 
         }
@@ -152,7 +171,7 @@ class Familia extends Controller
         if(!$request->ajax()){
             return response()->json($this->usuarioController->errorPeticion);
         }
-        $accessModulo = $this->usuarioController->validarXmlHttpRequest($this->moduloArea);
+        $accessModulo = $this->usuarioController->validarXmlHttpRequest($this->moduloFamilia);
         if(isset($accessModulo['session'])){
             return response()->json($accessModulo);
         }

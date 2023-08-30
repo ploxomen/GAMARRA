@@ -35,6 +35,7 @@ class PackingList implements FromView,ShouldAutoSize,WithStyles,WithTitle
         $tituloPackingList = $sheet->getStyle('A2');
         $tituloPackingList->getFont()->setBold(true);
         $tituloPackingList->getFont()->setUnderline(true);
+        $tituloPackingList->getFont()->setSize(22);
         $tituloPackingList->getAlignment()->setHorizontal('center');
         $cabeceraTabla = $sheet->getStyle("A".$this->filaInicial . ':' . "K" . $this->filaInicial);
         $cabeceraTabla->getFont()->setBold(true);

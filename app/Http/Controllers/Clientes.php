@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AdministradorClientes;
 use App\Http\Controllers\Usuario;
 use App\Models\Clientes as ModelsClientes;
 use App\Models\ClientesContactos;
@@ -10,9 +11,11 @@ use App\Models\Rol;
 use App\Models\TipoDocumento;
 use App\Models\User;
 use App\Models\UsuarioRol;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class Clientes extends Controller
@@ -34,7 +37,7 @@ class Clientes extends Controller
         $paises = Paises::all()->where('estado',1);
         return view("ventas.clientes",compact("modulos","tiposDocumentos","paises"));
     }
-    public function listar(Request $request)
+    public function listar()
     {
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloCliente);
         if(isset($verif['session'])){
@@ -42,6 +45,22 @@ class Clientes extends Controller
         }
         $clientes = ModelsClientes::obenerClientes();
         return DataTables::of($clientes)->toJson();
+    }
+    public function reporteExcel() {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloCliente);
+        if(isset($verif['session'])){
+            return redirect()->route("home"); 
+        }
+        $clientes = ModelsClientes::obenerClientes(true);
+        return Excel::download(new AdministradorClientes($clientes,$clientes->count()),'reportes_clientes.xlsx');
+    }
+    public function reportePdf() {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloCliente);
+        if(isset($verif['session'])){
+            return redirect()->route("home"); 
+        }
+        $clientes = ModelsClientes::obenerClientes(true);
+        return Pdf::loadView('ventas.reportes.clientesPdf',compact("clientes"))->setPaper('A4','landscape')->stream("reporte_clientes.pdf");
     }
     public function store(Request $request)
     {

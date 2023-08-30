@@ -36,7 +36,7 @@ function loadPage(){
         ,{
             data: 'articuloEstado',
             render:function(data){
-                return data ? `<span class="badge badge-success">Vigenta</span>` : `<span class="badge badge-danger">Descontinuado</span>`
+                return data ? `<span class="badge badge-success">Vigente</span>` : `<span class="badge badge-danger">Descontinuado</span>`
             }
         },
         {

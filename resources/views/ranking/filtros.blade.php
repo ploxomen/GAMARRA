@@ -10,10 +10,10 @@
     <button class="btn btn-sm btn-primary" id="btnBuscar" type="button" title="Aplicar filtros" data-toggle="tooltip">
         <i class="fas fa-search"></i>
     </button>
+    <button class="btn btn-sm btn-exportar btn-danger" data-type="{{$tipo}}" data-accion="pdf" type="button" title="Exportar en PDF" data-toggle="tooltip">
+        <i class="fas fa-file-pdf"></i>               
+    </button>
     <button class="btn btn-sm btn-exportar btn-success" data-type="{{$tipo}}" data-accion="excel" type="button" title="Exportar en Excel" data-toggle="tooltip">
         <i class="fas fa-file-excel"></i>                    
-    </button>
-    <button class="btn btn-sm btn-exportar btn-danger" data-type="{{$tipo}}" data-accion="pdf" type="button" title="Exportar en PDF" data-toggle="tooltip">
-        <i class="fas fa-file-pdf"></i>                    
     </button>
 </div>

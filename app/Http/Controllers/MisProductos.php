@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AdministradorProductos;
 use App\Http\Controllers\Usuario;
 use App\Models\Familia;
 use App\Models\Productos;
 use App\Models\SubFamilias;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class MisProductos extends Controller
@@ -38,6 +41,22 @@ class MisProductos extends Controller
         }
         $productos = Productos::obtenerProductos();
         return DataTables::of($productos)->toJson();
+    }
+    public function reporteExcel() {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloProducto);
+        if(isset($verif['session'])){
+            return redirect()->route("home"); 
+        }
+        $productos = Productos::obtenerProductos(true);
+        return Excel::download(new AdministradorProductos($productos,$productos->count()),'reportes_productos.xlsx');
+    }
+    public function reportePdf() {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloProducto);
+        if(isset($verif['session'])){
+            return redirect()->route("home"); 
+        }
+        $productos = Productos::obtenerProductos(true);
+        return Pdf::loadView('productos.reportes.productosPdf',compact("productos"))->setPaper('A4','landscape')->stream("reporte_productos.pdf");
     }
     public function obtenerSubfamilias(Familia $familia, Request $request){
         if(!$request->ajax()){

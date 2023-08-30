@@ -8,7 +8,7 @@
 </head>
 <body>
     @include('ranking.export.headerExport')
-    <h3 class="text-center">RANKING AGENTES DE ADUANAS DESDE {{$fechaInicio . ' HASTA '. $fechaFin}}</h3>
+    <h3 class="text-center">RANKING AGENTES DE ADUANAS DESDE <br> {{$fechaInicio . ' HASTA '. $fechaFin}}</h3>
     <table border="1">
         <thead>
             <tr>

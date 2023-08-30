@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AdministradorProveedor;
 use App\Http\Controllers\Usuario;
 use App\Models\Proveedores as ModelsProveedores;
 use App\Models\ProveedoresContactos;
 use App\Models\TipoDocumento;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class Proveedores extends Controller
@@ -39,6 +42,22 @@ class Proveedores extends Controller
         }
         $proveedores = ModelsProveedores::with("tipoDocumento:id,documento")->select("id","tipo_documento","nro_documento","nombre_proveedor","telefono","celular","correo","estado")->get();
         return DataTables::of($proveedores)->toJson();
+    }
+    public function reporteExcel() {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloProveedor);
+        if(isset($verif['session'])){
+            return redirect()->route("home"); 
+        }
+        $proveedores = ModelsProveedores::select("id","tipo_documento","nro_documento","nombre_proveedor","telefono","celular","correo","estado")->orderBy("nro_documento")->get();
+        return Excel::download(new AdministradorProveedor($proveedores,$proveedores->count()),'reportes_proveedores.xlsx');
+    }
+    public function reportePdf() {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloProveedor);
+        if(isset($verif['session'])){
+            return redirect()->route("home"); 
+        }
+        $proveedores = ModelsProveedores::select("id","tipo_documento","nro_documento","nombre_proveedor","telefono","celular","correo","estado")->orderBy("nro_documento")->get();
+        return Pdf::loadView('compras.reportes.proveedorPdf',compact("proveedores"))->setPaper('A4','landscape')->stream("reporte_proveedores.pdf");
     }
     public function store(Request $request)
     {

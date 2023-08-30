@@ -37,6 +37,7 @@ class PackingList48 implements FromView,ShouldAutoSize,WithStyles,WithTitle
         $tituloPackingList = $sheet->getStyle('A2');
         $tituloPackingList->getFont()->setBold(true);
         $tituloPackingList->getFont()->setUnderline(true);
+        $tituloPackingList->getFont()->setSize(22);
         $tituloPackingList->getAlignment()->setHorizontal('center');
         $cabeceraTabla = $sheet->getStyle("A8:E8");
         $cabeceraTabla->getFont()->setBold(true);
@@ -44,7 +45,7 @@ class PackingList48 implements FromView,ShouldAutoSize,WithStyles,WithTitle
         $sheet->getStyle($rango)->getBorders()->getAllBorders()->setBorderStyle('thin');
         $sheet->getStyle($rango)->getAlignment()->setHorizontal('center');
         $sheet->getStyle($rango)->getAlignment()->setVertical('center');
-        $sheet->setCellValue('B5', '=B'.$this->filaFinal);
+        $sheet->setCellValue('B5', '=COUNT(A'.($this->filaInicial + 1) . ':A'. ($this->filaFinal - 1) . ')');
         $sheet->setCellValue('B'.$this->filaFinal, '=SUM(B'. ($this->filaInicial + 1).':B'.($this->filaFinal - 1) . ')');
         $sheet->setCellValue('E'.$this->filaFinal, '=SUM(E'. ($this->filaInicial + 1).':E'.($this->filaFinal - 1) . ')');
         $sheet->getStyle("A".$this->filaFinal . ':' . "E" . $this->filaFinal)->getFont()->setBold(true);

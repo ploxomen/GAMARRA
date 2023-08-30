@@ -51,7 +51,7 @@ function loadPage(){
             data : 'productoEstado',
             render : function(data){
                 if(data === 1){
-                    return '<span class="badge badge-success">Activo</span>';
+                    return '<span class="badge badge-success">Vigente</span>';
                 }else if(data === 0){
                     return '<span class="badge badge-danger">Descontinuado</span>';
                 }else{
@@ -203,7 +203,17 @@ function loadPage(){
             
         }
     })
-
+    const btnExportarDatos = document.querySelectorAll('.exportar-datos');
+    for (const btn of btnExportarDatos) {
+        btn.addEventListener("click",function (e) {
+            const enlace = document.createElement("a");
+            enlace.href = gen.url + '/almacen/producto/reportes/' + e.target.dataset.type;
+            enlace.target = "_blank";
+            document.body.appendChild(enlace);
+            enlace.click();
+            enlace.remove();             
+        })
+    }
     $('#idModalfamiliaId').on("select2:select",async function(e){
         try {
             // $cbArticulos.innerHTML = "";

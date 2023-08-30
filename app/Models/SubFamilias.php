@@ -16,9 +16,9 @@ class SubFamilias extends Model
     {
         return $this->belongsTo(Familia::class,'id_familia');
     }
-    public function articulos()
+    public function productos()
     {
-        return $this->hasMany(Articulo::class,'id_familia_sub');
+        return $this->hasMany(Productos::class,'id_subfamilia');
     }
     function scopeCanitdadSubFamilias($query,$codigo){
         return $query->where('codigo',$codigo)->count();

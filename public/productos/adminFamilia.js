@@ -35,7 +35,7 @@ function loadPage(){
         ,{
             data: 'estado',
             render:function(data){
-                return data ? `<span class="badge badge-success">Vigenta</span>` : `<span class="badge badge-danger">Descontinuado</span>`
+                return data ? `<span class="badge badge-success">Vigente</span>` : `<span class="badge badge-danger">Descontinuado</span>`
             }
         },
         {
@@ -238,7 +238,17 @@ function loadPage(){
             console.error(error);
             alertify.error(idFamilia != null ? "error al editar la familia" : 'error al agregar la familia')
         }
-
+    }
+    const btnExportarDatos = document.querySelectorAll('.exportar-datos');
+    for (const btn of btnExportarDatos) {
+        btn.addEventListener("click",function (e) {
+            const enlace = document.createElement("a");
+            enlace.href = general.url + '/almacen/familias/reportes/' + e.target.dataset.type;
+            enlace.target = "_blank";
+            document.body.appendChild(enlace);
+            enlace.click();
+            enlace.remove();             
+        })
     }
 }
 window.addEventListener("DOMContentLoaded",loadPage);
