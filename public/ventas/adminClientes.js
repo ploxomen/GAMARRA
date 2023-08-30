@@ -44,7 +44,7 @@ function loadPage(){
             data : 'estado',
             render : function(data){
                 if(data === 1){
-                    return '<span class="badge badge-success">Activo</span>';
+                    return '<span class="badge badge-success">Vigente</span>';
                 }else if(data === 0){
                     return '<span class="badge badge-danger">Descontinuado</span>';
                 }else{

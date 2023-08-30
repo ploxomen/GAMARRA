@@ -1,7 +1,7 @@
 @extends('helper.index')
 @section('head')
     @include('helper.headDatatable')
-    <script src="/compras/proveedoresAdmin.js?v1.2"></script>
+    <script src="/compras/proveedoresAdmin.js?v1.5"></script>
     <title>Proveedores</title>
 @endsection
 @section('body')
@@ -17,11 +17,11 @@
                 <i class="fas fa-plus"></i>
                 <span>AGREGAR</span>
             </button>
-            <button class="btn btn-danger" data-type="pdf">
+            <button class="btn btn-danger exportar-datos" data-type="pdf">
                 <i class="fas fa-file-pdf"></i>                
                 <span>PDF</span>
             </button>
-            <button class="btn btn-success" data-type="excel">
+            <button class="btn btn-success exportar-datos" data-type="excel">
                 <i class="fas fa-file-excel"></i>
                 <span>EXCEL</span>
             </button>

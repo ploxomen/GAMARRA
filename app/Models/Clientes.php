@@ -19,12 +19,13 @@ class Clientes extends Model
     {
         return $this->hasOne(Paises::class,'id_pais');
     }
-    public function scopeObenerClientes($query)
+    public function scopeObenerClientes($query,$ordenarNombre = false)
     {
-        return $query->select("clientes.id","tipo_documento.documento","paises.pais_espanish","clientes.nro_documento","usuarios.correo","clientes.nombreCliente","usuarios.celular","usuarios.telefono","usuarios.direccion","clientes.estado")
+        $clientes = $query->select("clientes.id","tipo_documento.documento","paises.pais_espanish","clientes.nro_documento","usuarios.correo","clientes.nombreCliente","usuarios.celular","usuarios.telefono","usuarios.direccion","clientes.estado")
         ->join("usuarios","usuarios.id","=",'clientes.id_usuario')
         ->join("paises","paises.id","=","clientes.id_pais")
-        ->join("tipo_documento","clientes.tipo_documento","=","tipo_documento.id","left")->get();
+        ->join("tipo_documento","clientes.tipo_documento","=","tipo_documento.id","left");
+        return $ordenarNombre ? $clientes->orderBy("clientes.nombreCliente")->get() : $clientes->get();
     }
     public function scopeObenerClientesActivos($query)
     {

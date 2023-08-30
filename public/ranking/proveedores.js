@@ -38,7 +38,6 @@ function loadPage(){
     document.querySelector("#btnBuscar").addEventListener("click",function(e){
         e.preventDefault();
         tablaProveedoresDataTable.draw();
-    });
-    
+    });   
 }
 window.addEventListener("DOMContentLoaded",loadPage);

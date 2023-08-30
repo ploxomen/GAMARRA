@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Reportes de clientes</title>
+    <title>Reportes de proveedores</title>
 </head>
 <body>
     <style>
@@ -13,19 +13,17 @@
         }
     </style>
     @include('ranking.export.headerExport')
-    <h3 class="text-center">REPORTE DE CLIENTES</h3>
+    <h3 class="text-center">REPORTE DE PROVEEDORES</h3>
     <table border="1">
         <thead>
             <tr>
                 <th>N°</th>
-                <th>PAIS</th>
                 <th>TIPO DE DOCUMENTO</th>
                 <th>NRO. DE DOCUMENTO</th>
-                <th>CLIENTE</th>
-                <th>CELULAR</th>
+                <th>PROVEEDOR</th>
                 <th>TELEFONO</th>
+                <th>CELULAR</th>
                 <th>CORREO</th>
-                <th>DIRECCION</th>
                 <th>ESTADO</th>
             </tr>
         </thead>
@@ -33,20 +31,18 @@
             @php
                 $estados = ["Descontinuado","Vigente"];
             @endphp
-            @foreach ($clientes as $key => $cliente)
+            @foreach ($proveedores as $key => $proveedor)
                 @php
-                    $estado = !isset($estados[$cliente->estado]) ? 'Estado no establecido' : $estados[$cliente->estado];
+                    $estado = !isset($estados[$proveedor->estado]) ? 'Estado no establecido' : $estados[$proveedor->estado];
                 @endphp
                 <tr>
                     <td>{{$key + 1}}</td>
-                    <td>{{$cliente->pais_espanish}}</td>
-                    <td>{{$cliente->documento}}</td>
-                    <td>{{$cliente->nro_documento}}</td>
-                    <td>{{$cliente->nombreCliente}}</td>
-                    <td>{{$cliente->celular}}</td>
-                    <td>{{$cliente->telefono}}</td>
-                    <td>{{$cliente->correo}}</td>
-                    <td>{{$cliente->direccion}}</td>
+                    <td>{{$proveedor->tipoDocumento->documento}}</td>
+                    <td>{{$proveedor->nro_documento}}</td>
+                    <td>{{$proveedor->nombre_proveedor}}</td>
+                    <td>{{$proveedor->telefono}}</td>
+                    <td>{{$proveedor->celular}}</td>
+                    <td>{{$proveedor->correo}}</td>
                     <td>{{$estado === false ? 'Estado no establecido' : $estado}}</td>
                 </tr>
             @endforeach

@@ -47,6 +47,8 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
     Route::prefix('compras')->group(function () {
         Route::prefix('proveedores')->group(function () {
             Route::get('/', [Proveedores::class, 'index'])->name("admin.compras.proveedores");
+            Route::get('reportes/excel', [Proveedores::class, 'reporteExcel']);
+            Route::get('reportes/pdf', [Proveedores::class, 'reportePdf']);
             Route::post('contacto/eliminar', [Proveedores::class, 'eliminarContacto']);
             Route::post('listar', [Proveedores::class, 'listar']);
             Route::get('listar/{proveedor}', [Proveedores::class, 'show']);
@@ -77,6 +79,8 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
     Route::prefix('almacen')->group(function () {
         Route::prefix('familias')->group(function () {
             Route::get('/', [Familia::class, 'index'])->name('admin.familia.index');
+            Route::get('reportes/excel', [Familia::class, 'reporteExcel']);
+            Route::get('reportes/pdf', [Familia::class, 'reportePdf']);
             Route::post('listar', [Familia::class, 'listar']);
             Route::get('listar/{familia}', [Familia::class, 'show']);
             Route::post('crear', [Familia::class, 'store']);
@@ -86,6 +90,8 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
         });
         Route::prefix('aduaneros')->group(function () {
             Route::get('/', [Aduaneros::class, 'index'])->name('admin.aduaneros.index');
+            Route::get('reportes/excel', [Aduaneros::class, 'reporteExcel']);
+            Route::get('reportes/pdf', [Aduaneros::class, 'reportePdf']);
             Route::post('listar', [Aduaneros::class, 'listar']);
             Route::get('listar/{aduanero}', [Aduaneros::class, 'show']);
             Route::post('crear', [Aduaneros::class, 'store']);
@@ -94,6 +100,8 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
         });
         Route::prefix('producto')->group(function () {
             Route::get('/', [MisProductos::class, 'index'])->name('admin.producto.index');
+            Route::get('reportes/excel', [MisProductos::class, 'reporteExcel']);
+            Route::get('reportes/pdf', [MisProductos::class, 'reportePdf']);
             Route::post('listar', [MisProductos::class, 'listar']);
             Route::get('listar/{producto}', [MisProductos::class, 'show']);
             Route::post('crear', [MisProductos::class, 'store']);

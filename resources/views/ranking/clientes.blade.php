@@ -2,7 +2,7 @@
 @section('head')
     @include('helper.headDatatable')
     <script src="/ranking/clientes.js"></script>
-    <script src="/ranking/filtros.js"></script>
+    <script src="/ranking/filtros.js?v1.5"></script>
     <title>Ranking clientes</title>
 @endsection
 @section('body')

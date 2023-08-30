@@ -1,8 +1,8 @@
 @extends('helper.index')
 @section('head')
     @include('helper.headDatatable')
-    <script src="/ranking/proveedores.js?v1"></script>
-    <script src="/ranking/filtros.js"></script>
+    <script src="/ranking/proveedores.js?v1.5"></script>
+    <script src="/ranking/filtros.js?v1.5"></script>
     <title>Ranking proveedores</title>
 @endsection
 @section('body')

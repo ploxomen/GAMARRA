@@ -42,12 +42,11 @@ class Productos extends Model
         }
         return $producto;
     }
-    public function scopeObtenerProductos($query) {
-        return $query->select(/*"articulo.nombre AS articuloNombre",*/"productos.id AS productoId","familia.nombre AS familiaNombre","familia_sub.nombre AS familiaSubNombre","productos.codigo AS productoCodigo","productos.nombreProducto AS productoNombre","productos.precioVenta","productos.estado AS productoEstado")
-        // ->join("articulo","productos.id_articulo","=","articulo.id")
+    public function scopeObtenerProductos($query,$ordenarCodigo = false) {
+        $productos = $query->select("productos.id AS productoId","familia.nombre AS familiaNombre","familia_sub.nombre AS familiaSubNombre","productos.codigo AS productoCodigo","productos.nombreProducto AS productoNombre","productos.precioVenta","productos.estado AS productoEstado")
         ->join("familia_sub","familia_sub.id","=","productos.id_subfamilia")
-        ->join("familia","familia.id","=","familia_sub.id_familia")
-        ->get();
+        ->join("familia","familia.id","=","familia_sub.id_familia");
+        return $ordenarCodigo ? $productos->orderBy("productoCodigo")->get() : $productos->get();
     }
     public function detalleFardo()
     {

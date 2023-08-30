@@ -2,7 +2,6 @@
     @page{
         font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
         font-size: 14px;
-        margin-top: 10px; 
     }
     table{
         border-collapse: collapse;
@@ -13,6 +12,11 @@
     }
     .text-end{
         text-align: right;
+    }
+    header{
+        position: absolute;
+        top: -40px;
+        width: 100%;
     }
 </style>
 <header class="text-end">
