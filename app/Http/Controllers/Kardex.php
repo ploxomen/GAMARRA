@@ -250,7 +250,7 @@ class Kardex extends Controller
         $kardex->update(['nroFardoActivo' => $request->fardo]);
         return response()->json(['success' => 'El fardo N° ' . $request->fardo . ' a sido abierto correctamente','nroFardo' => $request->fardo]);
     }
-    public function generarKardex(Request $request){
+    public function generarKardex(){
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);
         if(isset($verif['session'])){
             return response()->json(['session' => true]);
@@ -284,12 +284,12 @@ class Kardex extends Controller
         $kardex = ModelsKardex::misKardex();
         return DataTables::of($kardex)->toJson();
     }
-    public function eliminarKardex(Request $request,$id) {
+    public function eliminarKardex($id) {
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
         if(isset($verif['session'])){
             return response()->json(['session' => true]);
         }
-        ModelsKardex::find($id)->update(['estado' => 0]);
+        ModelsKardex::find($id)->update(['estado' => 0, 'nroFardoActivo' => null]);
         return response()->json(['success' => 'Kardex eliminado correctamente']);
     }
     public function misKardexIndex()  {
