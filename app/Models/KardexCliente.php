@@ -15,8 +15,10 @@ class KardexCliente extends Model
     static function kilajesRankingCliente($fechaIncio,$fechaFin,$buscador) : Object {
         return DB::table('kardex_fardos AS kf')->select("c.nombreCliente","p.pais_espanish","c.id")
         ->selectRaw("SUM(kf.kilaje) AS kilajes")
+        ->join("kardex AS k","k.id","=","kf.id_kardex")
         ->join("clientes AS c","kf.id_cliente","=","c.id")
         ->join("paises AS p","p.id","=","c.id_pais")
+        ->where('k.estado','>',1)
         ->where('c.nombreCliente','LIKE','%' . $buscador .'%')
         ->where('kf.estado','>=',2)->whereRaw("DATE_FORMAT(kf.fechaCreada,'%Y-%m-%d') BETWEEN ? AND ?",[$fechaIncio,$fechaFin])->groupBy("kf.id_cliente")->orderBy("kilajes","desc")->get();
     }
@@ -25,8 +27,10 @@ class KardexCliente extends Model
         ->select("p.nombre_proveedor","p.id","pro.nombreProducto")
         ->selectRaw("SUM(kfd.cantidad) AS cantidades")
         ->join("kardex_fardos AS kf","kfd.id_fardo","=","kf.id")
+        ->join("kardex AS k","k.id","=","kf.id_kardex")
         ->join("proveedores AS p","kfd.id_proveedor","=","p.id")
         ->join("productos AS pro","pro.id","=","kfd.id_producto")
+        ->where('k.estado','>',1)
         ->where('p.nombre_proveedor','LIKE','%' . $buscador .'%')
         ->where('kfd.estado','>=',2)->whereRaw("DATE_FORMAT(kf.fechaCreada,'%Y-%m-%d') BETWEEN ? AND ?",[$fechaIncio,$fechaFin])
         ->groupBy("kfd.id_proveedor")->groupBy("kfd.id_producto")->orderBy("cantidades","desc")->get();
