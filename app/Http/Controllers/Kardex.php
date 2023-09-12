@@ -6,6 +6,7 @@ use App\Exports\KardexExport;
 use App\Exports\PreFacturacionCliente;
 use App\Models\Aduanero;
 use App\Models\Clientes;
+use App\Models\Factura;
 use App\Models\Kardex as ModelsKardex;
 use App\Models\KardexCliente;
 use App\Models\KardexFardo;
@@ -14,7 +15,9 @@ use App\Models\KardexProveedor;
 use App\Models\Presentacion;
 use App\Models\Productos;
 use App\Models\Proveedores;
+use App\Models\TipoDocumento;
 use Barryvdh\DomPDF\Facade\Pdf;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
@@ -41,6 +44,90 @@ class Kardex extends Controller
         $proveedores = Proveedores::all();
         $presentaciones = Presentacion::orderBy("presentacion")->get();
         return view("kardex.generar",compact("modulos","clientes","productos","proveedores","presentaciones"));
+    }
+    public function facturarKardex(Request $request) {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
+        if(isset($verif['session'])){
+            return response()->json(['session' => true]);
+        }
+        $productos = KardexFardoDetalle::obtenerProductosPreFactura($request->kardex);
+        $rapifac = new RapiFac();
+        $fechaEmison = date('d/m/Y',strtotime($request->fechaEmision));
+        $datosFacturar = [
+            'ClienteNombreRazonSocial' => $request->nombreAgente,
+            'ClienteDireccion' => $request->direccionAgente,
+            'ClienteNumeroDocIdentidad' => $request->numeroDocumento,
+            'ClienteTipoDocIdentidadCodigo' => $request->agenteTipoDocumento,
+            'FechaEmision' => $fechaEmison,
+            'CondicionPago' => $request->tipoFactura,
+            'Observacion' => empty($request->observaciones) ? "" : $request->observaciones,
+            'CreditoTotal' => false
+        ];
+        if($request->tipoFactura == 'Credito'){
+            $datosFacturar['CreditoTotal'] = true;
+            if($request->has('cuotasFacturaFecha') && $request->has('cuotasFacturaMonto')){
+                $detalleCuotas = [];
+                $fecha1 = new DateTime($request->fechaEmision);
+                for ($i=0; $i < count($request->cuotasFacturaFecha); $i++) { 
+                    $fecha2 = new DateTime($request->cuotasFacturaFecha[$i]);
+                    $direncia = $fecha2->diff($fecha1);
+                    $detalleCuotas[] = [
+                        'FechaVencimientoCuota' => date('d/m/Y',strtotime($request->cuotasFacturaFecha[$i])),
+                        'MontoCuota' => floatval($request->cuotasFacturaMonto[$i]),
+                        'PlazoDiasCuota' => $direncia->days
+                    ];
+                }
+                $datosFacturar['ListaCuotas'] = $detalleCuotas;
+            }
+        }
+        $generarFactura = $rapifac->facturar($productos,$datosFacturar);
+        if(is_null($generarFactura)){
+            return response()->json(['error' => 'Error al generar la factura, por favor intentelo nuevamente más tarde']);
+        }
+        if(isset($generarFactura->xml_pdf) && isset($generarFactura->cdr)){
+            $kardex = ModelsKardex::find($request->kardex);
+            Factura::create([
+                'xml_pdf_numero_documento' => $generarFactura->xml_pdf->Mensaje,
+                'fecha_emision' => $request->fechaEmision,
+                'id_kardex' => $request->kardex,
+                'tipo_documento_destinatario' => $request->agenteTipoDocumento,
+                'numero_documento_destinatario' => $request->numeroDocumento,
+                'nombre_completo_destinatario' => $request->nombreAgente,
+                'xml_pdf_IDComprobante' => $generarFactura->xml_pdf->IDComprobante,
+                'observaciones' => $request->observaciones,
+                'xml_pdf_Codigo' => $generarFactura->xml_pdf->Codigo,
+                'xml_pdf_IDRepositorio' => $generarFactura->xml_pdf->IDRepositorio,
+                'xml_pdf_Firma' =>  $generarFactura->xml_pdf->Firma,
+                'cdr_IDComprobante' => $generarFactura->cdr->IDComprobante,
+                'cdr_Codigo' => $generarFactura->cdr->Codigo,
+                'cdr_IDRepositorio' => $generarFactura->cdr->IDRepositorio,
+                'cdr_firma' => $generarFactura->cdr->Firma,
+                'tipo_factura' => $request->tipoFactura,
+                'tipo_moneda' => 'USD',
+                'monto_total' => $kardex->importe,
+                'estado' => 1
+            ]);
+            $kardex->update(['estado' => 3]);
+            return response()->json(['success' => $generarFactura->cdr->Mensaje]);
+        }
+    }
+    public function informacionFacturar(ModelsKardex $kardex) {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
+        if(isset($verif['session'])){
+            return response()->json(['session' => true]);
+        }
+        $detallesProducto = KardexFardoDetalle::obtenerProductosPreFactura($kardex->id);
+        foreach ($detallesProducto as $detalleProducto) {
+            $detalleProducto->nombreProducto = $detalleProducto->productos->nombreProducto;
+        }
+        $rapifac = new RapiFac();
+        $kardex->setHidden(['nroFardoActivo','aduanero','id_aduanero','tasa_extranjera','kilaje','estado','fechaActualizada','fechaCreada']);
+        $kardex->agente = $kardex->aduanero->nombre_completo;
+        $kardex->agenteTipoDocumento = $kardex->aduanero->tipo_documento;
+        $kardex->agenteNumeroDocumento = $kardex->aduanero->nro_documento;
+        $kardex->totalLetras = $rapifac->numeroAPalabras($kardex->importe);
+        $kardex->listaProductos = $detallesProducto->setHidden(['id','id_fardo','estado','id_producto','id_proveedor','productos','cantidad']);
+        return response()->json(['informacionFactura' => $kardex]);
     }
     public function actualizarTasas(Request $request) {
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
@@ -95,6 +182,10 @@ class Kardex extends Controller
             $db = $columnaActualizar == "kilaje" || $columnaActualizar == 'tasa' || $columnaActualizar == 'tasa_extranjera'  ? $fardoCliente->update([$columnaActualizar => $request->valor]) : KardexFardoDetalle::where(['id_fardo' => $fardoCliente->id,'id' => $request->idDetalle])->update([$columnaActualizar => $request->valor]);
             if($columnaActualizar == 'id_proveedor'){
                 $this->filtrarProveedores($kardex->id);
+            }
+            if($columnaActualizar == 'cantidad' || $columnaActualizar == 'kilaje' || $columnaActualizar == 'precio'){
+                list($totalImporte,$cantidad,$kilaje) = $this->calcularImporteKardex($kardex->id);
+                $kardex->update(['nroFardoActivo' => null,'cantidad' => $cantidad,'kilaje' => $kilaje,'importe' => $totalImporte]);
             }
             DB::commit();
             return response()->json(['success' => $db ? $request->campo . ' se modifico de manera correcta' : $request->campo . ' no se a podido modificar']);
@@ -189,7 +280,6 @@ class Kardex extends Controller
         try {
             KardexFardoDetalle::where(['id_fardo' => $fardoKardex->id])->delete();
             KardexFardo::where(['id_kardex' => $kardex->id,'nro_fardo' => $request->fardo,'id_cliente' => $request->cliente])->delete();
-            $kardex->update(['nroFardoActivo' => null]);
             foreach (KardexFardo::where(['id_kardex' => $kardex->id])->get() as $k => $v) {
                 $v->update(['nro_fardo' => $k + 1]);
             }
@@ -198,13 +288,14 @@ class Kardex extends Controller
                 KardexCliente::where(['id_kardex' => $kardex->id,'id_cliente' => $request->cliente])->delete();
             }
             $this->filtrarProveedores($kardex->id);
+            list($totalImporte,$cantidad,$kilaje) = $this->calcularImporteKardex($kardex->id);
+            $kardex->update(['nroFardoActivo' => null,'cantidad' => $cantidad,'kilaje' => $kilaje,'importe' => $totalImporte]);
             DB::commit();
             return response()->json(['success' => 'El fardo N° ' . $request->fardo . ' a sido eliminado correctamente','nroFardo' => $kardex->nroFardoActivo]);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json(['error' => $th->getMessage()]);
         }
-        
     }
     function filtrarProveedores($idKardex){
         $proveedores = KardexFardoDetalle::obtenerProveedoresKardex($idKardex);
@@ -266,15 +357,27 @@ class Kardex extends Controller
                 $cantidad = KardexFardoDetalle::where(['id_fardo' => $vFardo->id])->sum('cantidad');
                 $vFardo->update(['cantidad' => $cantidad,'estado' => 2]);
             }
-            $cantidad = KardexFardo::where(['estado' => 2,'id_kardex' => $kardex->id])->sum('cantidad');
-            $kilaje = KardexFardo::where(['estado' => 2,'id_kardex' => $kardex->id])->sum('kilaje');
-            $kardex->update(['nroFardoActivo' => null,'estado' => 2,'cantidad' => $cantidad,'kilaje' => $kilaje]);
+            list($totalImporte,$cantidad,$kilaje) = $this->calcularImporteKardex($kardex->id);
+            $kardex->update(['nroFardoActivo' => null,'estado' => 2,'cantidad' => $cantidad,'kilaje' => $kilaje,'importe' => $totalImporte]);
             DB::commit();
             return response()->json(['success' => 'El kardex se generó correctamente']);
         }catch(\Exception $th){
             DB::rollBack();
             return response()->json(['error' => $th->getMessage()]);
         }
+    }
+    public function calcularImporteKardex($idKardex) {
+        $fardos = KardexFardo::where(['estado' => 2,'id_kardex' => $idKardex])->get();
+        $cantidad = KardexFardo::where(['id_kardex' => $idKardex])->sum('cantidad');
+        $kilaje = KardexFardo::where(['id_kardex' => $idKardex])->sum('kilaje');
+        $totalImporte = 0;
+        foreach ($fardos as $fardo) {
+            $detalleFardos = KardexFardoDetalle::where(['id_fardo' => $fardo->id])->get();
+            foreach ($detalleFardos as $detalleFardo) {
+                $totalImporte += $detalleFardo->cantidad * $detalleFardo->precio;
+            }
+        }
+        return [$totalImporte,$cantidad,$kilaje];
     }
     public function misKardex()  {
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
@@ -303,7 +406,10 @@ class Kardex extends Controller
         $proveedores = Proveedores::all();
         $presentaciones = Presentacion::orderBy("presentacion")->get();
         $aduaneros = Aduanero::where('estado',1)->get();
-        return view("kardex.misKardex",compact("modulos","productos","clientes","proveedores","presentaciones","aduaneros"));
+        $hoy = date('Y-m-d');
+        $haceTresDias = date('Y-m-d',strtotime(date('Y-m-d') . ' - 3 days'));
+        $tiposDocumentos = TipoDocumento::where('estado',1)->get();
+        return view("kardex.misKardex",compact("tiposDocumentos","modulos","productos","clientes","proveedores","presentaciones","aduaneros","hoy","haceTresDias"));
     }
     public function agregarFardo(Request $request){
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);

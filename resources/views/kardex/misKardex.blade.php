@@ -21,6 +21,7 @@
                     <th>Fecha</th>
                     <th>Cantidad</th>
                     <th>Kilaje</th>
+                    <th>Importe</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                 </tr>
@@ -30,4 +31,6 @@
     </section>
     @include('kardex.modales.kardex')
     @include('kardex.modales.kardexClientes')
+    @include('kardex.modales.nuevaFactura')
+    @include('helper.carga')
 @endsection

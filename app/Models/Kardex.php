@@ -27,13 +27,24 @@ class Kardex extends Model
         }
         return $kardex;
     }
+    public function scopeFacturacionesElectronicas($query){
+        return $query->select("kardex.id","a.nombre_completo","f.estado")
+        ->selectRaw("LPAD(kardex.id,5,'0') AS nroKardex,IF(f.serie IS NULL,'No establecido',CONCAT(f.serie,'-',f.numero)) AS numeroFactura,CONCAT('$', kardex.importe) AS montoSistema,IF(f.monto_total IS NULL,'No establecido',CONCAT('$ ',f.monto_total)) AS montoFactura,IF(f.fecha_emision IS NULL,'No establecido',DATE_FORMAT(f.fecha_emision,'%d/%m/%Y')) AS fechaFactura")
+        ->join("aduaneros AS a","a.id","=","kardex.id_aduanero")
+        ->leftJoin("facturas AS f","f.id_kardex","=","kardex.id")
+        ->where('kardex.estado','>',1)->get();
+    }
     public static function scopeMisKardex($query) {
-        return $query->select("kardex.id","kardex.cantidad","kardex.tasa_extranjera","kardex.kilaje","kardex.estado","kardex.id_aduanero")
+        return $query->select("kardex.id","kardex.cantidad","kardex.tasa_extranjera","kardex.kilaje","kardex.estado","kardex.id_aduanero","kardex.importe")
         ->selectRaw("LPAD(kardex.id,5,'0') AS nroKardex,DATE_FORMAT(kardex.fechaCreada,'%d/%m/%Y') AS fechaKardex")
         ->where('estado','!=',0)->get();
     }
     public function fardos()
     {
         return $this->hasMany(KardexFardo::class,'id_kardex');
+    }
+    public function aduanero()
+    {
+        return $this->belongsTo(Aduanero::class,'id_aduanero');
     }
 }

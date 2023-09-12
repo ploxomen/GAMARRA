@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Observers\KardexDetalleObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -34,7 +35,8 @@ class KardexFardoDetalle extends Model
         ->join('kardex_fardos','kardex_fardos.id','=','kardex_fardos_detalle.id_fardo')
         ->join('kardex','kardex.id','=','kardex_fardos.id_kardex')
         ->where('kardex.id',$idKardex)
-        ->groupBy("kardex_fardos_detalle.id_producto")->get();    
+        ->groupBy("kardex_fardos_detalle.id_producto")
+        ->groupBy("kardex_fardos_detalle.precio")->get();    
     }
     public function productos()
     {

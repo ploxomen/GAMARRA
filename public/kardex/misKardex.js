@@ -26,6 +26,12 @@ function loadPage() {
             data : 'kilaje'
         },
         {
+            data: 'importe',
+            render : function(data){
+                return gen.resetearMoneda(data);
+            }
+        },
+        {
             data : 'estado',
             render : function(data){
                 let estado = "";
@@ -36,6 +42,9 @@ function loadPage() {
                     case 2:
                         estado = '<span class="badge badge-success">Generado</span>';
                     break;
+                    case 3:
+                        estado = '<span class="badge badge-info">Facturado</span>';
+                    break;
                 }
                 return estado;
             }
@@ -43,6 +52,14 @@ function loadPage() {
         {
             data: 'id',
             render : function(data,type,row){
+                const btnFactura = row.estado === 2 ? `
+                <button class="btn btn-sm facturar-cliente btn-outline-info p-1" data-kardex="${data}">
+                    <small>
+                        <i class="fas fa-money-check-alt"></i>
+                        Facturar
+                    </small>
+                </button>` 
+                : "";
                 return `<div class="d-flex justify-content-center" style="gap:5px;">
                 <button class="btn btn-sm btn-outline-info editar-kardex p-1" data-kardex="${data}" data-tasa="${row.tasa_extranjera}" data-aduanero="${row.id_aduanero}">
                     <small>
@@ -59,9 +76,10 @@ function loadPage() {
                 <a href="reportes/facturacion/${data}" target="_blank" class="btn btn-sm btn-outline-success p-1">
                     <small>
                         <i class="far fa-file-excel"></i>                        
-                        Pre factura cliente
+                        Pre factura
                     </small>
                 </a>
+                ${btnFactura}
                 <a href="reportes/packing/${data}" target="_blank" class="btn btn-sm btn-outline-success p-1">
                     <small>
                         <i class="far fa-file-excel"></i>                        
@@ -90,6 +108,9 @@ function loadPage() {
     const frmKardex = document.querySelector("#frmDatosKardex");
     const txtTasaExtranjera = document.querySelector("#idModaltasa_extranjera");
     let idKardex = null;
+    const tablaDetalleProducto = document.querySelector("#generarFactura #tablaProductos");
+    let validoFacturar = true;
+    let totalFacturar = 0;
     tablaKardex.addEventListener("click",async function(e){
         if(e.target.classList.contains("reporte-clientes")){
             try {
@@ -135,6 +156,60 @@ function loadPage() {
             },()=>{})
             
         }
+        if(e.target.classList.contains("facturar-cliente")){
+            try {
+                const response = await gen.funcfetch("facturar/" + e.target.dataset.kardex,null,"GET");
+                if (response.session) {
+                    return alertify.alert([...gen.alertaSesion], () => { window.location.reload() });
+                }
+                if (response.informacionFactura) {
+                    idKardex = e.target.dataset.kardex;
+                    for (const key in response.informacionFactura) {
+                        if (Object.hasOwnProperty.call(response.informacionFactura, key)) {
+                            const valor = response.informacionFactura[key];
+                            const dom = document.querySelector("#generarFactura #modal" + key);
+                            if(key == "listaProductos"){
+                                let template = "";
+                                let total = 0;
+                                valor.forEach((producto,k) => {
+                                    const subTotal = producto.precio * producto.totalCantidades;
+                                    template += `
+                                    <tr>
+                                        <td>${k + 1}</td>
+                                        <td>${producto.nombreProducto}</td>
+                                        <td>${producto.totalCantidades}</td>
+                                        <td>${gen.resetearMoneda(producto.precio)}</td>
+                                        <td>${gen.resetearMoneda(subTotal)}</td>
+                                    <tr>
+                                    `
+                                    total += subTotal;
+                                });
+                                tablaDetalleProducto.innerHTML = template;
+                                totalFacturar = Number.parseFloat(total).toFixed(2);
+                                if(Number.parseFloat(total).toFixed(2) !== Number.parseFloat(response.informacionFactura.importe).toFixed(2)){
+                                    alertify.alert("Alerta","El monto total generado no coincide con el importe acomulado de los detalles del producto");
+                                    validoFacturar = false;
+                                };
+                                continue;
+                            }
+                            if(key === "totalLetras" || key === "importe"){
+                                dom.textContent = key === "importe" ? gen.resetearMoneda(valor) : valor;
+                                continue;
+                            }
+                            if(!dom){
+                                continue;
+                            }
+                            dom.value = valor;
+                        }
+                    }
+                    $("#generarFactura .select2-simple").trigger("change");
+                    $("#generarFactura").modal("show");
+                }
+            } catch (error) {
+                console.error(error);
+                alertify.error("no se pudo eliminar el kardex, por favor intentelo nuevamente dentro de unos minutos");
+            }
+        }
         if(e.target.classList.contains("editar-kardex")){
             idKardex = e.target.dataset.kardex;
             $('#idModaladuanero').val(e.target.dataset.aduanero).trigger("change");
@@ -142,8 +217,130 @@ function loadPage() {
             txtTasaExtranjera.value = e.target.dataset.tasa;
             return
         }
+    });
+    const $txtFechaEmision = document.querySelector("#generarFactura #modalFechaEmision");
+    const $tablaCreditosFactura = document.querySelector("#generarFactura #tablaCreditos");
+    const $sinCuotas = `
+    <tr>
+        <td colspan="100%" class="text-center">No se asignaron cuotas</td>
+    </tr>
+    `
+    let numeroCuotasFactura = 0;
+    document.querySelector("#generarFactura #btnFacturar").onclick = e => document.querySelector("#generarFactura #inputFacturar").click();
+    const formFacturar = document.querySelector("#generarFactura #formFacturar");
+    formFacturar.addEventListener("submit",async function(e){
+        e.preventDefault();
+        if(!validoFacturar){
+            return alertify.alert("Alerta","El monto total generado no coincide con el importe acomulado de los detalles del producto");
+        }
+        if(document.querySelector("#generarFactura #tipoACredito:checked")){
+            if(numeroCuotasFactura <= 0 ){
+                return alertify.error("debe haber al menos un detalle de credito");
+            }
+            let montoCredito = 0;
+            Array.from($tablaCreditosFactura.children).forEach((tr,key) => {
+                if(!tr.querySelector("input[type='date']").value){
+                    return alertify.error("debe establecer la fecha limite de la fila " + (key + 1));
+                }
+                for (let i = (key + 1); i < $tablaCreditosFactura.children.length; i++) {
+                    if(tr.querySelector("input[type='date']").value === $tablaCreditosFactura.children[i].querySelector("input[type='date']").value){
+                        return alertify.error("las fechas de los creditos no deben ser iguales cambie la fecha de la fila " + (key + 1) + " o de la fila " + (i + 1));
+                    }
+                }
+                if(!tr.querySelector("input[type='number']").value.trim()){
+                    return alertify.error("debe establecer el monto de la fila " + (key + 1));
+                }
+                montoCredito += Number.parseFloat(tr.querySelector("input[type='number']").value);
+            });
+            if(montoCredito.toFixed(2) !== totalFacturar){
+                return alertify.error("el monto acumulado de los creditos que actualmente es "+ gen.resetearMoneda(montoCredito.toFixed(2)) + " debe ser igual a " + gen.resetearMoneda(totalFacturar));
+            }
+        }
+        alertify.confirm("Alerta","Estas apunto de facturar <strong>" + gen.resetearMoneda(totalFacturar) + "</strong><br>¿Deseas continuar de todas formas?",async ()=>{
+            try {
+                gen.banerLoader.hidden = false;
+                let datos = new FormData(formFacturar);
+                datos.append("kardex",idKardex);
+                const response = await gen.funcfetch("facturar",datos,"POST");
+                if (response.session) {
+                    return alertify.alert([...gen.alertaSesion], () => { window.location.reload() });
+                }
+                if (response.error) {
+                    return alertify.alert("Alerta",response.error);
+                }
+                $('#generarFactura').modal("hide");
+                tablaKardexDatatable.draw();
+                return alertify.alert("Mensaje",response.success);
+            } catch (error) {
+                alertify.alert("Alerta","Ocurrió un error al generar la factura, por favor intentelo nuevamente más tarde");
+                console.error(error);
+            }finally{
+                gen.banerLoader.hidden = true;
+            }
+        },()=>{})
+    });
+    for (const tipoFactura of document.querySelectorAll(".cambio-tipo-factura")) {
+        tipoFactura.addEventListener("change",function(e){
+            const bloqueCredito = document.querySelector("#generarFactura #bloqueCredito");
+            if(e.target.value === "Contado"){
+                $tablaCreditosFactura.innerHTML = $sinCuotas;
+                bloqueCredito.hidden = true;
+                numeroCuotasFactura = 0;
+                return false;
+            }
+            bloqueCredito.hidden = false;
+        })
+    }
+    $tablaCreditosFactura.addEventListener("click",function(e){
+        if(e.target.classList.contains("btn-danger")){
+            numeroCuotasFactura--;
+            e.target.parentElement.parentElement.remove();
+            Array.from($tablaCreditosFactura.children).forEach((tr,key) => {
+                tr.children[0].textContent = key + 1;
+            });
+            alertify.success("cuota eliminada correctamente");
+        }
     })
-
+    function agregarCuotaFactura() {
+        if(numeroCuotasFactura <= 0){
+            $tablaCreditosFactura.innerHTML = "";
+        }
+        numeroCuotasFactura++;
+        const $fechaLimite = document.createElement("input");
+        const $monto = document.createElement("input");
+        const $btnEliminar = document.createElement("button");
+        const $tr = document.createElement("tr");
+        $fechaLimite.type = "date";
+        $monto.type = "number";
+        $fechaLimite.setAttribute("required","required");
+        $monto.setAttribute("required","required");
+        $fechaLimite.name = "cuotasFacturaFecha[]";
+        $monto.name = "cuotasFacturaMonto[]";
+        $fechaLimite.className = 'form-control form-control-sm';
+        $monto.className = 'form-control form-control-sm';
+        $fechaLimite.min = $txtFechaEmision.value;
+        $monto.step = "0.01";
+        $monto.min = "0";
+        $btnEliminar.className = 'btn btn-sm btn-danger';
+        $btnEliminar.innerHTML = `<i class="fas fa-trash-alt"></i>`
+        $tr.innerHTML = `
+        <td>${numeroCuotasFactura}</td>
+        <td>${$fechaLimite.outerHTML}</td>
+        <td>${$monto.outerHTML}</td>
+        <td class="text-center">${$btnEliminar.outerHTML}</td>
+        `
+        return $tr;
+    }
+    $('#generarFactura').on("hidden.bs.modal",function(e){
+        formFacturar.reset();
+        numeroCuotasFactura = 0;
+        validoFacturar = true;
+        idKardex = null;
+        $tablaCreditosFactura.innerHTML = $sinCuotas;
+    });
+    document.querySelector("#generarFactura #btnAgregarCuotaFactura").addEventListener("click",()=>{
+        $tablaCreditosFactura.append(agregarCuotaFactura());
+    })
     const frmTasas = document.querySelector("#formTasasKardex");
     $('#idCliente').on("select2:select",function(e){
         document.querySelector("#idModaltasa").value = "";

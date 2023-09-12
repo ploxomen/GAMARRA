@@ -3,12 +3,14 @@
 use App\Http\Controllers\Aduaneros;
 use App\Http\Controllers\Familia;
 use App\Http\Controllers\Clientes;
+use App\Http\Controllers\FacturacionElectronica;
 use App\Http\Controllers\Kardex;
 use App\Http\Controllers\KardexProveedores;
 use App\Http\Controllers\MisProductos;
 use App\Http\Controllers\Modulos;
 use App\Http\Controllers\Proveedores;
 use App\Http\Controllers\Ranking;
+use App\Http\Controllers\RapiFac;
 use App\Http\Controllers\Rol;
 use App\Http\Controllers\Usuario;
 use Illuminate\Support\Facades\File;
@@ -76,6 +78,15 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
             Route::post('actualizar', [KardexProveedores::class, 'update']);
         });
     });
+    Route::prefix('facturacion-electronica')->group(function () {
+        Route::get('facturar', [FacturacionElectronica::class, 'indexFactura'])->name('facturacion.facturar.index');
+        Route::post('facturar/listar', [FacturacionElectronica::class, 'misFacturaciones']);
+        Route::post('facturar/eliminar', [FacturacionElectronica::class, 'eliminarFacturaElectronica']);
+        Route::prefix('rapifac')->group(function () {
+            Route::get('token', [RapiFac::class, 'obtenerToken']);
+        });
+
+    });
     Route::prefix('almacen')->group(function () {
         Route::prefix('familias')->group(function () {
             Route::get('/', [Familia::class, 'index'])->name('admin.familia.index');
@@ -114,6 +125,8 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
             Route::get('/', [Kardex::class, 'index'])->name('admin.kardex.index');
             Route::put('eliminar/{id}', [Kardex::class, 'eliminarKardex']);
             Route::get('todos', [Kardex::class, 'misKardexIndex'])->name('admin.miskardex.index');
+            Route::get('facturar/{kardex}', [Kardex::class, 'informacionFacturar']);
+            Route::post('facturar', [Kardex::class, 'facturarKardex']);
             Route::post('actualizar/fardos', [Kardex::class, 'actualizarValoresKardex']);
             Route::post('actualizar/tasa', [Kardex::class, 'actualizarTasas']);
             Route::post('actualizar/aduanero', [Kardex::class, 'actualizarAduanero']);

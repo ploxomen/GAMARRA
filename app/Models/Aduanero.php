@@ -17,4 +17,8 @@ class Aduanero extends Model
         ->join("paises AS p","aduaneros.id_pais","=","p.id");
         return $ordenarNombre ? $aduaneros->orderBy("aduaneros.nombre_completo")->get() : $aduaneros->get();
     }
+    public function kardex()
+    {
+        return $this->hasMany(Kardex::class,'id_aduanero');
+    }
 }
