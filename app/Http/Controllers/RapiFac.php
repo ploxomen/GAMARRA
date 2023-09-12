@@ -13,6 +13,7 @@ class RapiFac extends Controller
     private $urlListaComprobantes = "https://wsventas-exp.rapifac.com/v0/comprobantes";
     private $urlRecuperarComprobante = "https://wsventas-exp.rapifac.com/v0/comprobantes";
     private $urlAnularComprobante = "https://wsventas-exp.rapifac.com/v0/comprobantes/anular?IncluirCDR=1";
+    public $urlPdfComprobantes = "https://wscomprobante-exp.rapifac.com/v0/comprobantes/pdf";
 
     function obtenerToken()  {
         $cliente = new Client();
@@ -60,7 +61,7 @@ class RapiFac extends Controller
                 "ClienteNumeroDocIdentidad" => $datosFactura['ClienteNumeroDocIdentidad'],
                 "ClientePaisDocEmisor" => "US",
                 "ClienteTipoDocIdentidadCodigo" => $datosFactura['ClienteTipoDocIdentidadCodigo'],
-                "CondicionPago" => "Credito",
+                "CondicionPago" => $datosFactura['CondicionPago'],
                 "Correlativo" => 2999,
                 "CorrelativoModificado" => "",
                 "CorreoElectronicoPrincipal" => "jeanpi.jpct@gmail.com",

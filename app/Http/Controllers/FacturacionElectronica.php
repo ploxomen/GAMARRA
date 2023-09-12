@@ -31,13 +31,13 @@ class FacturacionElectronica extends Controller
         $busqueda = $request->has('busqueda') ? $request->busqueda : "";
         $pagina = $request->has('pagina') ? $request->pagina : "1";
         $facturas = $rapifac->listarComprobantes($documento,$desde,$hasta,$busqueda,$pagina);
-
         if($pagina > $facturas->TotalPaginas){
             $pagina = $facturas->TotalPaginas;
         }else if($pagina <= 0){
             $pagina = 1;
         }
-        return view("facturacion.factura",compact("modulos","facturas","documento","desde","hasta","busqueda","pagina"));
+        $urlPdfFactura = $rapifac->urlPdfComprobantes;
+        return view("facturacion.factura",compact("modulos","facturas","urlPdfFactura","documento","desde","hasta","busqueda","pagina"));
     }
     function eliminarFacturaElectronica(Request $request) {
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloFactura);

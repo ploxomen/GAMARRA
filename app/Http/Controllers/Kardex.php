@@ -80,6 +80,7 @@ class Kardex extends Controller
                 $datosFacturar['ListaCuotas'] = $detalleCuotas;
             }
         }
+        
         $generarFactura = $rapifac->facturar($productos,$datosFacturar);
         if(is_null($generarFactura)){
             return response()->json(['error' => 'Error al generar la factura, por favor intentelo nuevamente más tarde']);
