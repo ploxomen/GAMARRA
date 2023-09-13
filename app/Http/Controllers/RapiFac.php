@@ -8,13 +8,26 @@ use Illuminate\Support\Facades\Auth;
 
 class RapiFac extends Controller
 {
-    private $urlAutenticacionPrueba = "https://wsoauth-exp.rapifac.com/oauth2/token";
-    private $urlComprobante = "https://wsventas-exp.rapifac.com/v0/comprobantes?IncluirCDR=1";
-    private $urlListaComprobantes = "https://wsventas-exp.rapifac.com/v0/comprobantes";
-    private $urlRecuperarComprobante = "https://wsventas-exp.rapifac.com/v0/comprobantes";
-    private $urlAnularComprobante = "https://wsventas-exp.rapifac.com/v0/comprobantes/anular?IncluirCDR=1";
-    public $urlPdfComprobantes = "https://wscomprobante-exp.rapifac.com/v0/comprobantes/pdf";
-
+    private $urlRapifacAutenticacion = "https://wsoauth-exp.rapifac.com";
+    private $urlRapifacEmision = "https://wsventas-exp.rapifac.com";
+    private $urlRapifacComprobantes = "https://wscomprobante-exp.rapifac.com";
+    private $urlAutenticacionPrueba;
+    private $urlComprobante;
+    private $urlListaComprobantes;
+    private $urlAnularComprobante;
+    public $urlPdfComprobantes;
+    public function __construct() {
+        if(env('API_RAPIFAC_PRODUCTION') === 'true'){
+            $this->urlRapifacAutenticacion = 'https://wsoauth.rapifac.com';
+            $this->urlRapifacEmision = 'https://wsventas.rapifac.com';
+            $this->urlRapifacComprobantes = 'https://wscomprobante.rapifac.com';
+        }
+        $this->urlAutenticacionPrueba = $this->urlRapifacAutenticacion . '/oauth2/token';
+        $this->urlComprobante = $this->urlRapifacEmision . '/v0/comprobantes?IncluirCDR=1';
+        $this->urlListaComprobantes = $this->urlRapifacEmision . '/v0/comprobantes';
+        $this->urlAnularComprobante = $this->urlRapifacEmision . '/v0/comprobantes/anular?IncluirCDR=1';
+        $this->urlPdfComprobantes = $this->urlRapifacComprobantes . '/v0/comprobantes/pdf';
+    }
     function obtenerToken()  {
         $cliente = new Client();
         $cabeceras = [
@@ -49,6 +62,78 @@ class RapiFac extends Controller
         ]);
         $data = $response->getBody()->getContents();
         return json_decode($data);
+    }
+    function listaDetallesGuiaRemision($detalleKardex){
+        $detalles = [];
+        foreach ($detalleKardex as $key => $kardex) {
+            $detalles[] = [
+                "Cantidad" => $kardex->cantidad,
+                "CantidadReferencial" => $kardex->cantidad,
+                "CantidadUnidadMedida" => 1,
+                "Cargo" => 0,
+                "CargoCargoCodigo" => "",
+                "CargoIndicador" => 0,
+                "CargoItem" => 0,
+                "CargoNeto" => 0,
+                "CargoPorcentaje" => 0,
+                "CargoTotal" => 0,
+                "CodigoCategoria" => 0,
+                "ComprobanteID" => 0,
+                "Control" => 0,
+                "Descripcion" => $kardex->productos->nombreProducto,
+                "Descuento" => 0,
+                "DescuentoBase" => 0,
+                "DescuentoCargo" => 0,
+                "DescuentoCargoCodigo" => "00",
+                "DescuentoCargoGravado" => 0,
+                "DescuentoGlobal" => 0,
+                "DescuentoIndicador" => 0,
+                "DescuentoMonto" => 0,
+                "DescuentoPorcentaje" => 0,
+                "EsAnticipo" => false,
+                "Ganancia" => 0,
+                "ICBPER" => 0,
+                "ICBPERItem" => 0,
+                "ICBPERSubTotal" => 0,
+                "ID" => 0,
+                "IGV" => 0,
+                "IGVNeto" => 0,
+                "ISC" => 0,
+                "ISCMonto" => 0,
+                "ISCNeto" => 0,
+                "ISCPorcentaje" => 0,
+                "ISCUnitario" => 0,
+                "Importado" => false,
+                "ImporteTotal" => 0,
+                "ImporteTotalReferencia" => 1,
+                "Item" => $key + 1,
+                "MontoTributo" => 0,
+                "Observacion" => "",
+                "Peso" => 0,
+                "PesoTotal" => 0,
+                "Peso_BASE" => 0,
+                "PrecioUnitario" => 0,
+                "PrecioUnitarioItem" => 0,
+                "PrecioUnitarioNeto" => 0,
+                "PrecioVenta" => 0,
+                "PrecioVentaCodigo" => "01",
+                "ProductoCodigo" => $kardex->productos->codigo,
+                "ProductoCodigoCliente" => $kardex->productos->codigo,
+                "ProductoCodigoSUNAT" => "",
+                "TipoAfectacionIGVCodigo" => "10",
+                "TipoProductoCodigo" => "1",
+                "TipoSistemaISCCodigo" => "00",
+                "UnidadMedidaCodigo" => $kardex->id_presentacion,
+                "ValorUnitario" => 0,
+                "ValorUnitarioNeto" => 0,
+                "ValorVenta" => 0,
+                "ValorVentaItem" => 0,
+                "ValorVentaItemXML" => 0,
+                "ValorVentaNeto" => 0,
+                "ValorVentaNetoXML" => 0
+            ];
+        }
+        return $detalles;
     }
     function facturar($productos,$datosFactura){
         $detalle = $this->detallesFactura($productos);
@@ -131,6 +216,9 @@ class RapiFac extends Controller
             $parametros['ListaCuotas'] = $datosFactura['ListaCuotas'];
             $parametros['PermitirCuotas'] = count($datosFactura['ListaCuotas']);
         }
+        if(isset($datosFactura['ListaGuias'])){
+            $parametros['ListaGuias'] = $datosFactura['ListaGuias'];
+        }
         try {
             $token = $this->obtenerToken();
             $client = new Client();
@@ -144,19 +232,20 @@ class RapiFac extends Controller
                 'body' => $body
             ]);
             $data = $response->getBody()->getContents();
-            return json_decode($data);
+            $nuevaData = json_decode($data);
+            $nuevaData->MontoTotal = $montoTotal;
+            return $nuevaData;
         } catch (\GuzzleHttp\Exception\RequestException $e) {
             return $e->getMessage();
         }
     }
-    
     function detallesFactura($detalleKardex) {
         $detalles = [];
         $total = 0;
         foreach ($detalleKardex as $key => $kardex) {
-            $importe = $kardex->cantidad * $kardex->precio;
+            $importe = $kardex->totalCantidades * $kardex->precio;
             $detalles[] = [
-                "Cantidad"=> $kardex->cantidad,
+                "Cantidad"=> $kardex->totalCantidades,
                 "CantidadUnidadMedida"=> 1,
                 "Cargo"=> 0,
                 "CargoCargoCodigo"=> 0,
@@ -257,7 +346,7 @@ class RapiFac extends Controller
             'Usuario' =>  env('API_RAPIFAC_USER'),
         ];
         $body = json_encode($parametros);
-        $url = $this->urlRecuperarComprobante . "?Id=" . $idDocumento . "&TipoDocumento=" . $tipoDocumento . "&Serie=" . $serie ."&Correlativo=" . $correlativo .'&Sucursal=' . env('API_RAPIFAC_SUCURSAL_ID') . '&Usuario=' . env('API_RAPIFAC_USER') . '&Detalles=1&Adicionales=1&Movimientos=0';
+        $url = $this->urlListaComprobantes . "?Id=" . $idDocumento . "&TipoDocumento=" . $tipoDocumento . "&Serie=" . $serie ."&Correlativo=" . $correlativo .'&Sucursal=' . env('API_RAPIFAC_SUCURSAL_ID') . '&Usuario=' . env('API_RAPIFAC_USER') . '&Detalles=1&Adicionales=1&Movimientos=0';
         $response = $client->get($url,[
             'headers' => $headers,
         ]);
@@ -292,6 +381,139 @@ class RapiFac extends Controller
         } catch (\Throwable $th) {
             return ['error' => json_decode(explode("\n",$th->getMessage())[1])];
         }
-        
+    }
+    function generarGuiaRemision($datosFactura,$productos){
+        $detallesFacturacion = $this->listaDetallesGuiaRemision($productos);
+        $parametros = [
+            "AgentePercepcion" => false,
+            "AlojamientoNombreRazonSocial" => "",
+            "AlojamientoNumeroDocIdentidad" => "",
+            "AlojamientoPaisDocEmisor" =>  "AF",
+            "AlojamientoTipoDocIdentidadCodigo" => "1",
+            "BienServicioCodigo" => "027",
+            "Bultos" => count($detallesFacturacion),
+            "BultosCelular" => count($detallesFacturacion),
+            "ClienteDireccion" => "-",
+            "ClienteNombreRazonSocial" => $datosFactura['ClienteNombreRazonSocial'],
+            "ClienteNumeroDocIdentidad" => $datosFactura['ClienteNumeroDocIdentidad'],
+            "ClientePaisDocEmisor" => "PE",
+            "ClienteTelefono" => "",
+            "ClienteTipoDocIdentidadCodigo" => "6",
+            "ClienteTipoSunat" => 1,
+            "ClienteUbigeo" => "",
+            "ConductorLicencia" => $datosFactura['ConductorLicencia'],
+            "ConductorLicencia2" => $datosFactura['ConductorLicencia2'],
+            "ConductorNumeroDocIdentidad" => $datosFactura['ConductorNumeroDocIdentidad'],
+            "ConductorTipoDocIdentidadCodigo" => $datosFactura['ConductorTipoDocIdentidadCodigo'],
+            "Correlativo" => 144,
+            "CorreoElectronicoPrincipal" => "no-send@rapifac.com",
+            "CreditoTotal" => 0,
+            "DUADAMCodigo" => "",
+            "DescuentoGlobalMonto" => 0,
+            "DescuentoNGMonto" => 0,
+            "DiasPermanencia" => 0,
+            "DireccionLlegada" => $datosFactura['DireccionLlegada'],
+            "DireccionPartida" => $datosFactura['DireccionPartida'],
+            "DocAdicionalCodigo" => 1,
+            "DocAdicionalDetalle" => "",
+            "ExoneradaXML" => 0,
+            "Exportacion" => 0,
+            "ExportacionXML" => 0,
+            "FechaConsumo" => $datosFactura['FechaEmision'],
+            "FechaEmision" => $datosFactura['FechaEmision'],
+            "FechaIngresoEstablecimiento" => $datosFactura['FechaEmision'],
+            "FechaIngresoPais" => $datosFactura['FechaEmision'],
+            "FechaSalidaEstablecimiento" => "",
+            "FechaTraslado" => $datosFactura['FechaTraslado'],
+            "FormatoPDF" => 0,
+            "GratuitoGravado" => 0,
+            "Gravado" => 0,
+            "GuiaNumero" => "",
+            "ICBPER" => 0,
+            "ID" => 0,
+            "IGV" => 0,
+            "IGVPorcentaje" => 18,
+            "ISC" => 0,
+            "ISCBase" => 0,
+            "IdRepositorio" => 0,
+            "ImporteTotalTexto" => "CERO CON 00/100 DOLARES",
+            "ImpuestoTotal" => 0,
+            "ImpuestoVarios" => 0,
+            "Inafecto" => 0,
+            "InafectoXML" => 0,
+            "ListaDetalles" => $detallesFacturacion,
+            "ListaDocumentosRelacionados" => isset($datosFactura['ListaDocumentosRelacionados']) ? $datosFactura['ListaDocumentosRelacionados'] : [],
+            "ListaMovimientos" => [],
+            "ModalidadTrasladoCodigo" => "01",
+            "MonedaCodigo" => "USD",
+            "MontoRetencion" => 0,
+            "MotivoTrasladoCodigo" => "01",
+            "MotivoTrasladoDescripcion" => "VENTA",
+            "NOMBRE_UBIGEOLLEGADA" => $datosFactura['NOMBRE_UBIGEOLLEGADA'],
+            "NOMBRE_UBIGEOPARTIDA" => $datosFactura['NOMBRE_UBIGEOPARTIDA'],
+            "Observacion" => $datosFactura['Observacion'],
+            "PaisResidencia" => "AF",
+            "PendientePago" => "0.00",
+            "PercepcionFactor" => 0,
+            "PercepcionRegimen" => "",
+            "PercepcionTotal" => 0,
+            "PermitirCuotas" => 1,
+            "Peso" => 0,
+            "PesoTotal" => $datosFactura['PesoTotal'],
+            "PesoTotalCelular" => $datosFactura['PesoTotal'],
+            "RemitenteNombreRazonSocial" => "",
+            "RemitenteNumeroDocIdentidad" => "",
+            "RemitenteTipoDocIdentidadCodigo" => "",
+            "RetencionPorcentaje" => 0,
+            "Serie" => "T002",
+            "SerieModificado" => "",
+            "SituacionPagoCodigo" => 2,
+            "Sucursal" => env('API_RAPIFAC_SUCURSAL_ID'),
+            "TipoCambio" => "3.919",
+            "TipoDocumentoCodigo" => "09",
+            "TipoGuiaRemisionCodigo" => "",
+            "TipoOperacionCodigo" => "0101",
+            "TotalImporteVenta" => 0,
+            "TotalImporteVentaReferencia" => 0,
+            "TotalOtrosCargos" => 0,
+            "TotalPago" => 0,
+            "TotalPrecioVenta" => 0,
+            "TotalValorVenta" => 0,
+            "TransportistaNombreRazonSocial" => $datosFactura['TransportistaNombreRazonSocial'],
+            "TransportistaNombreRazonSocial2" => "",
+            "TransportistaNumeroDocIdentidad" => $datosFactura['TransportistaNumeroDocIdentidad'],
+            "TransportistaNumeroDocIdentidad2" => "",
+            "TransportistaTipoDocIdentidadCodigo" => "6",
+            "TransportistaTipoDocIdentidadCodigo2" => "",
+            "Ubigeo" => "",
+            "UbigeoLlegada" => "",
+            "UbigeoPartida" => "",
+            "Usuario" => "13131313",
+            "VehiculoAutorizacion" => "",
+            "VehiculoAutorizacion2" => "",
+            "VehiculoCertificado" => $datosFactura['VehiculoCertificado'],
+            "VehiculoCertificado2" => $datosFactura['VehiculoCertificado2'],
+            "VehiculoConfiguracion" => "",
+            "VehiculoConfiguracion2" => "",
+            "VehiculoPlaca" => $datosFactura['VehiculoPlaca'],
+            "VehiculoPlaca2" => $datosFactura['VehiculoPlaca2'],
+            "VehiculoRegistrado" => "",
+            "Vendedor" => env('API_RAPIFAC_USER'),
+            "VendedorNombre" => $datosFactura['VendedorNombre']
+        ];
+        $token = $this->obtenerToken();
+        $client = new Client();
+        $headers = [
+            'Authorization' => 'bearer ' . $token->access_token,
+            'Content-Type' => 'application/json'
+        ];
+        $body = json_encode($parametros);
+        // dd($body);
+        $response = $client->post($this->urlComprobante,[
+            'headers' => $headers,
+            'body' => $body
+        ]);
+        $data = $response->getBody()->getContents();
+        return json_decode($data);
     }
 }

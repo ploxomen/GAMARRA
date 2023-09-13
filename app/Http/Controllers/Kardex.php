@@ -6,7 +6,6 @@ use App\Exports\KardexExport;
 use App\Exports\PreFacturacionCliente;
 use App\Models\Aduanero;
 use App\Models\Clientes;
-use App\Models\Factura;
 use App\Models\Kardex as ModelsKardex;
 use App\Models\KardexCliente;
 use App\Models\KardexFardo;
@@ -19,6 +18,7 @@ use App\Models\TipoDocumento;
 use Barryvdh\DomPDF\Facade\Pdf;
 use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
@@ -45,17 +45,96 @@ class Kardex extends Controller
         $presentaciones = Presentacion::orderBy("presentacion")->get();
         return view("kardex.generar",compact("modulos","clientes","productos","proveedores","presentaciones"));
     }
+    public function informacionGuiaRemitente(ModelsKardex $kardex) {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
+        if(isset($verif['session'])){
+            return response()->json(['session' => true]);
+        }
+        $detallesProducto = KardexFardoDetalle::obtenerProductosPreFactura($kardex->id);
+        foreach ($detallesProducto as $detalleProducto) {
+            $detalleProducto->nombreProducto = $detalleProducto->productos->nombreProducto;
+        }
+        return response()->json(['informacionFactura' => ['listaProductos' => $detallesProducto->setHidden(['id','id_fardo','estado','id_producto','id_proveedor','productos','cantidad']), 'pesoBultoTotal' => $kardex->kilaje, 'observaciones' => 'VAN CONTENIDO ' . KardexFardo::where('id_kardex',$kardex->id)->count() .' FARDOS DE TEXTILES', 'facturaSunat' => $kardex->factura_sunat]]);
+    }
+    public function facturarGuiaRemision(Request $request) {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
+        if(isset($verif['session'])){
+            return response()->json(['session' => true]);
+        }
+        $expresionRegular = "/^[A-Za-z]+[0-9]+-[0-9]+$/";
+        if($request->has("facturaSunat") && !empty($request->facturaSunat) && !preg_match($expresionRegular, $request->facturaSunat)){
+            return response()->json(['error' => 'La factura no tiene el formato solicitado, por favor establesca el formato correcto']);
+        }
+        $productos = KardexFardoDetalle::obtenerProductosPreFactura($request->kardex);
+        $rapifac = new RapiFac();
+        $datosFacturar = [
+            'ConductorTipoDocIdentidadCodigo' => $request->tipoDocumentoConductorPrincipal,
+            'VendedorNombre' => Auth::user()->nombres,
+            'ClienteNumeroDocIdentidad' => $request->numeroDocumentoDestinatario,
+            'FechaEmision' => date('d/m/Y',strtotime($request->fechaEmision)),
+            'TransportistaNumeroDocIdentidad' => $request->numeroDocumentoTransportista,
+            'ConductorNumeroDocIdentidad' => $request->numeroDocumentoConductorPrincipal,
+            'TransportistaTipoDocIdentidadCodigo2' => "",
+            'TransportistaNumeroDocIdentidad2' => "",
+            'NOMBRE_UBIGEOLLEGADA' => 'LIMA - CALLAO - CALLAO',
+            'NOMBRE_UBIGEOPARTIDA' => 'LIMA - LIMA - LA VICTORIA',
+            'BANDERA_TRANSPORTISTA' => $request->nombreTransportista,
+            'ClienteNombreRazonSocial' => $request->nombreDestinatario,
+            'DireccionPartida' => $request->puntoPartida,
+            'DireccionLlegada' => $request->puntoLlegada,
+            'PesoTotal' => $request->pesoBultoTotal,
+            'FechaTraslado' => date('d/m/Y',strtotime($request->fechaTraslado)),
+            'ConductorLicencia' => $request->numeroLicenciaConductorPrincipal,
+            'ConductorLicencia2' => empty($request->numeroLicenciaConductorSecundario) ? "" : $request->numeroLicenciaConductorSecundario,
+            'VehiculoPlaca' => $request->numeroPlacaPrincipal,
+            'VehiculoPlaca2' => empty($request->numeroPlacaSecundario) ? "" : $request->numeroPlacaSecundario,
+            'TransportistaNombreRazonSocial' => $request->nombreTransportista,
+            'VehiculoCertificado' => $request->numeroTuceOChvPrincipal,
+            'VehiculoCertificado2' => empty($request->numeroTuceOChvSecundario) ? "" : $request->numeroTuceOChvSecundario,
+            'ConductorTipoDocIdentidadCodigo2' => empty($request->tipoDocumentoConductorSecundario) ? "" : $request->tipoDocumentoConductorSecundario,
+            'ConductorNumeroDocIdentidad2' => empty($request->numeroDocumentoConductorSecundario) ? "" : $request->numeroDocumentoConductorSecundario,
+            'Observacion' =>  empty($request->observaciones) ? "" : $request->observaciones
+        ];
+        $kardex = ModelsKardex::find($request->kardex);
+        if($request->has("facturaSunat") && !empty($request->facturaSunat)){
+            if(empty($kardex->factura_total_sunat)){
+                return response()->json(['error' => 'La factura ' . $request->facturaSunat . ' ingresada, no se encuentra registrada en el sistema, por favor establesca otro número de factura']);
+            }
+            list($serieRemitente,$correlativoRemitente) = explode('-',$request->facturaSunat);
+            $datosFacturar['ListaDocumentosRelacionados'] = [
+                [
+                    'TipoDocumentoCodigo' => "01",
+                    'Moneda' => 'USD',
+                    'Serie' => $serieRemitente,
+                    'Correlativo' => $correlativoRemitente,
+                    'Importe' => $kardex->factura_total_sunat,
+                    'Baja' => 0
+                ]
+            ];
+        }
+        $generarGuiaRemision = $rapifac->generarGuiaRemision($datosFacturar,$productos);
+        // dd($generarGuiaRemision);
+        if(isset($generarGuiaRemision->xml_pdf) && isset($generarGuiaRemision->cdr)){
+            list($numero,$serie,$correlativo) = explode('-',$generarGuiaRemision->xml_pdf->Mensaje);
+            $kardex->update(['estado' => 4,'guia_remision_sunat' => $serie . '-'.$correlativo]);
+            return response()->json(['success' => $generarGuiaRemision->cdr->Mensaje, 'urlPdf' => $rapifac->urlPdfComprobantes .'?key=' . $generarGuiaRemision->xml_pdf->IDRepositorio]);
+        }
+    }
     public function facturarKardex(Request $request) {
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
         if(isset($verif['session'])){
             return response()->json(['session' => true]);
+        }
+        $expresionRegular = "/^[A-Za-z]+[0-9]+-[0-9]+$/";
+        if($request->has("guiaRemision") && !empty($request->guiaRemision) && !preg_match($expresionRegular, $request->guiaRemision)){
+            return response()->json(['error' => 'La guía de remision no tiene el formato solicitado, por favor establesca el formato correcto']);
         }
         $productos = KardexFardoDetalle::obtenerProductosPreFactura($request->kardex);
         $rapifac = new RapiFac();
         $fechaEmison = date('d/m/Y',strtotime($request->fechaEmision));
         $datosFacturar = [
             'ClienteNombreRazonSocial' => $request->nombreAgente,
-            'ClienteDireccion' => $request->direccionAgente,
+            'ClienteDireccion' => empty($request->direccionAgente) ? "" : $request->direccionAgente ,
             'ClienteNumeroDocIdentidad' => $request->numeroDocumento,
             'ClienteTipoDocIdentidadCodigo' => $request->agenteTipoDocumento,
             'FechaEmision' => $fechaEmison,
@@ -63,6 +142,17 @@ class Kardex extends Controller
             'Observacion' => empty($request->observaciones) ? "" : $request->observaciones,
             'CreditoTotal' => false
         ];
+        if($request->has("guiaRemision") && !empty($request->guiaRemision)){
+            list($serieRemitente,$correlativoRemitente) = explode('-',$request->guiaRemision);
+            $datosFacturar['ListaGuias'] = [
+                [
+                    'Serie' => $serieRemitente,
+                    'Correlativo' => $correlativoRemitente,
+                    'TipoGuia' => 0,
+                    'SerieCorrelativo' => $request->guiaRemision
+                ]
+            ];
+        }
         if($request->tipoFactura == 'Credito'){
             $datosFacturar['CreditoTotal'] = true;
             if($request->has('cuotasFacturaFecha') && $request->has('cuotasFacturaMonto')){
@@ -87,29 +177,30 @@ class Kardex extends Controller
         }
         if(isset($generarFactura->xml_pdf) && isset($generarFactura->cdr)){
             $kardex = ModelsKardex::find($request->kardex);
-            Factura::create([
-                'xml_pdf_numero_documento' => $generarFactura->xml_pdf->Mensaje,
-                'fecha_emision' => $request->fechaEmision,
-                'id_kardex' => $request->kardex,
-                'tipo_documento_destinatario' => $request->agenteTipoDocumento,
-                'numero_documento_destinatario' => $request->numeroDocumento,
-                'nombre_completo_destinatario' => $request->nombreAgente,
-                'xml_pdf_IDComprobante' => $generarFactura->xml_pdf->IDComprobante,
-                'observaciones' => $request->observaciones,
-                'xml_pdf_Codigo' => $generarFactura->xml_pdf->Codigo,
-                'xml_pdf_IDRepositorio' => $generarFactura->xml_pdf->IDRepositorio,
-                'xml_pdf_Firma' =>  $generarFactura->xml_pdf->Firma,
-                'cdr_IDComprobante' => $generarFactura->cdr->IDComprobante,
-                'cdr_Codigo' => $generarFactura->cdr->Codigo,
-                'cdr_IDRepositorio' => $generarFactura->cdr->IDRepositorio,
-                'cdr_firma' => $generarFactura->cdr->Firma,
-                'tipo_factura' => $request->tipoFactura,
-                'tipo_moneda' => 'USD',
-                'monto_total' => $kardex->importe,
-                'estado' => 1
-            ]);
-            $kardex->update(['estado' => 3]);
-            return response()->json(['success' => $generarFactura->cdr->Mensaje]);
+            // Factura::create([
+            //     'xml_pdf_numero_documento' => $generarFactura->xml_pdf->Mensaje,
+            //     'fecha_emision' => $request->fechaEmision,
+            //     'id_kardex' => $request->kardex,
+            //     'tipo_documento_destinatario' => $request->agenteTipoDocumento,
+            //     'numero_documento_destinatario' => $request->numeroDocumento,
+            //     'nombre_completo_destinatario' => $request->nombreAgente,
+            //     'xml_pdf_IDComprobante' => $generarFactura->xml_pdf->IDComprobante,
+            //     'observaciones' => $request->observaciones,
+            //     'xml_pdf_Codigo' => $generarFactura->xml_pdf->Codigo,
+            //     'xml_pdf_IDRepositorio' => $generarFactura->xml_pdf->IDRepositorio,
+            //     'xml_pdf_Firma' =>  $generarFactura->xml_pdf->Firma,
+            //     'cdr_IDComprobante' => $generarFactura->cdr->IDComprobante,
+            //     'cdr_Codigo' => $generarFactura->cdr->Codigo,
+            //     'cdr_IDRepositorio' => $generarFactura->cdr->IDRepositorio,
+            //     'cdr_firma' => $generarFactura->cdr->Firma,
+            //     'tipo_factura' => $request->tipoFactura,
+            //     'tipo_moneda' => 'USD',
+            //     'monto_total' => $kardex->importe,
+            //     'estado' => 1
+            // ]);
+            list($numero,$serie,$correlativo) = explode('-',$generarFactura->xml_pdf->Mensaje);
+            $kardex->update(['estado' => 3,'factura_sunat' => $serie . '-'.$correlativo, 'factura_total_sunat' => $generarFactura->MontoTotal]);
+            return response()->json(['success' => $generarFactura->cdr->Mensaje, 'urlPdf' => $rapifac->urlPdfComprobantes .'?key=' . $generarFactura->xml_pdf->IDRepositorio]);
         }
     }
     public function informacionFacturar(ModelsKardex $kardex) {
@@ -122,7 +213,7 @@ class Kardex extends Controller
             $detalleProducto->nombreProducto = $detalleProducto->productos->nombreProducto;
         }
         $rapifac = new RapiFac();
-        $kardex->setHidden(['nroFardoActivo','aduanero','id_aduanero','tasa_extranjera','kilaje','estado','fechaActualizada','fechaCreada']);
+        $kardex->setHidden(['nroFardoActivo','aduanero','id_aduanero','tasa_extranjera','kilaje','estado','fechaActualizada','fechaCreada','factura_sunat','factura_total_sunat']);
         $kardex->agente = $kardex->aduanero->nombre_completo;
         $kardex->agenteTipoDocumento = $kardex->aduanero->tipo_documento;
         $kardex->agenteNumeroDocumento = $kardex->aduanero->nro_documento;

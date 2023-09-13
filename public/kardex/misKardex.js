@@ -32,6 +32,12 @@ function loadPage() {
             }
         },
         {
+            data : 'factura_sunat'
+        },
+        {
+            data : 'guia_remision_sunat'
+        },
+        {
             data : 'estado',
             render : function(data){
                 let estado = "";
@@ -40,10 +46,13 @@ function loadPage() {
                         estado = '<span class="badge badge-danger">En curso</span>';
                     break;
                     case 2:
-                        estado = '<span class="badge badge-success">Generado</span>';
+                        estado = '<span class="badge badge-info">Generado</span>';
                     break;
                     case 3:
-                        estado = '<span class="badge badge-info">Facturado</span>';
+                        estado = '<span class="badge badge-success">Facturado</span>';
+                    break;
+                    case 4:
+                        estado = '<span class="badge badge-primary">Facturado con Guía R.</span>';
                     break;
                 }
                 return estado;
@@ -52,46 +61,48 @@ function loadPage() {
         {
             data: 'id',
             render : function(data,type,row){
-                const btnFactura = row.estado === 2 ? `
-                <button class="btn btn-sm facturar-cliente btn-outline-info p-1" data-kardex="${data}">
-                    <small>
-                        <i class="fas fa-money-check-alt"></i>
-                        Facturar
-                    </small>
-                </button>` 
+                const btnFactura = row.estado >= 2 ? `
+                <a class="dropdown-item facturar-cliente" href="javascript:void(0)" data-kardex="${data}">
+                    <i class="fas fa-money-check-alt"></i>
+                    <span>Generar Factura</span>
+                </a>` 
+                : "";
+                const btnGuiaRemision = row.estado >= 2 ? `
+                <a class="dropdown-item guia-remision-cliente" href="javascript:void(0)" data-kardex="${data}">
+                    <i class="fas fa-car"></i>
+                    <span>Generar Guía Remision</span>
+                </a>` 
                 : "";
                 return `<div class="d-flex justify-content-center" style="gap:5px;">
-                <button class="btn btn-sm btn-outline-info editar-kardex p-1" data-kardex="${data}" data-tasa="${row.tasa_extranjera}" data-aduanero="${row.id_aduanero}">
-                    <small>
-                        <i class="fas fa-pencil-alt"></i>
-                        Editar
-                    </small>
+                <button class="btn btn-sm reporte-clientes btn-danger p-1" data-kardex="${data}">
+                    <i class="fas fa-eye"></i>
+                    <span>Clientes</span>
                 </button>
-                <button class="btn btn-sm reporte-clientes btn-outline-danger p-1" data-kardex="${data}">
-                    <small>
-                        <i class="fas fa-eye"></i>
-                        Clientes
-                    </small>
-                </button>
-                <a href="reportes/facturacion/${data}" target="_blank" class="btn btn-sm btn-outline-success p-1">
-                    <small>
-                        <i class="far fa-file-excel"></i>                        
-                        Pre factura
-                    </small>
+                <a href="reportes/packing/${data}" target="_blank" class="btn btn-sm btn-success p-1">
+                    <i class="far fa-file-excel"></i>                        
+                    <span>Packing List</span>
                 </a>
-                ${btnFactura}
-                <a href="reportes/packing/${data}" target="_blank" class="btn btn-sm btn-outline-success p-1">
-                    <small>
-                        <i class="far fa-file-excel"></i>                        
-                        Packing List
-                    </small>
-                </a>
-                <button class="btn btn-sm eliminar-kardex btn-outline-danger p-1" data-kardex="${data}">
-                    <small>
-                        <i class="fas fa-trash"></i>
-                        Eliminar
-                    </small>
-                </button>
+                <div class="dropdown lista-noicons">
+                    <a class="btn btn-light btn-sm dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item editar-kardex" href="javascript:void(0)" data-kardex="${data}" data-tasa="${row.tasa_extranjera}" data-aduanero="${row.id_aduanero}">
+                            <i class="fas fa-pencil-alt"></i>
+                            <span>Editar Kardex</span>
+                        </a>
+                        <a href="reportes/facturacion/${data}" target="_blank" class="dropdown-item">
+                            <i class="far fa-file-excel"></i>
+                            <span>Pre Factura</span>
+                        </a>
+                        ${btnFactura}
+                        ${btnGuiaRemision}
+                        <a class="dropdown-item eliminar-kardex" href="javascript:void(0)" data-kardex="${data}">
+                            <i class="fas fa-trash"></i>
+                            <span>Eliminar Kardex</span>
+                        </a>
+                    </div>
+                </div>
                 </div>`
             }
         },
@@ -105,6 +116,10 @@ function loadPage() {
     const txtCantidad = document.querySelector("#idCantidad");
     const txtPresentacion = document.querySelector("#idPresentacion");
     const txtFardoActivo = document.querySelector("#txtFardoActivo");
+    const tablaDetalleGuiaRemitente = document.querySelector("#generarGuiaRemision #tablaProductos");
+    const txtTotalCantidadGuiaRemitente = document.querySelector("#generarGuiaRemision #modalCantidadTotal");
+    const bloqueCredito = document.querySelector("#generarFactura #bloqueCredito");
+
     const frmKardex = document.querySelector("#frmDatosKardex");
     const txtTasaExtranjera = document.querySelector("#idModaltasa_extranjera");
     let idKardex = null;
@@ -154,7 +169,6 @@ function loadPage() {
                     alertify.error("no se pudo eliminar el kardex, por favor intentelo nuevamente dentro de unos minutos");
                 }
             },()=>{})
-            
         }
         if(e.target.classList.contains("facturar-cliente")){
             try {
@@ -210,6 +224,49 @@ function loadPage() {
                 alertify.error("no se pudo eliminar el kardex, por favor intentelo nuevamente dentro de unos minutos");
             }
         }
+        if(e.target.classList.contains("guia-remision-cliente")){
+            try {
+                const response = await gen.funcfetch("facturar/guia-remision/" + e.target.dataset.kardex,null,"GET");
+                if (response.session) {
+                    return alertify.alert([...gen.alertaSesion], () => { window.location.reload() });
+                }
+                if (response.informacionFactura) {
+                    idKardex = e.target.dataset.kardex;
+                    for (const key in response.informacionFactura) {
+                        if (Object.hasOwnProperty.call(response.informacionFactura, key)) {
+                            const valor = response.informacionFactura[key];
+                            const dom = document.querySelector("#generarGuiaRemision #modal" + key);
+                            if(key == "listaProductos"){
+                                let template = "";
+                                let cantidadTotal = 0;
+                                valor.forEach((producto,k) => {
+                                    template += `
+                                    <tr>
+                                        <td>${k + 1}</td>
+                                        <td>${producto.nombreProducto}</td>
+                                        <td>${producto.id_presentacion}</td>
+                                        <td>${producto.totalCantidades}</td>
+                                    <tr>
+                                    `
+                                    cantidadTotal += parseFloat(producto.totalCantidades);
+                                });
+                                tablaDetalleGuiaRemitente.innerHTML = template;
+                                txtTotalCantidadGuiaRemitente.textContent = cantidadTotal;
+                                continue;
+                            }
+                            if(!dom){
+                                continue;
+                            }
+                            dom.value = valor;
+                        }
+                    }
+                    $("#generarGuiaRemision").modal("show");
+                }
+            } catch (error) {
+                console.error(error);
+                alertify.error("no se pudo eliminar el kardex, por favor intentelo nuevamente dentro de unos minutos");
+            }
+        }
         if(e.target.classList.contains("editar-kardex")){
             idKardex = e.target.dataset.kardex;
             $('#idModaladuanero').val(e.target.dataset.aduanero).trigger("change");
@@ -227,7 +284,34 @@ function loadPage() {
     `
     let numeroCuotasFactura = 0;
     document.querySelector("#generarFactura #btnFacturar").onclick = e => document.querySelector("#generarFactura #inputFacturar").click();
+    document.querySelector("#generarGuiaRemision #btnFacturar").onclick = e => document.querySelector("#generarGuiaRemision #inputFacturar").click();
     const formFacturar = document.querySelector("#generarFactura #formFacturar");
+    const formGuiaRemitente = document.querySelector("#generarGuiaRemision #formGuiaRemitente");
+    formGuiaRemitente.addEventListener("submit",async function(e){
+        e.preventDefault();
+        alertify.confirm("Alerta","Estas apunto de generar una Guía de Remision <strong><br>¿Deseas continuar de todas formas?",async ()=>{
+            try {
+                gen.banerLoader.hidden = false;
+                let datos = new FormData(formGuiaRemitente);
+                datos.append("kardex",idKardex);
+                const response = await gen.funcfetch("facturar/guia-remision",datos,"POST");
+                if (response.session) {
+                    return alertify.alert([...gen.alertaSesion], () => { window.location.reload() });
+                }
+                if (response.error) {
+                    return alertify.alert("Alerta",response.error);
+                }
+                $('#generarGuiaRemision').modal("hide");
+                tablaKardexDatatable.draw();
+                return alertify.alert("Mensaje",response.success);
+            } catch (error) {
+                alertify.alert("Alerta","Ocurrió un error al generar la factura, por favor intentelo nuevamente más tarde");
+                console.error(error);
+            }finally{
+                gen.banerLoader.hidden = true;
+            }
+        },()=>{})
+    });
     formFacturar.addEventListener("submit",async function(e){
         e.preventDefault();
         if(!validoFacturar){
@@ -270,6 +354,14 @@ function loadPage() {
                 }
                 $('#generarFactura').modal("hide");
                 tablaKardexDatatable.draw();
+                if(response.urlPdf){
+                    const pdf = document.createElement("a");
+                    pdf.href = response.urlPdf;
+                    pdf.target = "_blank";
+                    document.body.append(pdf);
+                    pdf.click();
+                    document.body.removeChild(pdf);
+                }
                 return alertify.alert("Mensaje",response.success);
             } catch (error) {
                 alertify.alert("Alerta","Ocurrió un error al generar la factura, por favor intentelo nuevamente más tarde");
@@ -281,7 +373,6 @@ function loadPage() {
     });
     for (const tipoFactura of document.querySelectorAll(".cambio-tipo-factura")) {
         tipoFactura.addEventListener("change",function(e){
-            const bloqueCredito = document.querySelector("#generarFactura #bloqueCredito");
             if(e.target.value === "Contado"){
                 $tablaCreditosFactura.innerHTML = $sinCuotas;
                 bloqueCredito.hidden = true;
@@ -336,6 +427,7 @@ function loadPage() {
         numeroCuotasFactura = 0;
         validoFacturar = true;
         idKardex = null;
+        bloqueCredito.hidden = false;
         $tablaCreditosFactura.innerHTML = $sinCuotas;
     });
     document.querySelector("#generarFactura #btnAgregarCuotaFactura").addEventListener("click",()=>{

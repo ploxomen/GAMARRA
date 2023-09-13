@@ -126,6 +126,8 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
             Route::put('eliminar/{id}', [Kardex::class, 'eliminarKardex']);
             Route::get('todos', [Kardex::class, 'misKardexIndex'])->name('admin.miskardex.index');
             Route::get('facturar/{kardex}', [Kardex::class, 'informacionFacturar']);
+            Route::get('facturar/guia-remision/{kardex}', [Kardex::class, 'informacionGuiaRemitente']);
+            Route::post('facturar/guia-remision', [Kardex::class, 'facturarGuiaRemision']);
             Route::post('facturar', [Kardex::class, 'facturarKardex']);
             Route::post('actualizar/fardos', [Kardex::class, 'actualizarValoresKardex']);
             Route::post('actualizar/tasa', [Kardex::class, 'actualizarTasas']);

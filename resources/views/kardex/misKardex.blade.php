@@ -6,6 +6,15 @@
     <title>Mis Kardex</title>
 @endsection
 @section('body')
+<style>
+    .formulario-remision label, input, textarea, select{
+        font-size: 0.8rem !important;
+    }
+    .lista-noicons > .dropdown-menu > .dropdown-item i, .lista-noicons > .dropdown-menu > .dropdown-item > span{
+        user-select: none;
+        pointer-events: none;
+    }
+</style>
     <section class="p-3">
         <div class="mb-4">
             <div class="m-auto" style="max-width: 400px;">
@@ -22,6 +31,8 @@
                     <th>Cantidad</th>
                     <th>Kilaje</th>
                     <th>Importe</th>
+                    <th>Factura</th>
+                    <th>Guia Remisión</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                 </tr>
@@ -32,5 +43,6 @@
     @include('kardex.modales.kardex')
     @include('kardex.modales.kardexClientes')
     @include('kardex.modales.nuevaFactura')
+    @include('kardex.modales.nuevaGuiaRemitente')
     @include('helper.carga')
 @endsection

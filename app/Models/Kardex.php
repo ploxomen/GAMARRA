@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Kardex extends Model
 {
     public $table = "kardex";
-    protected $fillable = ['nroFardoActivo','id_aduanero','tasa_extranjera','cantidad','kilaje','importe','estado'];
+    protected $fillable = ['nroFardoActivo','id_aduanero','tasa_extranjera','cantidad','kilaje','importe','estado','guia_remision_sunat','factura_sunat','factura_total_sunat'];
     const CREATED_AT = 'fechaCreada';
     const UPDATED_AT = 'fechaActualizada';
 
@@ -35,7 +35,7 @@ class Kardex extends Model
         ->where('kardex.estado','>',1)->get();
     }
     public static function scopeMisKardex($query) {
-        return $query->select("kardex.id","kardex.cantidad","kardex.tasa_extranjera","kardex.kilaje","kardex.estado","kardex.id_aduanero","kardex.importe")
+        return $query->select("kardex.id","kardex.cantidad","kardex.tasa_extranjera","kardex.guia_remision_sunat","kardex.factura_sunat","kardex.kilaje","kardex.estado","kardex.id_aduanero","kardex.importe")
         ->selectRaw("LPAD(kardex.id,5,'0') AS nroKardex,DATE_FORMAT(kardex.fechaCreada,'%d/%m/%Y') AS fechaKardex")
         ->where('estado','!=',0)->get();
     }

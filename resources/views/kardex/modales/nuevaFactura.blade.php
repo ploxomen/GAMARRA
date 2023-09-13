@@ -28,23 +28,23 @@
                         <option value="F">PERMISO TEMPORAL DE PERMANENCIA PTP</option>
                         <option value="G">SALVOCONDUCTO</option>
                         <option value="00">OTROS</option>
-                        {{-- @foreach ($tiposDocumentos as $tipoDocumento)
-                            <option value="{{$tipoDocumento->id}}">{{$tipoDocumento->documento}}</option>
-                        @endforeach --}}
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="modalagenteNumeroDocumento">Número Documento</label>
                     <input type="text" name="numeroDocumento" required id="modalagenteNumeroDocumento" class="form-control form-control-sm">
-
                 </div>
-                <div class="form-group col-12">
-                    <label for="modalagente">Nombre del agente</label>
+                <div class="form-group col-12 col-md-6 col-lg-8">
+                    <label for="modalagente">Nombre</label>
                     <input type="text" required name="nombreAgente" id="modalagente" class="form-control form-control-sm">
                 </div>
+                <div class="form-group col-12 col-md-6 col-lg-4">
+                    <label for="modalguia_remision_sunat">Guia de Remisión Remitente</label>
+                    <input type="text" name="guiaRemision" id="modalguia_remision_sunat" class="form-control form-control-sm" pattern="^[A-Za-z]+[0-9]+-[0-9]+$" placeholder="Ejm: GR001-1234">
+                </div>
                 <div class="form-group col-12">
-                    <label for="modalDireccion">Dirección de mi Empresa</label>
-                    <input type="text" required name="direccionAgente" id="modalDireccion" class="form-control form-control-sm" value="JR. AMERICA 626 URB. EL PORVENIR INT. 302 LIMA-LIMA-LA VICTORIA">
+                    <label for="modalDireccion">Dirección</label>
+                    <input type="text" name="direccionAgente" id="modalDireccion" class="form-control form-control-sm">
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <div class="custom-control custom-radio">
@@ -64,7 +64,10 @@
                 </div>
                 <div class="form-group col-12" id="bloqueCredito">
                     <div class="d-flex justify-content-between form-group" style="gap: 10px;">
-                        <b class="text-secondary">Créditos</b>
+                        <h5 class="text-primary">
+                            <i class="fas fa-caret-right"></i>
+                            Detalle Crédito
+                        </h5>
                         <button type="button" class="btn btn-sm btn-primary" id="btnAgregarCuotaFactura" title="Agregar cuotas">
                             <i class="fas fa-plus"></i>
                         </button>
@@ -88,7 +91,10 @@
                     </div>
                 </div>
                 <div class="form-group col-12">
-                    <b class="text-secondary">Detalle de productos</b>
+                    <h5 class="text-primary">
+                        <i class="fas fa-caret-right"></i>
+                        Detalle de productos
+                    </h5>
                     <div class="table-responsive">
                         <table class="table table-sm table-bordered" style="font-size: 0.8rem;">
                             <thead>

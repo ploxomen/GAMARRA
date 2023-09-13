@@ -48,6 +48,8 @@ class FacturacionElectronica extends Controller
         $datos = json_decode($request->comprobante);
         $anulacion = $rapiFac->anularComprobante($datos->id,$datos->codigoDocumento,$datos->serie,$datos->correlativo,$request->motivo,$datos->fecha);
         if(isset($anulacion['success'])){
+            // $condicional = $datos->codigoDocumento === "01" ? ['factura_sunat']
+            // if($datos->codigoDocumento === "01")
             return response()->json(['success' => 'Comprobante anulado correctamente']);
         }
         return response()->json(['error' => $anulacion['error']->message]);
