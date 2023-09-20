@@ -1,8 +1,8 @@
 @extends('helper.index')
 @section('head')
     @include('helper.headDatatable')
-    <script src="/kardex/generalKardex.js?v1.3"></script>
-    <script src="/kardex/misKardex.js?v1.5"></script>
+    <script src="/kardex/generalKardex.js?v1.4"></script>
+    <script src="/kardex/misKardex.js?v1.6"></script>
     <title>Mis Kardex</title>
 @endsection
 @section('body')

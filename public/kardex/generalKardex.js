@@ -5,14 +5,20 @@ class Kardex{
         try {
             const response = await this.general.funcfetch(this.general.url + "/almacen/kardex/pendiente/cerrar",datosKardex,"POST");
             if(response.alerta){
-                return alertify.alert("Mensaje",response.alerta);
+                alertify.alert("Mensaje",response.alerta);
             }
-            txtFardoActivo.textContent = 'Ninguno';
-            const brnCerrar = tableDetalleKardex.querySelector('.btn-primary');
-            brnCerrar.querySelector('i').classList.replace("fa-door-open","fa-door-closed");
-            brnCerrar.classList.replace("btn-primary","btn-success");
-            brnCerrar.setAttribute("title","Abrir fardo");
-            return alertify.success(response.success);
+            if(response.success || response.fardo){
+                txtFardoActivo.textContent = 'Ninguno';
+                const brnCerrar = tableDetalleKardex.querySelector('.btn-primary');
+                if(brnCerrar){
+                    brnCerrar.querySelector('i').classList.replace("fa-door-open","fa-door-closed");
+                    brnCerrar.classList.replace("btn-primary","btn-success");
+                    brnCerrar.setAttribute("title","Abrir fardo");
+                }
+                if(response.success){
+                    alertify.success(response.success);
+                }
+            }
         } catch (error) {
             console.error(error);
             alertify.error("error al cerrar el fardo");

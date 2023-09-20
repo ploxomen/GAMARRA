@@ -289,7 +289,7 @@ function loadPage() {
     const formGuiaRemitente = document.querySelector("#generarGuiaRemision #formGuiaRemitente");
     formGuiaRemitente.addEventListener("submit",async function(e){
         e.preventDefault();
-        alertify.confirm("Alerta","Estas apunto de generar una Guía de Remision <strong><br>¿Deseas continuar de todas formas?",async ()=>{
+        alertify.confirm("Alerta","Estas apunto de generar una Guía de Remision Remitente<br>¿Deseas continuar de todas formas?",async ()=>{
             try {
                 gen.banerLoader.hidden = false;
                 let datos = new FormData(formGuiaRemitente);
@@ -300,6 +300,14 @@ function loadPage() {
                 }
                 if (response.error) {
                     return alertify.alert("Alerta",response.error);
+                }
+                if(response.urlPdf){
+                    const pdf = document.createElement("a");
+                    pdf.href = response.urlPdf;
+                    pdf.target = "_blank";
+                    document.body.append(pdf);
+                    pdf.click();
+                    document.body.removeChild(pdf);
                 }
                 $('#generarGuiaRemision').modal("hide");
                 tablaKardexDatatable.draw();
@@ -352,8 +360,6 @@ function loadPage() {
                 if (response.error) {
                     return alertify.alert("Alerta",response.error);
                 }
-                $('#generarFactura').modal("hide");
-                tablaKardexDatatable.draw();
                 if(response.urlPdf){
                     const pdf = document.createElement("a");
                     pdf.href = response.urlPdf;
@@ -362,6 +368,8 @@ function loadPage() {
                     pdf.click();
                     document.body.removeChild(pdf);
                 }
+                $('#generarFactura').modal("hide");
+                tablaKardexDatatable.draw();
                 return alertify.alert("Mensaje",response.success);
             } catch (error) {
                 alertify.alert("Alerta","Ocurrió un error al generar la factura, por favor intentelo nuevamente más tarde");

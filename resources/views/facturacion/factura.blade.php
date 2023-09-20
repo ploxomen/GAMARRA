@@ -18,9 +18,9 @@
                     <div class="form-group col-6 col-lg-4 col-xl-3">
                         <label for="txtComprontes">Comprobantes</label>
                         <select name="documento" id="txtComprontes" class="form-control" required>
-                            <option value="00">Todos</option>
-                            <option value="01">Factura</option>
-                            <option value="09">Guía Remitente</option>
+                            <option value="00" {{$documento == "00" ? 'selected' : ''}}>Todos</option>
+                            <option value="01" {{$documento == "01" ? 'selected' : ''}}>Factura</option>
+                            <option value="09" {{$documento == "09" ? 'selected' : ''}}>Guía Remitente</option>
                         </select>
                     </div>
                     <div class="form-group col-6 col-lg-3 col-xl-2">

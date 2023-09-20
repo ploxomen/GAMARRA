@@ -114,12 +114,12 @@ class Kardex extends Controller
             ];
         }
         $generarGuiaRemision = $rapifac->generarGuiaRemision($datosFacturar,$productos);
-        $kardex->update(['estado' => 4,'guia_remision_sunat' => null]);
-        return response()->json(['success' => 'Guia de remision remitente generada correctamente']);
-        if(isset($generarGuiaRemision->xml_pdf) && isset($generarGuiaRemision->cdr)){
-            list($numero,$serie,$correlativo) = explode('-',$generarGuiaRemision->xml_pdf->Mensaje);
-            $kardex->update(['estado' => 4,'guia_remision_sunat' => $serie . '-'.$correlativo]);
-            return response()->json(['success' => $generarGuiaRemision->cdr->Mensaje, 'urlPdf' => $rapifac->urlPdfComprobantes .'?key=' . $generarGuiaRemision->xml_pdf->IDRepositorio]);
+        // $kardex->update(['estado' => 4,'guia_remision_sunat' => null]);
+        // return response()->json(['success' => 'Guia de remision remitente generada correctamente']);
+        if(isset($generarGuiaRemision->Mensaje) && empty($generarGuiaRemision->Mensaje)){
+            // list($numero,$serie,$correlativo) = explode('-',$generarGuiaRemision->xml_pdf->Mensaje);
+            $kardex->update(['estado' => 4]);
+            return response()->json(['success' => 'Guia de remision remitente generada correctamente', 'urlPdf' => $rapifac->urlPdfComprobantes .'?key=' . $generarGuiaRemision->IDRepositorio]);
         }
     }
     public function facturarKardex(Request $request) {
@@ -348,7 +348,7 @@ class Kardex extends Controller
         }
         $nroFardoActual = $kardex->nroFardoActivo;
         if(empty($nroFardoActual)){
-            return response()->json(['alerta' => 'No hay fardos pendientes por cerrar']);
+            return response()->json(['alerta' => 'No hay fardos pendientes por cerrar','fardo' => true]);
         }
         $kardex->update(['nroFardoActivo' => null]);
         return response()->json(['success' => 'El fardo N° ' . $nroFardoActual . ' a sido cerrado correctamente' ]);
