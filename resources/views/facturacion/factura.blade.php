@@ -56,7 +56,7 @@
                                 <th>Tipo Documento</th>
                                 <th>Numero Documento</th>
                                 <th>Nombre Cliente</th>
-                                <th>Monto Total</th>
+                                <th>Monto o Kg Total</th>
                                 <th>Estado</th>
                                 <th style="width: 200px;">Acciones</th>
                             </tr>
@@ -83,7 +83,7 @@
                                     <td>{{$factura->ClienteTipoDocIdentidadDetalle}}</td>
                                     <td>{{$factura->ClienteNumeroDocIdentidad}}</td>
                                     <td>{{$factura->ClienteNombreRazonSocial}}</td>
-                                    <td>{{$factura->MonedaSimbolo . '' . number_format($factura->Total,2)}}</td>
+                                    <td>{{$factura->MonedaSimbolo . ' ' . number_format($factura->Total,2)}}</td>
                                     <td>
                                         @if($factura->Baja)
                                             <span class="badge badge-danger">Anulado</span>

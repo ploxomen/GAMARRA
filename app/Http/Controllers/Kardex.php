@@ -79,6 +79,7 @@ class Kardex extends Controller
             'NOMBRE_UBIGEOLLEGADA' => 'LIMA - CALLAO - CALLAO',
             'NOMBRE_UBIGEOPARTIDA' => 'LIMA - LIMA - LA VICTORIA',
             'BANDERA_TRANSPORTISTA' => $request->nombreTransportista,
+            'ClienteDireccion' => $request->direccionDestinatario,
             'ClienteNombreRazonSocial' => $request->nombreDestinatario,
             'DireccionPartida' => $request->puntoPartida,
             'DireccionLlegada' => $request->puntoLlegada,
@@ -113,7 +114,8 @@ class Kardex extends Controller
             ];
         }
         $generarGuiaRemision = $rapifac->generarGuiaRemision($datosFacturar,$productos);
-        // dd($generarGuiaRemision);
+        $kardex->update(['estado' => 4,'guia_remision_sunat' => null]);
+        return response()->json(['success' => 'Guia de remision remitente generada correctamente']);
         if(isset($generarGuiaRemision->xml_pdf) && isset($generarGuiaRemision->cdr)){
             list($numero,$serie,$correlativo) = explode('-',$generarGuiaRemision->xml_pdf->Mensaje);
             $kardex->update(['estado' => 4,'guia_remision_sunat' => $serie . '-'.$correlativo]);
@@ -199,7 +201,7 @@ class Kardex extends Controller
             //     'estado' => 1
             // ]);
             list($numero,$serie,$correlativo) = explode('-',$generarFactura->xml_pdf->Mensaje);
-            $kardex->update(['estado' => 3,'factura_sunat' => $serie . '-'.$correlativo, 'factura_total_sunat' => $generarFactura->MontoTotal]);
+            $kardex->update(['estado' => 3,'factura_sunat' => $serie . '-'.$correlativo, 'factura_total_sunat' => $generarFactura->MontoTotal,'guia_remision_sunat' => $request->has("guiaRemision") ? $request->guiaRemision : null ]);
             return response()->json(['success' => $generarFactura->cdr->Mensaje, 'urlPdf' => $rapifac->urlPdfComprobantes .'?key=' . $generarFactura->xml_pdf->IDRepositorio]);
         }
     }

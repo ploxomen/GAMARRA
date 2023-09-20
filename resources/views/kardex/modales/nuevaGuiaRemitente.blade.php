@@ -43,24 +43,17 @@
                     <label for="modalagente">Nombre</label>
                     <input type="text" required name="nombreDestinatario" value="SERVICIOS AEROPORTUARIOS ANDINOS S.A" id="modalagente" class="form-control form-control-sm">
                 </div>
+                <div class="form-group mb-1 col-12">
+                    <label for="modalDireccionDestinatario">Dirección</label>
+                    <input type="text" required name="direccionDestinatario" value="Av. Mariscal Jose de la Mar Nro. 1263 Int. 604" id="modalDireccionDestinatario" class="form-control form-control-sm">
+                </div>
                 <div class="col-12">
                     <h6 class="text-primary">
                         <i class="fas fa-caret-right"></i>
                         Datos Bultos
                     </h6>
                 </div>
-                <div class="form-group mb-1 col-6">
-                    <label for="modalunidadMedidad">Unidad de Medida</label>
-                    <select name="tipoDocumentoDestinatario" required id="modalunidadMedidad" class="form-control">
-                        <option value="">Ninguno</option>
-                        <option value="GRM">GRAMO</option>
-                        <option value="KGM" selected>KILOGRAMO</option>
-                        <option value="STN">TONELADA CORTA</option>
-                        <option value="LTN">TONELADA LARGA</option>
-                        <option value="TNE">TONELADAS</option>    
-                    </select> 
-                </div>
-                <div class="form-group mb-1 col-6">
+                <div class="form-group mb-1 col-12">
                     <label for="pesoBultoTotal">Peso Bulto Total</label>
                     <input type="number" step="0.01" min="0" required name="pesoBultoTotal" id="modalpesoBultoTotal" class="form-control form-control-sm">
                 </div>
