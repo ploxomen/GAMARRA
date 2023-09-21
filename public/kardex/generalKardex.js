@@ -1,11 +1,11 @@
 class Kardex{
     general = new General();
     txtSinFardos = `<tr><td colspan="100%" class="text-center">No se agregaron detalles</td></tr>`
-    async cerrarFardo(datosKardex,txtFardoActivo,tableDetalleKardex){
+    async cerrarFardo(datosKardex,txtFardoActivo,tableDetalleKardex,mensaje = true){
         try {
             const response = await this.general.funcfetch(this.general.url + "/almacen/kardex/pendiente/cerrar",datosKardex,"POST");
             if(response.alerta){
-                alertify.alert("Mensaje",response.alerta);
+                // alertify.alert("Mensaje",response.alerta);
             }
             if(response.success || response.fardo){
                 txtFardoActivo.textContent = 'Ninguno';
@@ -15,7 +15,7 @@ class Kardex{
                     brnCerrar.classList.replace("btn-primary","btn-success");
                     brnCerrar.setAttribute("title","Abrir fardo");
                 }
-                if(response.success){
+                if(response.success && mensaje){
                     alertify.success(response.success);
                 }
             }
@@ -27,6 +27,14 @@ class Kardex{
     async eliminarFardo(datosKardex){
         try {
             return await this.general.funcfetch(this.general.url + "/almacen/kardex/pendiente/eliminar",datosKardex,"POST");
+        } catch (error) {
+            alertify.error("error al cerrar el fardo");
+            return {error : 'error al eliminar el fardo'};
+        }
+    }
+    async eliminarDetalleFardo(datosKardex){
+        try {
+            return await this.general.funcfetch(this.general.url + "/almacen/kardex/pendiente/producto/eliminar",datosKardex,"POST");
         } catch (error) {
             alertify.error("error al cerrar el fardo");
             return {error : 'error al eliminar el fardo'};
@@ -169,10 +177,15 @@ class Kardex{
             ${cloneProducto.outerHTML}
         </td>
         ${costoProducto}
+        <td>
+            <button type="button" class="btn eliminar-producto btn-sm btn-danger mr-1" title="Eliminar producto">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </td>
         `
         if(producto <= 1){
             template += `
-            <td class="wt-cantidad">
+            <td class="wt-cantidad" style="min-width:100px;">
                 <input type="number" data-valor="kilaje" step="0.01" class="form-control form-control-sm" value="${valKilaje}">
             </td>
             <td rowspan="1">
@@ -180,7 +193,7 @@ class Kardex{
                     <button type="button" class="btn btn-sm ${fardo == nroFardoActivo ? 'btn-primary' : 'btn-success'}" title="${fardo == nroFardoActivo ? 'Cerrar fardo' : 'Abrir fardo'}">
                         <i class="fas fa-door-${fardo == nroFardoActivo ? 'open' : 'closed'}"></i>
                     </button>
-                    <button type="button" class="btn btn-sm btn-danger mr-1" title="Eliminar fardo">
+                    <button type="button" class="btn btn-sm eliminar-fardo btn-danger mr-1" title="Eliminar fardo">
                         <i class="fas fa-trash-alt"></i>
                     </button>
                 </div>
@@ -188,8 +201,8 @@ class Kardex{
 
             `
         }else if(producto > 1 && trFardo){
-            let inicio = !total ? 5 : 6;
-            let fin = !total ? 6 : 7;
+            let inicio = !total ? 6 : 7;
+            let fin = !total ? 7 : 8;
             for (inicio; inicio <= fin; inicio++) {
                 trFardo.children[inicio].setAttribute("rowspan",producto);                
             }

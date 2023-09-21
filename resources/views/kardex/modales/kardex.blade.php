@@ -107,6 +107,7 @@
                             <th>PROVEEDOR</th>
                             <th>DESCRIPCION</th>
                             <th>COSTO</th>
+                            <th>ELIMINAR</th>
                             <th>KILAJES</th>
                             <th>ACCIONES</th>
                         </tr>

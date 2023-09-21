@@ -7,6 +7,9 @@ function loadPage() {
     const txtPresentacion = document.querySelector("#idPresentacion");
     const txtFardoActivo = document.querySelector("#txtFardoActivo");
     $('#idCliente').on("select2:select",function(e){
+        let datos = new FormData();
+        datos.append('cliente',$('#idCliente').val())
+        kardex.cerrarFardo(datos,txtFardoActivo,tableDetalleKardex,false);
         kardex.obtenerKardexPendiente($(this).val(),tableDetalleKardex,txtProveedor,txtProducto,txtCantidad,txtPresentacion,txtFardoActivo);
     });
     document.querySelector("#cerrarFardo").onclick = function(){
@@ -28,9 +31,8 @@ function loadPage() {
         },()=>{})
     }
     tableDetalleKardex.onclick = function(e){
-        if(e.target.classList.contains("btn-danger")){
+        if(e.target.classList.contains("eliminar-fardo")){
             alertify.confirm("Mensaje","¿Deseas eliminar este fardo?",async ()=>{
-                $('#tablaDetalle .select2-simple').select2("destroy");
                 let datos = new FormData();
                 datos.append('cliente',$('#idCliente').val())
                 datos.append('fardo',e.target.parentElement.parentElement.parentElement.dataset.fardo);
@@ -38,6 +40,21 @@ function loadPage() {
                 if(response.success){
                     alertify.success(response.success);
                     kardex.obtenerKardexPendiente($('#idCliente').val(),tableDetalleKardex,txtProveedor,txtProducto,txtCantidad,txtPresentacion,txtFardoActivo);
+                    return false
+                }
+                return alertify.alert("Mensaje",response.alerta);
+            },()=>{})
+        }
+        if(e.target.classList.contains("eliminar-producto")){
+            alertify.confirm("Mensaje","¿Deseas eliminar este producto?",async ()=>{
+                let datos = new FormData();
+                datos.append('cliente',$('#idCliente').val())
+                datos.append('fardo',e.target.parentElement.parentElement.dataset.fardo);
+                datos.append('producto',e.target.parentElement.parentElement.dataset.detalle);
+                const response = await kardex.eliminarDetalleFardo(datos,txtFardoActivo,tableDetalleKardex);
+                if(response.success){
+                    alertify.success(response.success);
+                    kardex.obtenerKardexPendiente($('#idCliente').val(),tableDetalleKardex,txtProveedor,txtProducto,txtCantidad,txtPresentacion,txtFardoActivo);                    
                     return false
                 }
                 return alertify.alert("Mensaje",response.alerta);

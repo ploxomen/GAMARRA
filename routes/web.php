@@ -142,6 +142,7 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
             Route::post('pendiente/guardar', [Kardex::class, 'agregarFardo']);
             Route::post('pendiente/generar', [Kardex::class, 'generarKardex']);
             Route::post('pendiente/cerrar', [Kardex::class, 'cerrarFardo']);
+            Route::post('pendiente/producto/eliminar', [Kardex::class, 'eliminarProductoFardo']);
             Route::post('pendiente/eliminar', [Kardex::class, 'eliminarFardo']);
             Route::post('pendiente/abrir', [Kardex::class, 'abrirFardo']);
             Route::post('listar', [Kardex::class, 'listar']);

@@ -1,8 +1,8 @@
 @extends('helper.index')
 @section('head')
     <link rel="stylesheet" href="/kardex/nuevoKardex.css">
-    <script src="/kardex/generalKardex.js?v1.6"></script>
-    <script src="/kardex/nuevoKardex.js?v1.6"></script>
+    <script src="/kardex/generalKardex.js?v1.8"></script>
+    <script src="/kardex/nuevoKardex.js?v1.8"></script>
     <title>Generar Kardex</title>
 @endsection
 @section('body')
@@ -74,6 +74,7 @@
                                 <th>CANTIDAD</th>
                                 <th>PROVEEDOR</th>
                                 <th>DESCRIPCION</th>
+                                <th>ELIMINAR</th>
                                 <th>KILAJES</th>
                                 <th>ACCIONES</th>
                             </tr>

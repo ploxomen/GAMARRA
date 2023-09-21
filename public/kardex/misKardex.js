@@ -444,6 +444,10 @@ function loadPage() {
     const frmTasas = document.querySelector("#formTasasKardex");
     $('#idCliente').on("select2:select",function(e){
         document.querySelector("#idModaltasa").value = "";
+        let datos = new FormData();
+        datos.append('cliente',$('#idCliente').val());
+        datos.append("idKardex",idKardex);
+        kardex.cerrarFardo(datos,txtFardoActivo,tableDetalleKardex,false);
         kardex.obtenerKardexPendiente($(this).val(),tableDetalleKardex,txtProveedor,txtProducto,txtCantidad,txtPresentacion,txtFardoActivo,idKardex);
     })
     $('#editarKardex').on("hidden.bs.modal",function(e){
@@ -511,14 +515,29 @@ function loadPage() {
         kardex.cerrarFardo(datos,txtFardoActivo,tableDetalleKardex);
     }
     tableDetalleKardex.onclick = function(e){
-        if(e.target.classList.contains("btn-danger")){
+        if(e.target.classList.contains("eliminar-fardo")){
             alertify.confirm("Mensaje","¿Deseas eliminar este fardo?",async ()=>{
-                $('#tablaDetalle .select2-simple').select2("destroy");
                 let datos = new FormData();
                 datos.append('cliente',$('#idCliente').val())
                 datos.append('idKardex',idKardex);
                 datos.append('fardo',e.target.parentElement.parentElement.parentElement.dataset.fardo);
-                const response = await kardex.eliminarFardo(datos,txtFardoActivo,tableDetalleKardex);
+                const response = await kardex.eliminarFardo(datos);
+                if(response.success){
+                    alertify.success(response.success);
+                    kardex.obtenerKardexPendiente($('#idCliente').val(),tableDetalleKardex,txtProveedor,txtProducto,txtCantidad,txtPresentacion,txtFardoActivo,idKardex);
+                    return false
+                }
+                return alertify.alert("Mensaje",response.alerta);
+            },()=>{})
+        }
+        if(e.target.classList.contains("eliminar-producto")){
+            alertify.confirm("Mensaje","¿Deseas eliminar este producto?",async ()=>{
+                let datos = new FormData();
+                datos.append('cliente',$('#idCliente').val())
+                datos.append('idKardex',idKardex);
+                datos.append('fardo',e.target.parentElement.parentElement.dataset.fardo);
+                datos.append('producto',e.target.parentElement.parentElement.dataset.detalle);
+                const response = await kardex.eliminarDetalleFardo(datos);
                 if(response.success){
                     alertify.success(response.success);
                     kardex.obtenerKardexPendiente($('#idCliente').val(),tableDetalleKardex,txtProveedor,txtProducto,txtCantidad,txtPresentacion,txtFardoActivo,idKardex);

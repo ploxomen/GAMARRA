@@ -10,6 +10,7 @@
     <style>
         @page{
             font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            margin: 10px 50px 20px 50px;
         }
         table{
             border-collapse: collapse;
@@ -22,12 +23,33 @@
         .text-center{
             text-align: center;
         }
+        .text-right{
+            text-align: right;
+        }
         .border{
             border: 1px solid black;
         }
     </style>
+    <table>
+        <tr>
+            <td class="text-right" rowspan="3" style="width: 100%; height: 50px;">
+                <img src="{{public_path("img/logo-sin-fondo.png")}}" alt="logo de la empresa" width="100px">
+            </td>
+        </tr>
+    </table>
     <h2 class="titulo">KARDEX</h2>
-    <h4 class="text-center">Cliente: {{$fardos[0]->clientes->nombreCliente}}</h4>
+    <table style="margin-bottom: 25px;">
+        <tr>
+            <td style="width: 500px;">
+                <b>Cliente:</b> 
+                <span>{{$fardos[0]->clientes->nombreCliente}}</span>
+            </td>
+            <td>
+                <b>Fecha:</b> 
+                <span>{{date('d/m/Y',strtotime($kardex->fechaCreada))}}</span>
+            </td>
+        </tr>
+    </table>
     <table border="1">
         <thead>
             <tr>

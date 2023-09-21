@@ -334,7 +334,7 @@ class Kardex extends Controller
         }
         $fardos = $kardex->fardos()->where('id_cliente',$cliente)->get();
         $kardexCliente = KardexCliente::where(['id_kardex' => $kardex->id,'id_cliente' => $cliente])->first();
-        return Pdf::loadView("kardex.reportesPdf.kardexCliente",compact("fardos","kardexCliente"))->stream("kardex_cliente_" . $kardex->id . '_' . $cliente .'.pdf');
+        return Pdf::loadView("kardex.reportesPdf.kardexCliente",compact("fardos","kardexCliente","kardex"))->stream("kardex_cliente_" . $kardex->id . '_' . $cliente .'.pdf');
     }
     public function cerrarFardo(Request $request){
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
@@ -353,6 +353,37 @@ class Kardex extends Controller
         $kardex->update(['nroFardoActivo' => null]);
         return response()->json(['success' => 'El fardo N° ' . $nroFardoActual . ' a sido cerrado correctamente' ]);
     }
+    public function eliminarProductoFardo(Request $request) {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
+        $verif2 = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);
+        if(isset($verif['session']) && isset($verif2['session'])){
+            return response()->json(['session' => true]);
+        }
+        $kardex = $request->has("idKardex") ? ModelsKardex::findOrFail($request->idKardex)  : ModelsKardex::where(['estado' => 1])->first();
+        if(empty($kardex)){
+            return response()->json(['alerta' => 'El kardex posiblemente ya se haya generado, por favor actualize la página']);
+        }
+        $fardoKardex = KardexFardo::where(['id_kardex' => $kardex->id,'nro_fardo' => $request->fardo,'id_cliente' => $request->cliente])->first();
+        if(empty($fardoKardex)){
+            return response()->json(['alerta' => 'No existe ningún fardo con el número ' . $request->fardo. ', posiblemente se haya eliminado, por favor actualize la página']);
+        }
+        $productosFardos = KardexFardoDetalle::where(['id_fardo' => $fardoKardex->id]);
+        if($productosFardos->count() <= 1){
+            return response()->json(['alerta' => 'Si desea eliminar todo el contenido del fardo, por favor elimine el fardo completo']);
+        }
+        DB::beginTransaction();
+        try {
+            $productosFardos->where('id',$request->producto)->delete();
+            $this->filtrarProveedores($kardex->id);
+            list($totalImporte,$cantidad,$kilaje) = $this->calcularImporteKardex($kardex->id);
+            $kardex->update(['cantidad' => $cantidad,'kilaje' => $kilaje,'importe' => $totalImporte]);
+            DB::commit();
+            return response()->json(['success' => 'El producto se a eliminado del fardo de manera correcta']);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['error' => $th->getMessage()]);
+        }
+    }
     public function eliminarFardo(Request $request){
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);
         $verif2 = $this->usuarioController->validarXmlHttpRequest($this->moduloKardex);
@@ -361,15 +392,13 @@ class Kardex extends Controller
         }
         $kardex = $request->has("idKardex") ? ModelsKardex::findOrFail($request->idKardex)  : ModelsKardex::where(['estado' => 1])->first();
         if(empty($kardex)){
-            return response()->json(['alerta' => 'No existe ningún kardex']);
+            return response()->json(['alerta' => 'El kardex posiblemente ya se haya generado, por favor actualize la página']);
         }
         $fardoKardex = KardexFardo::where(['id_kardex' => $kardex->id,'nro_fardo' => $request->fardo,'id_cliente' => $request->cliente])->first();
         if(empty($fardoKardex)){
             return response()->json(['alerta' => 'No existe ningún fardo con el número ' . $request->fardo]);
         }    
-        if(empty($fardoKardex)){
-            return response()->json(['alerta' => 'No existe ningún fardo con el número ' . $request->fardo]);
-        }
+        
         DB::beginTransaction();
         try {
             KardexFardoDetalle::where(['id_fardo' => $fardoKardex->id])->delete();

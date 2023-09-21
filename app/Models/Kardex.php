@@ -16,7 +16,6 @@ class Kardex extends Model
         $condicionKardex = !is_null($idKardex) ? ['id' => $idKardex] : ['estado' => 1];
         $kardex = Kardex::where($condicionKardex)->first();
         if(!empty($kardex)){
-            $kardex->update(['nroFardoActivo' => null]);
             $kardex->proveedores = Proveedores::where('estado',1)->get();
             $kardex->presentaciones = Presentacion::obtenerPresentaciones();
             $kardex->productos = Productos::where('estado',1)->get();
