@@ -28,6 +28,8 @@ class Kardex extends Controller
     private $usuarioController;
     private $moduloKardex = "admin.kardex.index";
     private $moduloMisKardex = "admin.miskardex.index";
+    private $moduloMisKardexClientes = "admin.kardex.general.cliente";
+
     function __construct()
     {
         $this->usuarioController = new Usuario();
@@ -44,6 +46,47 @@ class Kardex extends Controller
         $proveedores = Proveedores::all();
         $presentaciones = Presentacion::orderBy("presentacion")->get();
         return view("kardex.generar",compact("modulos","clientes","productos","proveedores","presentaciones"));
+    }
+    public function indexKardexGeneralCliente()
+    {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardexClientes);
+        if(isset($verif['session'])){
+            return redirect()->route("home"); 
+        }
+        $modulos = $this->usuarioController->obtenerModulos();
+        $hoy = now();
+        $fechaInicio = date('Y-m-d',strtotime($hoy . " - 90 days"));
+        $fechafin = date('Y-m-d',strtotime($hoy));
+        $clientes = Clientes::all();
+        return view("kardex.kardexPorCliente",compact("modulos","fechaInicio","fechafin","clientes"));
+    }
+    public function mostrarClientesKardexGeneralReporte($tipo,Request $request)
+    {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardexClientes);
+        if(isset($verif['session'])){
+            return redirect()->route("home"); 
+        }
+        $fechaInicio = $request->fechaInicio;
+        $fechaFin = $request->fechaFin;
+        $cliente = $request->cliente;
+        switch ($tipo) {
+            case 'pdf':
+                $kardexs = KardexCliente::kardexClientesGeneralReporte($fechaInicio,$fechaFin,$cliente);
+                return Pdf::loadView("kardex.reportesPdf.kardexGeneralCliente",compact("kardexs"))->stream("kardex_genera_cliente.pdf");
+            break;
+        }
+    }
+    public function mostrarClientesKardexGeneral(Request $request)
+    {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardexClientes);
+        if(isset($verif['session'])){
+            return response()->json(['session' => true]);
+        }
+        $fechaInicio = $request->fechaInicio;
+        $fechaFin = $request->fechaFin;
+        $cliente = $request->cliente;
+        $kardex = KardexCliente::kardexClientesGeneral($fechaInicio,$fechaFin,$cliente);
+        return DataTables::of($kardex)->toJson();
     }
     public function informacionGuiaRemitente(ModelsKardex $kardex) {
         $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloMisKardex);

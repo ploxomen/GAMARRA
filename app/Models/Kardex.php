@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Kardex extends Model
 {
     public $table = "kardex";
-    protected $fillable = ['nroFardoActivo','id_aduanero','tasa_extranjera','cantidad','kilaje','importe','estado','guia_remision_sunat','factura_sunat','factura_total_sunat'];
+    protected $fillable = ['nroFardoActivo','guia_area','id_aduanero','tasa_extranjera','cantidad','kilaje','importe','estado','guia_remision_sunat','factura_sunat','factura_total_sunat'];
     const CREATED_AT = 'fechaCreada';
     const UPDATED_AT = 'fechaActualizada';
 

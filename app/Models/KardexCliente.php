@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
 
 class KardexCliente extends Model
@@ -11,6 +12,47 @@ class KardexCliente extends Model
     protected $fillable = ['id_kardex','id_cliente','tasa','tasa_extranjera'];
     const CREATED_AT = 'fechaCreada';
     const UPDATED_AT = 'fechaActualizada';
+
+    public static function kardexClientesGeneralReporte($fechaInicio,$fechaFin,$cliente) {
+        if(empty($cliente)){
+            return [];
+        }
+        $kardexs = KardexCliente::select("c.nombreCliente","k.guia_area","c.id AS idCliente","kardex_cliente.id_kardex")
+        ->selectRaw("LPAD(k.id,5,'0') AS nro_kardex,DATE_FORMAT(k.fechaCreada,'%d/%m/%Y') AS fecha_kardex")
+        ->join("kardex AS k","kardex_cliente.id_kardex","=","k.id")
+        ->join("clientes AS c","c.id","=","kardex_cliente.id_cliente")
+        ->where('K.estado','>=',2)
+        ->whereRaw("DATE_FORMAT(k.fechaCreada,'%Y-%m-%d') BETWEEN ? AND ?",[$fechaInicio,$fechaFin])->groupBy("kardex_cliente.id_kardex","kardex_cliente.id_cliente");
+        if($cliente !== 'todos'){
+            return $kardexs->where('kardex_cliente.id_cliente',$cliente)->get();
+        }
+        return $kardexs->get();
+    }
+
+    public function kardex()
+    {
+        return $this->belongsTo(Kardex::class,'id_kardex');
+    }
+    public static function kardexClientesGeneral($fechaInicio,$fechaFin,$cliente) {
+        if(empty($cliente)){
+            return [];
+        }
+        $kardexs = DB::table('kardex_cliente AS kc')->select("kf.nro_fardo","c.nombreCliente","p.nombreProducto","kfd.cantidad")
+        ->selectRaw("LPAD(k.id,5,'0') AS nro_kardex,DATE_FORMAT(k.fechaCreada,'%d/%m/%Y') AS fecha_kardex")
+        ->join("kardex AS k","kc.id_kardex","=","k.id")
+        ->join("clientes AS c","c.id","=","kc.id_cliente")
+        ->join("kardex_fardos AS kf",function (JoinClause $join) {
+            $join->on("kc.id_kardex","=","kf.id_kardex")->on("kc.id_cliente","=","kf.id_cliente");
+        })
+        ->join("kardex_fardos_detalle AS kfd","kf.id","=","kfd.id_fardo")
+        ->join("productos AS p","p.id","=","kfd.id_producto")
+        ->where('K.estado','>=',2)
+        ->whereRaw("DATE_FORMAT(k.fechaCreada,'%Y-%m-%d') BETWEEN ? AND ?",[$fechaInicio,$fechaFin])->groupBy("k.id","kf.id","p.id");
+        if($cliente !== 'todos'){
+            return $kardexs->where('kc.id_cliente',$cliente)->get();
+        }
+        return $kardexs->get();
+    }
 
     static function kilajesRankingCliente($fechaIncio,$fechaFin,$buscador) : Object {
         return DB::table('kardex_fardos AS kf')->select("c.nombreCliente","p.pais_espanish","c.id")

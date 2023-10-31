@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Aduaneros;
+use App\Http\Controllers\Categoria;
 use App\Http\Controllers\Familia;
 use App\Http\Controllers\Clientes;
 use App\Http\Controllers\FacturacionElectronica;
@@ -88,6 +89,14 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
 
     });
     Route::prefix('almacen')->group(function () {
+        Route::prefix('categorias')->group(function () {
+            Route::get('/', [Categoria::class, 'index'])->name('admin.categoria');
+            Route::get('listar', [Categoria::class, 'all']);
+            Route::get('listar/{categoria}', [Categoria::class, 'show']);
+            Route::post('crear', [Categoria::class, 'store']);
+            Route::post('actualizar', [Categoria::class, 'update']);
+            Route::delete('eliminar', [Categoria::class, 'destroy']);
+        });
         Route::prefix('familias')->group(function () {
             Route::get('/', [Familia::class, 'index'])->name('admin.familia.index');
             Route::get('reportes/excel', [Familia::class, 'reporteExcel']);
@@ -123,6 +132,9 @@ Route::middleware('auth')->prefix('intranet')->group(function(){
         });
         Route::prefix('kardex')->group(function () {
             Route::get('/', [Kardex::class, 'index'])->name('admin.kardex.index');
+            Route::get('general/clientes', [Kardex::class, 'indexKardexGeneralCliente'])->name('admin.kardex.general.cliente');
+            Route::get('general/clientes/listar', [Kardex::class, 'mostrarClientesKardexGeneral']);
+            Route::get('general/clientes/reporte/{tipo}', [Kardex::class, 'mostrarClientesKardexGeneralReporte']);
             Route::put('eliminar/{id}', [Kardex::class, 'eliminarKardex']);
             Route::get('todos', [Kardex::class, 'misKardexIndex'])->name('admin.miskardex.index');
             Route::get('facturar/{kardex}', [Kardex::class, 'informacionFacturar']);

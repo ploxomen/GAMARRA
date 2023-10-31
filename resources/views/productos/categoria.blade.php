@@ -1,24 +1,28 @@
 @extends('helper.index')
 @section('head')
     @include('helper.headDatatable')
-    <script src="/productos/adminMarca.js"></script>
-    <title>Marcas</title>
+    <script src="/productos/adminCategoria.js"></script>
+    <title>Categorias</title>
 @endsection
 @section('body')
     <section class="p-3">
         <div class="mb-4">
             <div class="m-auto" style="max-width: 400px;">
-                <img src="/img/modulo/marca.png" alt="Imagen de marcas" width="120px" class="img-fluid d-block m-auto">
-                <h4 class="text-center text-primary my-2">Administración de marcas</h4>
+                <img src="/img/modulo/categorias.png" alt="Imagen de categorias" width="120px" class="img-fluid d-block m-auto">
+                <h4 class="text-center text-primary my-2">Administración de categorías</h4>
             </div>
         </div>
         
        <div class="row">
             <div class="form-group col-12 col-md-4">
-                <form class="bg-white p-3 border" id="formMarca">
+                <form class="bg-white p-3 border" id="formCategoria">
                     <div class="form-group">
-                        <label for="txtArea">Marcas</label>
-                        <input type="text" name="nombreMarca" maxlength="255" class="form-control" placeholder="Ej: Gloria" id="txtMarca" required>
+                        <label for="txtnombreCategoria">Categoría</label>
+                        <input type="text" name="nombreCategoria" maxlength="255" class="form-control" id="txtnombreCategoria" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="txttasaCategoria">Tasa</label>
+                        <input type="number" name="tasaCategoria" step="0.01" min="0" class="form-control" id="txttasaCategoria" required>
                     </div>
                     <div class="form-group">
                         <div class="custom-control custom-switch">
@@ -44,7 +48,8 @@
                         <thead class="text-center">
                             <tr>
                                 <th>N°</th>
-                                <th>Marca</th>
+                                <th>Categoría</th>
+                                <th>Tasa</th>
                                 <th>Estado</th>
                                 {{-- <th>Fecha Creada</th>
                                 <th>Fecha Actualizada</th> --}}

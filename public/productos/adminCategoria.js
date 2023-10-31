@@ -3,11 +3,11 @@ function loadPage(){
     const tablaMarca = document.querySelector("#tablaMarca");
     const tablaMarcaDataTable = $(tablaMarca).DataTable({
         ajax: {
-            url: 'marca/listar',
-            method: 'POST',
+            url: 'categorias/listar',
+            method: 'GET',
             headers: general.requestJson,
             data: function (d) {
-                d.accion = 'obtener';
+                // d.accion = 'obtener';
             }
         },
         columns: [{
@@ -17,29 +17,27 @@ function loadPage(){
             }
         },
         {
-            data: 'nombreMarca'
-        },{
+            data: 'nombreCategoria'
+        },
+        {
+            data: 'tasaCategoria'
+        },
+        {
             data: 'estado',
             render:function(data){
                 return data ? `<span class="badge badge-success">Vigente</span>` : `<span class="badge badge-danger">Descontinuado</span>`
             }
         },
-        // {
-        //     data: 'fechaCreada'
-        // },
-        // {
-        //     data: 'fechaActualizada'
-        // },
         {
             data: 'id',
             render : function(data){
-                return `<div class="d-flex justify-content-center" style="gap:5px;"><button class="btn btn-sm btn-outline-info p-1" data-marca="${data}">
+                return `<div class="d-flex justify-content-center" style="gap:5px;"><button class="btn btn-sm btn-outline-info p-1" data-categoria="${data}">
                     <small>
                     <i class="fas fa-pencil-alt"></i>
                     Editar
                     </small>
                 </button>
-                <button class="btn btn-sm btn-outline-danger p-1" data-marca="${data}">
+                <button class="btn btn-sm btn-outline-danger p-1" data-categoria="${data}">
                     <small>    
                     <i class="fas fa-trash-alt"></i>
                         Eliminar
@@ -49,33 +47,36 @@ function loadPage(){
         },
         ]
     });
-    const txtMarca = document.querySelector("#txtMarca");
-    const formMarca = document.querySelector("#formMarca");
+    const txtnombreCategoria = document.querySelector("#txtnombreCategoria");
+    const txttasaCategoria = document.querySelector("#txttasaCategoria");
+
+    const formCategoria = document.querySelector("#formCategoria");
     const btnGuardarForm = document.querySelector("#btnGuardarForm");
     const checkEstado = document.querySelector("#customSwitch1");
-    let idMarca = null;
+    let idCategoria = null;
     tablaMarca.onclick = async function(e){
         if (e.target.classList.contains("btn-outline-info")){
             try {
                 general.cargandoPeticion(e.target, general.claseSpinner, true);
-                const response = await general.funcfetch("marca/listar/" +e.target.dataset.marca,null, "GET");
+                const response = await general.funcfetch("categorias/listar/" +e.target.dataset.categoria,null, "GET");
                 general.cargandoPeticion(e.target, 'fas fa-pencil-alt', false);
                 if(response.session){
                     return alertify.alert([...alertaSesion],() => {window.location.reload()});
                 }
                 if(response.success){
                     alertify.success("pendiente para editar");
-                    const marca = response.success;
-                    txtMarca.value = marca.nombreMarca;
-                    idMarca = marca.id;
-                    checkEstado.checked = marca.estado;
+                    const categoria = response.success;
+                    txtnombreCategoria.value = categoria.nombreMarca;
+                    txttasaCategoria.value = categoria.tasaCategoria;
+                    idCategoria = categoria.id;
+                    checkEstado.checked = categoria.estado;
                     btnGuardarForm.querySelector("span").textContent = "Editar";
                 }
             } catch (error) {
                 general.cargandoPeticion(e.target, 'fas fa-pencil-alt', false);
-                idMarca = null;
+                idCategoria = null;
                 console.error(error);
-                alertify.error("error al obtener la área")
+                alertify.error("error al obtener la categoria")
             }
 
         }
@@ -83,7 +84,7 @@ function loadPage(){
             alertify.confirm("Alerta","¿Deseas eliminar esta marca?",async () => {
                 try {
                     general.cargandoPeticion(e.target, general.claseSpinner, true);
-                    const response = await general.funcfetch("marca/eliminar/" + e.target.dataset.marca,null,"DELETE");
+                    const response = await general.funcfetch("categorias/eliminar/" + e.target.dataset.categoria,null,"DELETE");
                     general.cargandoPeticion(e.target, 'fas fa-trash-alt', true);
                     if (response.session) {
                         return alertify.alert([...general.alertaSesion], () => { window.location.reload() });
@@ -104,15 +105,15 @@ function loadPage(){
             },() => {})
         }
     }
-    formMarca.onreset = function(e){
+    formCategoria.onreset = function(e){
         btnGuardarForm.querySelector("span").textContent = "Guardar";
         checkEstado.checked = 0;
-        idMarca = null;
+        idCategoria = null;
     }
-    formMarca.onsubmit = async function(e){
+    formCategoria.onsubmit = async function(e){
         e.preventDefault();
         let datos = new FormData(this);
-        const url = idMarca != null ? "marca/editar/" + idMarca : 'marca/crear';
+        const url = idCategoria != null ? "categorias/editar/" + idCategoria : 'categorias/crear';
         try {
             general.cargandoPeticion(btnGuardarForm, general.claseSpinner, true);
             const response = await general.funcfetch(url, datos, "POST");
@@ -123,13 +124,13 @@ function loadPage(){
             if (response.success) {
                 alertify.success(response.success);
                 tablaMarcaDataTable.draw();
-                formMarca.reset();
-                idMarca = null;
+                formCategoria.reset();
+                idCategoria = null;
             }
         } catch (error) {
-            idMarca = null;
+            idCategoria = null;
             console.error(error);
-            alertify.error(idMarca != null ? "error al editar la marca" : 'error al agregar la marca')
+            alertify.error(idCategoria != null ? "error al editar la marca" : 'error al agregar la marca')
         }
 
     }
