@@ -21,7 +21,7 @@ class KardexCliente extends Model
         ->selectRaw("LPAD(k.id,5,'0') AS nro_kardex,DATE_FORMAT(k.fechaCreada,'%d/%m/%Y') AS fecha_kardex")
         ->join("kardex AS k","kardex_cliente.id_kardex","=","k.id")
         ->join("clientes AS c","c.id","=","kardex_cliente.id_cliente")
-        ->where('K.estado','>=',2)
+        ->where('k.estado','>=',2)
         ->whereRaw("DATE_FORMAT(k.fechaCreada,'%Y-%m-%d') BETWEEN ? AND ?",[$fechaInicio,$fechaFin])->groupBy("kardex_cliente.id_kardex","kardex_cliente.id_cliente");
         if($cliente !== 'todos'){
             return $kardexs->where('kardex_cliente.id_cliente',$cliente)->get();
@@ -46,7 +46,7 @@ class KardexCliente extends Model
         })
         ->join("kardex_fardos_detalle AS kfd","kf.id","=","kfd.id_fardo")
         ->join("productos AS p","p.id","=","kfd.id_producto")
-        ->where('K.estado','>=',2)
+        ->where('k.estado','>=',2)
         ->whereRaw("DATE_FORMAT(k.fechaCreada,'%Y-%m-%d') BETWEEN ? AND ?",[$fechaInicio,$fechaFin])->groupBy("k.id","kf.id","p.id");
         if($cliente !== 'todos'){
             return $kardexs->where('kc.id_cliente',$cliente)->get();
