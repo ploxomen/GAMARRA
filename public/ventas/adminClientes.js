@@ -100,11 +100,68 @@ function loadPage(){
         }
     });
     const listaContacto = document.querySelector("#listaContactos");
+    const listaTasa = document.querySelector("#contenidoTasas");
+
     const txtSinContacto = document.querySelector("#txtSinContacto");
+    document.querySelector("#btnAgregarTasa").onclick = e=>{
+        $(listaTasa.querySelectorAll("select")).select2('destroy');
+        listaTasa.append(agregarTasa({idTasa : null,valorCategoria : "",valorTasa : ""}));
+        $(listaTasa.querySelectorAll("select")).select2({
+            theme: 'bootstrap',
+            width: '100%',
+            placeholder: 'Seleccione una categoría'
+        });
+    }
     document.querySelector("#btnAgregarContacto").onclick = e=>{
         listaContacto.append(agregarContacto(null,"",""));
         if(listaContacto.children.length){
             txtSinContacto.hidden = true;
+        }
+    }
+    function agregarTasa({idTasa,valorCategoria,valorTasa}) {
+        const primerItem = listaTasa.children[0].cloneNode(true);
+        const cbCategoria = primerItem.querySelector("select");
+        const txtTasa = primerItem.querySelector("input[type='number']");
+        const btnEliminar = primerItem.querySelector("button");
+        const idTasaContenido = primerItem.querySelector("input[type='hidden']");
+        btnEliminar.removeAttribute("data-tasa");
+        idTasaContenido.value = 0;
+        if(idTasa){
+            btnEliminar.setAttribute("data-tasa",idTasa);
+            idTasaContenido.value = idTasa;
+        }
+        cbCategoria.value = valorCategoria;
+        txtTasa.value = valorTasa;
+        cbCategoria.setAttribute("id",`idModalid_categoria${!idTasa ? (new Date).valueOf() : idTasa}`);
+        cbCategoria.setAttribute("id",`idModalid_tasa${!idTasa ? (new Date).valueOf() : idTasa}`);
+        return primerItem;
+    }
+    listaTasa.onclick = function(e){
+        if(e.target.classList.contains("btn-danger")){
+            if(listaTasa.children.length === 1){
+                return alertify.error("el cliente debe de contener al menos una tasa");
+            }
+            const li = e.target.parentElement.parentElement.parentElement;
+            if(!e.target.dataset.tasa){
+                li.remove();
+                return alertify.success("tasa eliminada");
+            }
+            alertify.confirm("Mensaje","¿Estas seguro de eliminar esta tasa de forma permanente?",async () => {
+                try {
+                    gen.cargandoPeticion(e.target, gen.claseSpinner, true);
+                    const response = await gen.funcfetch("clientes/tasa/eliminar/" + idCliente + "/" + e.target.dataset.tasa ,null,"DELETE");
+                    if (response.session) {
+                        return alertify.alert([...gen.alertaSesion], () => { window.location.reload() });
+                    }
+                    li.remove();
+                    alertify.success(response.success);
+                }catch(error){
+                    console.error(error);
+                    alertify.error("error al eliminar la tasa")
+                }finally{
+                    gen.cargandoPeticion(e.target, 'fas fa-trash-alt', false);
+                }
+            },()=>{})
         }
     }
     listaContacto.onclick = function(e){
@@ -180,6 +237,11 @@ function loadPage(){
         switchEstado.parentElement.querySelector("label").textContent = "VIGENTE";
         formCliente.reset();
         listaContacto.innerHTML = "";
+        Array.from(listaTasa.children).forEach((li,key) => {
+            if(key > 0){
+                li.remove();
+            }
+        })
         if(!listaContacto.children.length){
             txtSinContacto.hidden = false;
         }
@@ -212,6 +274,22 @@ function loadPage(){
                             if(listaContacto.children.length){
                                 txtSinContacto.hidden = true;
                             }
+                            continue;
+                        }
+                        if (key == "tasas"){
+                            $(listaTasa.querySelectorAll("select")).select2('destroy');
+                            valor.forEach(tasa => {
+                                listaTasa.append(agregarTasa({idTasa:tasa.id,valorCategoria : tasa.id_categoria,valorTasa : tasa.tasa}));
+                            });
+                            if(listaTasa.children.length > 1){
+                                listaTasa.children[0].remove();
+                            }
+                            $(listaTasa.querySelectorAll("select")).select2({
+                                theme: 'bootstrap',
+                                width: '100%',
+                                placeholder: 'Seleccione una categoría'
+                            });
+                            continue;
                         }
                         if (key == "estado"){
                             switchEstado.checked = valor === 1 ? true : false;

@@ -59,23 +59,42 @@
                     <b>N° de fardo activo: <span class="text-danger" id="txtFardoActivo">Ninguno</span></b>
                 </div>
             </form>
-            <h5 class="text-primary">
-                <i class="fas fa-caret-right"></i>
-                Datos Excel
-            </h5>
+            <div class="d-flex form-group justify-content-between flex-wrap" style="gap: 5px;">
+                <h5 class="text-primary">
+                    <i class="fas fa-caret-right"></i>
+                    Tasas por categoría
+                </h5>
+                <button type="button" class="btn btn-sm btn-danger" id="btnTasasCliente">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+            <form id="formTasasProductos">
+                <div id="contenidoTasasProductos" class="d-flex flex-wrap" style="gap: 10px;">
+                    <div class="w-100 form-group text-center">
+                        <span>Seleccione un cliente para visualizar las tasas</span>
+                    </div>
+                </div>
+                <input type="submit" hidden id="frmTasasProductoInput">
+            </form>
+            <div class="d-flex justify-content-between flex-wrap" style="gap: 5px;">
+                <h5 class="text-primary">
+                    <i class="fas fa-caret-right"></i>
+                    Datos Adicionales
+                </h5>
+                <button type="button" class="btn btn-sm btn-danger" id="btnTasasAdicionales">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
             <form id="formTasasKardex" class="form-row">
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="idModaltasa">Tasa</label>
+                    <label for="idModalguia_aerea">Guía aérea</label>
                     <div class="input-group">
-                        <div class="input-group-prepend">
-                            <div class="input-group-text">$</div>
-                        </div>
-                        <input type="number" step="0.01" min="0" class="form-control" name="tasa" id="idModaltasa">
+                        <input type="text" maxlength="250" class="form-control" name="guia_aerea" id="idModalguia_aerea">
                     </div>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="idModaladuanero">Agente aduanas</label>
-                    <select name="aduanero" id="idModaladuanero" class="select2-simple">
+                    <label for="idModalid_aduanero">Agente aduanas</label>
+                    <select name="aduanero" id="idModalid_aduanero" class="select2-simple">
                         <option value=""></option>
                         @foreach ($aduaneros as $aduanero)
                             <option value="{{$aduanero->id}}">{{$aduanero->nombre_completo}}</option>
@@ -91,11 +110,7 @@
                         <input type="number" step="0.01" min="0" class="form-control" name="tasa_extranjera" id="idModaltasa_extranjera" required>
                     </div>
                 </div>
-                <div class="form-grop col-12 col-md-6 col-lg-3">
-                    <button type="submit" class="btn btn-sm btn-danger">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                </div>
+                <input type="submit" id="frmTasasKardexInput" hidden>
             </form>
             <div class="table-responsive">
                 <table class="table table-sm table-bordered" style="font-size: 0.8rem; text-align: center;">

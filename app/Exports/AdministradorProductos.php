@@ -27,14 +27,14 @@ class AdministradorProductos implements FromView,ShouldAutoSize,WithStyles,WithT
     }
     public function styles(Worksheet $sheet)
     {
-        $rango = "B" . $this->lineaInicio . ":H" . $this->lineaFin;
+        $rango = "B" . $this->lineaInicio . ":I" . $this->lineaFin;
         $titulo = $sheet->getStyle('B2');
         $titulo->getFont()->setBold(true);
         $titulo->getFont()->setUnderline(true);
         $titulo->getFont()->setSize(18);
         $titulo->getAlignment()->setHorizontal('center');
         $titulo->getAlignment()->setVertical('center');
-        $cabeceraTabla = $sheet->getStyle("B4:H4");
+        $cabeceraTabla = $sheet->getStyle("B4:I4");
         $cabeceraTabla->getAlignment()->setHorizontal('center');
         $cabeceraTabla->getFont()->setBold(true);
         $sheet->getRowDimension(2)->setRowHeight(40);

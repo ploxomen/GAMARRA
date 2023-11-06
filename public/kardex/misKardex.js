@@ -38,6 +38,9 @@ function loadPage() {
             data : 'guia_remision_sunat'
         },
         {
+            data : 'guia_aerea'
+        },
+        {
             data : 'estado',
             render : function(data){
                 let estado = "";
@@ -269,10 +272,27 @@ function loadPage() {
         }
         if(e.target.classList.contains("editar-kardex")){
             idKardex = e.target.dataset.kardex;
-            $('#idModaladuanero').val(e.target.dataset.aduanero).trigger("change");
-            $('#editarKardex').modal("show");
-            txtTasaExtranjera.value = e.target.dataset.tasa;
-            return
+            try {
+                const response = await gen.funcfetch("visualizar/adicional/" + idKardex,null,"GET");
+                if (response.session) {
+                    return alertify.alert([...gen.alertaSesion], () => { window.location.reload() });
+                }
+                for (const key in response.infoAdicional) {
+                    if (Object.hasOwnProperty.call(response.infoAdicional, key)) {
+                        const valor = response.infoAdicional[key];
+                        const dom = document.querySelector("#editarKardex #idModal" + key);
+                        if(!dom){
+                            continue;
+                        }
+                        dom.value = valor;
+                    }
+                }
+                $("#editarKardex .select2-simple").trigger("change");
+                $("#editarKardex").modal("show");
+            } catch (error) {
+                console.error(error);
+                alertify.error("error al obtener los datos adicionales");
+            }
         }
     });
     const $txtFechaEmision = document.querySelector("#generarFactura #modalFechaEmision");
@@ -440,16 +460,18 @@ function loadPage() {
     });
     document.querySelector("#generarFactura #btnAgregarCuotaFactura").addEventListener("click",()=>{
         $tablaCreditosFactura.append(agregarCuotaFactura());
-    })
+    });
+    document.querySelector("#btnTasasCliente").onclick = e =>document.querySelector("#frmTasasProductoInput").click();
+    document.querySelector("#btnTasasAdicionales").onclick = e => document.querySelector("#frmTasasKardexInput").click();
     const frmTasas = document.querySelector("#formTasasKardex");
     $('#idCliente').on("select2:select",function(e){
-        document.querySelector("#idModaltasa").value = "";
         let datos = new FormData();
         datos.append('cliente',$('#idCliente').val());
         datos.append("idKardex",idKardex);
         kardex.cerrarFardo(datos,txtFardoActivo,tableDetalleKardex,false);
         kardex.obtenerKardexPendiente($(this).val(),tableDetalleKardex,txtProveedor,txtProducto,txtCantidad,txtPresentacion,txtFardoActivo,idKardex);
-    })
+    });
+    const frmTasasCliente = document.querySelector("#formTasasProductos");
     $('#editarKardex').on("hidden.bs.modal",function(e){
         frmTasas.reset()
         idKardex = null;
@@ -459,7 +481,11 @@ function loadPage() {
         txtFardoActivo.textContent = "Ninguno";
         tableDetalleKardex.innerHTML = `<tr>
             <td colspan="100%" class="text-center">No se agregaron detalles</td>
-        </tr>`
+        </tr>`;
+        document.querySelector("#contenidoTasasProductos").innerHTML =`
+        <div class="w-100 form-group text-center">
+            <span>Seleccione un cliente para visualizar las tasas</span>
+        </div>`;
     });
     frmKardex.addEventListener("submit",function(e){
         e.preventDefault();
@@ -467,29 +493,28 @@ function loadPage() {
         datos.append("idKardex",idKardex);
         kardex.agregarFardo(datos,txtProveedor,txtProducto,txtPresentacion,txtCantidad,tableDetalleKardex,txtFardoActivo);
     })
-    // $('#idModaladuanero').on("select2:selecting",async function(e){
-    //     try {
-    //         let datos = new FormData();
-    //         datos.append("idKardex",idKardex);
-    //         datos.append("aduanero",$(this).val());
-    //         const response = await gen.funcfetch("actualizar/aduanero",datos,"POST");
-    //         if(response.session){
-    //             return alertify.alert([...gen.alertaSesion],() => {window.location.reload()});
-    //         }
-    //         if(response.alerta){
-    //             return alertify.alert("Alerta",response.alerta);
-    //         }
-    //         alertify.success(response.success);
-    //     } catch (error) {
-    //         console.error(error);
-    //         alertify.error("error al actualizar el agente de aduanas");
-    //     }
-    // });
+    frmTasasCliente.addEventListener("submit",async function(e){
+        e.preventDefault();
+        try {
+            let datos = new FormData(this);
+            datos.append("idKardex",idKardex);
+            datos.append("cliente",$('#idCliente').val());
+            const response = await gen.funcfetch("actualizar/categoriza-tasas",datos,"POST");
+            if(response.session){
+                return alertify.alert([...gen.alertaSesion],() => {window.location.reload()});
+            }
+            if(response.alerta){
+                return alertify.alert("Alerta",response.alerta);
+            }
+            alertify.success(response.success);
+            tablaKardexDatatable.draw();
+        } catch (error) {
+            console.error(error);
+            alertify.error("error al actualizar las tasas");
+        }
+    })
     frmTasas.addEventListener("submit",async function(e){
         e.preventDefault();
-        // if($('#idCliente').val() == ""){
-        //     return alertify.error("por favor seleccione un cliente");
-        // }
         try {
             let datos = new FormData(this);
             datos.append("idKardex",idKardex);

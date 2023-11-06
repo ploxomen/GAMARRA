@@ -46,10 +46,16 @@ class PackingList implements FromView,ShouldAutoSize,WithStyles,WithTitle
         $sheet->getStyle($rango)->getAlignment()->setVertical('center');
         $filaFormula = $this->filaInicial + 1;
         foreach ($this->kardex as $valor) {
-            $sheet->setCellValue('I'.$filaFormula, '=G'.$filaFormula.'*H'.$filaFormula);
-            $sheet->setCellValue('J'.$filaFormula, '=G'.$filaFormula.'*'.$valor['tasa_extranjera']);
-            $sheet->setCellValue('K'.$filaFormula, '=I'.$filaFormula.'-J'.$filaFormula);
-            $filaFormula += $valor['totalProductos'];
+            $tasa = null;
+            foreach ($valor['fardos'] as $fardo) {
+               if($tasa !== $fardo['tasa']){
+                $sheet->setCellValue('I'.$filaFormula, '=G'.$filaFormula.'*H'.$filaFormula);
+                $sheet->setCellValue('J'.$filaFormula, '=G'.$filaFormula.'*'.$valor['tasa_extranjera']);
+                $sheet->setCellValue('K'.$filaFormula, '=I'.$filaFormula.'-J'.$filaFormula);
+               }
+               $filaFormula += count($fardo['productos']);
+               $tasa = $fardo['tasa'];
+            }
         }
         $filaFormula = $this->filaInicial + 1;
         $sheet->setCellValue('D'.$this->filaFinal, '=SUM(D'.$this->filaInicial + 1 .':D'.$this->filaFinal - 1 .')');

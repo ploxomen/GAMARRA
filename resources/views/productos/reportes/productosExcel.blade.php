@@ -18,6 +18,7 @@
             <th>N°</th>
             <th>CODIGO</th>
             <th>PRODUCTO</th>
+            <th>CATEGORÍA</th>
             <th>FAMILIA</th>
             <th>SUBFAMILIA</th>
             <th>PRECIO</th>
@@ -37,6 +38,7 @@
                 <td>{{ $key + 1 }}</td>
                 <td>{{ $producto->productoCodigo }}</td>
                 <td>{{ $producto->productoNombre }}</td>
+                <td>{{ $producto->nombreCategoria }}</td>
                 <td>{{ $producto->familiaNombre }}</td>
                 <td>{{ $producto->familiaSubNombre }}</td>
                 <td>{{ $producto->precioVenta}}</td>

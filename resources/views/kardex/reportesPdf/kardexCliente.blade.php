@@ -65,7 +65,7 @@
                 $peso = 0;
                 $tasa = empty($kardexCliente) ? 0 : $kardexCliente->tasa;
             @endphp
-            @foreach ($fardos as $fardo)
+            @foreach ($fardos as $keyFardo => $fardo)
                 @php
                     $rowspan = $fardo->productosDetalle()->count();
                     $peso = $peso + $fardo->kilaje;
@@ -75,6 +75,10 @@
                     @foreach ($fardo->productosDetalle as $key => $detalle)
                         @php
                             $cantidad = $cantidad + $detalle->cantidad;
+                            if($key === 0){
+                                $categoriaProducto = $detalle->productos->id_categoria;
+                                $fardos[$keyFardo]['categoria'] = $categoriaProducto;
+                            }
                         @endphp    
                         @if ($key > 0)
                             <tr>
@@ -98,21 +102,42 @@
         </tfoot>
     </table>
     <div style="height: 50px;"></div>
+    @php
+        $totalPagar = 0;
+    @endphp
     <table class="text-center">
-        <tr>
-            <td style="width: 50px;">
-                <b> Tasa: </b> 
-                <span>$ {{number_format($tasa,2)}}</span>
-            </td>
-            <td style="width: 150px;">
-                <b>Peso total: </b>
-                <span>{{$peso}}</span>
-            </td>
-            <td style="width: 100px;">
-                <b>Total a pagar: </b>
-                <span>$ {{number_format($peso * $tasa,2)}}</span> 
-            </td>
-        </tr>
+        <thead>
+            <tr>
+                <th>Categoría</th>
+                <th>Tasa</th>
+                <th>Peso total</th>
+                <th>Importe</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($categorias as $categoria)
+                @php
+                    $pesoCategorias = array_filter($fardos->toArray(),function($fardo)use($categoria){
+                        return $fardo['categoria'] === $categoria->id_categoria;
+                    });
+                    $pesoTotal = array_sum(array_column($pesoCategorias,'kilaje'));
+                    $pagoImporte = $pesoTotal * $categoria->tasa;
+                    $totalPagar += $pagoImporte;
+                @endphp
+                <tr>
+                    <td>{{$categoria->categoria->nombreCategoria}}</td>
+                    <td>$ {{number_format($categoria->tasa,2)}}</td>
+                    <td>{{$pesoTotal}}</td>
+                    <td>$ {{number_format($pagoImporte,2)}}</td>
+                </tr>
+            @endforeach
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3"></td>
+                <td class="text-center" style="border-top: 1px solid black;">$ {{number_format($totalPagar,2)}}</td>
+            </tr>
+        </tfoot>
     </table>
 </body>
 </html>

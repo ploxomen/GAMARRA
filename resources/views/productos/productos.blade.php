@@ -33,6 +33,7 @@
                     <th>N°</th>
                     <th>Código</th>
                     <th>Producto</th>
+                    <th>Categoría</th>
                     <th>Familia</th>
                     <th>Subfamilia</th>
                     <th>Precio</th>

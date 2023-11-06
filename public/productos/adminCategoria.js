@@ -1,7 +1,7 @@
 function loadPage(){
     const general = new General();
-    const tablaMarca = document.querySelector("#tablaMarca");
-    const tablaMarcaDataTable = $(tablaMarca).DataTable({
+    const tablaCategoria = document.querySelector("#tablaCategoria");
+    const tablaCategoriaDataTable = $(tablaCategoria).DataTable({
         ajax: {
             url: 'categorias/listar',
             method: 'GET',
@@ -54,7 +54,7 @@ function loadPage(){
     const btnGuardarForm = document.querySelector("#btnGuardarForm");
     const checkEstado = document.querySelector("#customSwitch1");
     let idCategoria = null;
-    tablaMarca.onclick = async function(e){
+    tablaCategoria.onclick = async function(e){
         if (e.target.classList.contains("btn-outline-info")){
             try {
                 general.cargandoPeticion(e.target, general.claseSpinner, true);
@@ -66,7 +66,7 @@ function loadPage(){
                 if(response.success){
                     alertify.success("pendiente para editar");
                     const categoria = response.success;
-                    txtnombreCategoria.value = categoria.nombreMarca;
+                    txtnombreCategoria.value = categoria.nombreCategoria;
                     txttasaCategoria.value = categoria.tasaCategoria;
                     idCategoria = categoria.id;
                     checkEstado.checked = categoria.estado;
@@ -81,7 +81,7 @@ function loadPage(){
 
         }
         if (e.target.classList.contains("btn-outline-danger")) {
-            alertify.confirm("Alerta","¿Deseas eliminar esta marca?",async () => {
+            alertify.confirm("Alerta","¿Deseas eliminar esta categoría?",async () => {
                 try {
                     general.cargandoPeticion(e.target, general.claseSpinner, true);
                     const response = await general.funcfetch("categorias/eliminar/" + e.target.dataset.categoria,null,"DELETE");
@@ -95,12 +95,12 @@ function loadPage(){
                     if (response.error) {
                         return alertify.alert("Alerta", response.error);
                     }
-                    tablaMarcaDataTable.draw();
+                    tablaCategoriaDataTable.draw();
                     return alertify.success(response.success);
                 } catch (error) {
                     general.cargandoPeticion(e.target, 'fas fa-trash-alt', true);
                     console.error(error);
-                    alertify.error('error al eliminar la marca');
+                    alertify.error('error al eliminar la categoria');
                 }
             },() => {})
         }
@@ -113,7 +113,7 @@ function loadPage(){
     formCategoria.onsubmit = async function(e){
         e.preventDefault();
         let datos = new FormData(this);
-        const url = idCategoria != null ? "categorias/editar/" + idCategoria : 'categorias/crear';
+        const url = idCategoria != null ? "categorias/actualizar/" + idCategoria : 'categorias/crear';
         try {
             general.cargandoPeticion(btnGuardarForm, general.claseSpinner, true);
             const response = await general.funcfetch(url, datos, "POST");
@@ -123,14 +123,14 @@ function loadPage(){
             }
             if (response.success) {
                 alertify.success(response.success);
-                tablaMarcaDataTable.draw();
+                tablaCategoriaDataTable.draw();
                 formCategoria.reset();
                 idCategoria = null;
             }
         } catch (error) {
             idCategoria = null;
             console.error(error);
-            alertify.error(idCategoria != null ? "error al editar la marca" : 'error al agregar la marca')
+            alertify.error(idCategoria != null ? "error al editar la categoria" : 'error al agregar la categoria')
         }
 
     }

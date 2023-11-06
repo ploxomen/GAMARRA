@@ -40,9 +40,9 @@
                     <button class="btn btn-sm btn-exportar btn-danger" data-accion="pdf" type="button" title="Exportar en PDF" data-toggle="tooltip">
                         <i class="fas fa-file-pdf"></i>               
                     </button>
-                    <button class="btn btn-sm btn-exportar btn-success" data-accion="excel" type="button" title="Exportar en Excel" data-toggle="tooltip">
+                    {{-- <button class="btn btn-sm btn-exportar btn-success" data-accion="excel" type="button" title="Exportar en Excel" data-toggle="tooltip">
                         <i class="fas fa-file-excel"></i>                    
-                    </button>
+                    </button> --}}
                 </div>
             </form>
         </div>

@@ -53,14 +53,46 @@
                     <label for="idModaldireccion">Dirección</label>
                     <input type="text" name="direccion" id="idModaldireccion" rows="3" class="form-control">
                 </div>
-                <div class="form-group col-12 col-md-6">
-                    <label for="idModaltasa">Tasa</label>
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <div class="input-group-text">$</div>
-                        </div>
-                        <input type="number" step="0.01" min="0" class="form-control" name="tasa" id="idModaltasa" required>
-                    </div>
+                <div class="form-group col-12 d-flex justify-content-between">
+                    <h5 class="text-primary">
+                        <i class="fas fa-caret-right"></i>
+                        Datos de la tasa
+                    </h5>
+                    <button type="button" class="btn btn-sm btn-light" id="btnAgregarTasa">
+                        <i class="fas fa-plus"></i> 
+                    </button>
+                </div>
+                <div class="col-12 form-group">
+                    <ol class="pl-3" id="contenidoTasas">
+                        <li>
+                            <div class="form-row align-items-center">
+                                <input type="hidden" value="0" name="id_tasa[]">
+                                <div class="form-group col-6 form-required">
+                                    <label for="idModalid_categoria">Categoría</label>
+                                    <select name="id_categoria[]" id="idModalid_categoria" data-placeholder="Seleccione una categoria" required class="select2-simple">
+                                        <option value=""></option>
+                                        @foreach ($categorias as $key => $categoria)
+                                            <option {{$key === 0 ? 'selected' : ''}} value="{{$categoria->id}}">{{$categoria->nombreCategoria}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group col-6 col-md-5">
+                                    <label for="idModaltasa">Tasa</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <div class="input-group-text">$</div>
+                                        </div>
+                                        <input type="number" step="0.01" min="0" class="form-control" name="tasa[]" id="idModaltasa" required>
+                                    </div>
+                                </div>
+                                <div class="form-group col-12 col-md-1">
+                                    <button type="button" class="btn btn-sm btn-danger" title="Eliminar tasa">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </li>
+                    </ol>
                 </div>
                 <div class="form-group col-12 d-flex justify-content-between">
                     <h5 class="text-primary">

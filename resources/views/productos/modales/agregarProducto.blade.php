@@ -43,6 +43,15 @@
                         </div>
                     </div>
                 </div>
+                <div class="form-group col-6 form-required">
+                    <label for="idModalid_categoria">Categoría</label>
+                    <select name="id_categoria" id="idModalid_categoria" data-placeholder="Seleccione una categoria" required class="select2-simple">
+                        <option value=""></option>
+                        @foreach ($categorias as $categoria)
+                            <option value="{{$categoria->id}}">{{$categoria->nombreCategoria}}</option>
+                        @endforeach
+                    </select>
+                </div>
                 <div class="form-group col-12 col-md-8">
                     <label for="customFileLang">Imagen del Producto</label>
                     <input type="file" name="urlImagen" class="form-control-file form-control-sm" accept="image/*" id="customFileLang">

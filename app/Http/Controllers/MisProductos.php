@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\AdministradorProductos;
 use App\Http\Controllers\Usuario;
+use App\Models\Categoria;
 use App\Models\Familia;
 use App\Models\Productos;
 use App\Models\SubFamilias;
@@ -31,7 +32,8 @@ class MisProductos extends Controller
         }
         $modulos = $this->usuarioController->obtenerModulos();
         $familias = Familia::all()->where('estado',1);
-        return view("productos.productos",compact("modulos","familias"));
+        $categorias = Categoria::all()->where('estado',1);
+        return view("productos.productos",compact("modulos","familias","categorias"));
     }
     public function listar(Request $request)
     {
@@ -91,7 +93,7 @@ class MisProductos extends Controller
             if(Productos::cantidadProductosCodigo($request->codigo)){
                 return response()->json(['alerta' => 'El código ' . $request->codigo . ' del producto ya se encuentra registrado, por favor establesca otro código']);
             }
-            $datos = $request->only("codigo","nombreProducto","descripcion","precioVenta","id_subfamilia");
+            $datos = $request->only("codigo","nombreProducto","id_categoria","descripcion","precioVenta","id_subfamilia");
             if($request->has('urlImagen')){
                 $datos['urlImagen'] = $this->guardarArhivo($request,'urlImagen',"productos");
                 $urlImage = $datos['urlImagen'];
@@ -130,7 +132,7 @@ class MisProductos extends Controller
             if(Productos::cantidadProductosCodigoEditar($request->codigo,$producto->id)){
                 return response()->json(['alerta' => 'El código ' . $request->codigo . ' del producto ya se encuentra registrado, por favor establesca otro código']);
             }
-            $datos = $request->only("codigo","nombreProducto","descripcion","precioVenta","id_subfamilia");
+            $datos = $request->only("codigo","nombreProducto","descripcion","id_categoria","precioVenta","id_subfamilia");
             if($request->has('urlImagen')){
                 if(!empty($producto->urlImagen) && Storage::disk('productos')->exists($producto->urlImagen)){
                     Storage::disk('productos')->delete($producto->urlImagen);

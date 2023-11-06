@@ -11,4 +11,9 @@ class Categoria extends Model
     protected $fillable = ['nombreCategoria','tasaCategoria','estado'];
     const CREATED_AT = 'fechaCreada';
     const UPDATED_AT = 'fechaActualizada';
+
+    public function productos()
+    {
+        return $this->hasMany(Productos::class,'id_categoria');
+    }
 }

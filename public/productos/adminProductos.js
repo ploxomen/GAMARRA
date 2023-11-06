@@ -33,6 +33,9 @@ function loadPage(){
             data: 'productoNombre'
         },
         {
+            data: 'nombreCategoria'
+        },
+        {
             data: 'familiaNombre'
         },
         {

@@ -32,7 +32,8 @@
                     <th>Kilaje</th>
                     <th>Importe</th>
                     <th>Factura</th>
-                    <th>Guia Remisión</th>
+                    <th>Guía Remisión</th>
+                    <th>Guía aérea</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                 </tr>

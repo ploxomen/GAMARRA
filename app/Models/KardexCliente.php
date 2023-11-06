@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 class KardexCliente extends Model
 {
     public $table = "kardex_cliente";
-    protected $fillable = ['id_kardex','id_cliente','tasa','tasa_extranjera'];
+    protected $fillable = ['id_kardex','id_cliente'];
     const CREATED_AT = 'fechaCreada';
     const UPDATED_AT = 'fechaActualizada';
 
@@ -17,7 +17,7 @@ class KardexCliente extends Model
         if(empty($cliente)){
             return [];
         }
-        $kardexs = KardexCliente::select("c.nombreCliente","k.guia_area","c.id AS idCliente","kardex_cliente.id_kardex")
+        $kardexs = KardexCliente::select("c.nombreCliente","k.guia_aerea","c.id AS idCliente","kardex_cliente.id_kardex","kardex_cliente.id")
         ->selectRaw("LPAD(k.id,5,'0') AS nro_kardex,DATE_FORMAT(k.fechaCreada,'%d/%m/%Y') AS fecha_kardex")
         ->join("kardex AS k","kardex_cliente.id_kardex","=","k.id")
         ->join("clientes AS c","c.id","=","kardex_cliente.id_cliente")
@@ -78,7 +78,6 @@ class KardexCliente extends Model
         ->groupBy("kfd.id_proveedor")->groupBy("kfd.id_producto")->orderBy("cantidades","desc")->get();
     }
     static function precioRankingAduanero($fechaIncio,$fechaFin,$buscador) : Object {
-        
         return DB::table('kardex AS k')->selectRaw("DISTINCT kf.id")->select("a.nombre_completo","p.pais_espanish","a.id","kf.id AS sss","kf.kilaje")
         ->selectRaw("(SUM(kf.kilaje) * k.tasa_extranjera) AS costos")
         ->join("kardex_fardos AS kf","kf.id_kardex","=","k.id")
@@ -89,5 +88,9 @@ class KardexCliente extends Model
         ->whereRaw("DATE_FORMAT(k.fechaCreada,'%Y-%m-%d') BETWEEN ? AND ?",[$fechaIncio,$fechaFin])
         ->groupBy("a.id")->orderBy("costos","desc")
         ->get();
+    }
+    public function tasasCategorias()
+    {
+        return $this->hasMany(KardexClienteCategoria::class,'id_kardex_cliente');
     }
 }

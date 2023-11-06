@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Exports\AdministradorClientes;
 use App\Http\Controllers\Usuario;
+use App\Models\Categoria;
 use App\Models\Clientes as ModelsClientes;
 use App\Models\ClientesContactos;
+use App\Models\ClientesTasas;
 use App\Models\Paises;
 use App\Models\Rol;
 use App\Models\TipoDocumento;
@@ -35,7 +37,8 @@ class Clientes extends Controller
         $modulos = $this->usuarioController->obtenerModulos();
         $tiposDocumentos = TipoDocumento::where('estado',1)->get();
         $paises = Paises::all()->where('estado',1);
-        return view("ventas.clientes",compact("modulos","tiposDocumentos","paises"));
+        $categorias = Categoria::all()->where('estado',1);
+        return view("ventas.clientes",compact("modulos","tiposDocumentos","paises","categorias"));
     }
     public function listar()
     {
@@ -92,7 +95,17 @@ class Clientes extends Controller
         try {
             $usuario = User::create($datosUsuario);
             UsuarioRol::create(['rolFk' => $rolCliente->id,'usuarioFk' => $usuario->id]);
-            $cliente = ModelsClientes::create(['tipo_documento' => $request->tipo_documento, 'nro_documento' => $request->nro_documento,'id_usuario' => $usuario->id,'id_pais' => $request->id_pais,'nombreCliente' => $request->nombreCliente,'estado' => 1,'tasa' => $request->tasa]);
+            $cliente = ModelsClientes::create(['tipo_documento' => $request->tipo_documento, 'nro_documento' => $request->nro_documento,'id_usuario' => $usuario->id,'id_pais' => $request->id_pais,'nombreCliente' => $request->nombreCliente,'estado' => 1]);
+            if(isset($request->id_categoria)){
+                for ($i=0; $i < count($request->id_categoria); $i++) {
+                    $tasa = [
+                        'id_cliente' => $cliente->id,
+                        'id_categoria' => isset($request->id_categoria[$i]) ? $request->id_categoria[$i] : null,
+                        'tasa' => isset($request->tasa[$i]) ? $request->tasa[$i] : 0
+                    ];
+                    ClientesTasas::create($tasa);
+                }
+            }
             if(isset($request->contactoNombres)){
                 for ($i=0; $i < count($request->contactoNombres); $i++) {
                     $contactos = [
@@ -136,10 +149,24 @@ class Clientes extends Controller
             }
             $datosUsuario = $request->only("telefono","celular","direccion");
             $datosUsuario['nombres'] = $request->nombreCliente;
-            $datosCliente = $request->only('tipo_documento','nro_documento',"nombreCliente","id_pais","tasa");
+            $datosCliente = $request->only('tipo_documento','nro_documento',"nombreCliente","id_pais");
             $datosCliente['estado'] = $request->has("estado") ? 1 : 0;
             User::where('id',$cliente->id_usuario)->update($datosUsuario);
             $cliente->update($datosCliente);
+            if(isset($request->id_categoria)){
+                for ($i=0; $i < count($request->id_categoria); $i++) {
+                    $tasa = [
+                        'id_categoria' => isset($request->id_categoria[$i]) ? $request->id_categoria[$i] : null,
+                        'tasa' => isset($request->tasa[$i]) ? $request->tasa[$i] : 0
+                    ];
+                    if(isset($request->id_tasa[$i]) && $request->id_tasa[$i] != '0'){
+                        ClientesTasas::where(['id' => $request->id_tasa[$i],'id_cliente' => $cliente->id])->update($tasa);
+                    }else{
+                        $tasa['id_cliente'] = $cliente->id;
+                        ClientesTasas::create($tasa);
+                    }
+                }
+            }
             if(isset($request->contactoNombres)){
                 for ($i=0; $i < count($request->contactoNombres); $i++) {
                     $contactos = [
@@ -160,6 +187,15 @@ class Clientes extends Controller
             DB::rollBack();
             return response()->json(['error' => $th->getMessage()]);
         }
+    }
+    public function eliminarTasa($cliente,$tasa)
+    {
+        $verif = $this->usuarioController->validarXmlHttpRequest($this->moduloCliente);
+        if(isset($verif['session'])){
+            return response()->json(['session' => true]); 
+        }
+        ClientesTasas::where(['id_cliente' => $cliente,'id' => $tasa])->delete();
+        return response()->json(['success' => 'tasa eliminada correctamente']);
     }
     public function eliminarContacto(ClientesContactos $contacto)
     {

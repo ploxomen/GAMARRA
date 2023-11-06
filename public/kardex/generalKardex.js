@@ -216,6 +216,7 @@ class Kardex{
         placeholder: !$(this).data("placeholder") ? "Seleccione una opción" : $(this).data("placeholder"),
         tags: !$(this).data("tags") ? false : true
     }
+    
     async obtenerKardexPendiente(idCliente,tableDetalleKardex,txtProveedor,txtProducto,txtCantidad,txtPresentacion,txtFardoActivo,idKardex = null){
         try {
             const url = !idKardex ? this.general.url + "/almacen/kardex/pendiente/" + idCliente : this.general.url + "/almacen/kardex/pendiente/editar/" + idCliente +"/" + idKardex;
@@ -228,7 +229,11 @@ class Kardex{
                 return false
             }
             if(idKardex && response.tasas){
-                document.querySelector("#idModaltasa").value = response.tasas.tasa;
+                let templateTasas = "";
+                response.tasas.forEach(tasas => {
+                    templateTasas += this.contenidoTasasEditar(tasas).outerHTML;
+                });
+                document.querySelector("#contenidoTasasProductos").innerHTML = !templateTasas ? `<div class="w-100 form-group text-center"><span>No se encontraron tasas para este cliente</span></div>` : templateTasas
             }
             this.vacioTablaDetalle = false;
             txtFardoActivo.textContent = !response.kardex.nroFardoActivo ? 'Ninguno' : response.kardex.nroFardoActivo;
@@ -240,6 +245,7 @@ class Kardex{
             $(txtProveedor).select2("destroy");
             $(txtProducto).select2("destroy");
             $(txtPresentacion).select2("destroy");
+            
             response.kardex.listaFardos.forEach(fardo => {
                 const nroFardo = fardo.nro_fardo;
                 fardo.productos.forEach((producto,kproducto) => {
@@ -257,6 +263,17 @@ class Kardex{
             console.error(error);
             alertify.error("error al obtener los fardos para este cliente");
         }
+    }
+    contenidoTasasEditar({id,nombreCategoria,tasa}) {
+        const div = document.createElement("div");
+        div.innerHTML = `
+        <input type="hidden" value="${id}" name="idCategoria[]">
+        <div class="form-group">
+            <label>Tasa de ${nombreCategoria}</label>
+            <input name="tasaCategoria[]" required step="0.01" min="0" class="form-control form-control" value="${tasa}">
+        </div>
+        `
+        return div;
     }
     async cambiarValorKardex(e,idKardex){
         let datos = new FormData();

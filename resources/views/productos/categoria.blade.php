@@ -44,7 +44,7 @@
             </div>
             <div class="form-group col-12 col-md-8">
                 <div class="bg-white p-3 border">
-                    <table id="tablaMarca" class="table table-sm table-bordered">
+                    <table id="tablaCategoria" class="table table-sm table-bordered">
                         <thead class="text-center">
                             <tr>
                                 <th>N°</th>

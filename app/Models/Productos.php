@@ -11,16 +11,12 @@ class Productos extends Model
     protected $primaryKey = 'id';
     const CREATED_AT = 'fechaCreada';
     const UPDATED_AT = 'fechaActualizada';
-    protected $fillable = ['nombreProducto','codigo','id_subfamilia','descripcion','precioVenta','urlImagen','estado'];
+    protected $fillable = ['nombreProducto','id_categoria','codigo','id_subfamilia','descripcion','precioVenta','urlImagen','estado'];
 
-    // public function marca()
-    // {
-    //     return $this->belongsTo(Marca::class,'marcaFk');
-    // }
-    // public function articulo()
-    // {
-    //     return $this->belongsTo(Articulo::class,'id_articulo');
-    // }
+    public function categoria()
+    {
+        return $this->belongsTo(Categoria::class,'id_categoria');
+    }
     public function subfamilia()
     {
         return $this->belongsTo(SubFamilias::class,'id_subfamilia');
@@ -32,7 +28,7 @@ class Productos extends Model
         return $query->where('codigo',$codigo)->where('id','!=',$productoId)->count();
     }
     public function scopeObtenerProductoEditar($query,$productoId){
-        $producto = $query->select(/*"productos.id_articulo AS articuloId",*/"productos.codigo AS productoCodigo","productos.nombreProducto AS productoNombre","productos.descripcion AS productoDescripcion","productos.precioVenta AS productoPrecioVenta","productos.urlImagen AS productoImagen","productos.estado AS productoEstado","familia_sub.id AS familiaSubId","familia_sub.id_familia AS familiaId")
+        $producto = $query->select(/*"productos.id_articulo AS articuloId",*/"productos.codigo AS productoCodigo","productos.id_categoria","productos.nombreProducto AS productoNombre","productos.descripcion AS productoDescripcion","productos.precioVenta AS productoPrecioVenta","productos.urlImagen AS productoImagen","productos.estado AS productoEstado","familia_sub.id AS familiaSubId","familia_sub.id_familia AS familiaId")
         // ->join("articulo","productos.id_articulo","=","articulo.id")
         ->join("familia_sub","productos.id_subfamilia","=","familia_sub.id")
         ->where('productos.id',$productoId)->first();
@@ -43,9 +39,10 @@ class Productos extends Model
         return $producto;
     }
     public function scopeObtenerProductos($query,$ordenarCodigo = false) {
-        $productos = $query->select("productos.id AS productoId","familia.nombre AS familiaNombre","familia_sub.nombre AS familiaSubNombre","productos.codigo AS productoCodigo","productos.nombreProducto AS productoNombre","productos.precioVenta","productos.estado AS productoEstado")
+        $productos = $query->select("productos.id AS productoId","familia.nombre AS familiaNombre","categorias.nombreCategoria","familia_sub.nombre AS familiaSubNombre","productos.codigo AS productoCodigo","productos.nombreProducto AS productoNombre","productos.precioVenta","productos.estado AS productoEstado")
         ->join("familia_sub","familia_sub.id","=","productos.id_subfamilia")
-        ->join("familia","familia.id","=","familia_sub.id_familia");
+        ->join("familia","familia.id","=","familia_sub.id_familia")
+        ->join("categorias","categorias.id","=","productos.id_categoria");
         return $ordenarCodigo ? $productos->orderBy("productoCodigo")->get() : $productos->get();
     }
     public function detalleFardo()

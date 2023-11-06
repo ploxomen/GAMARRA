@@ -50,6 +50,9 @@
             @foreach ($kardex as $cliente)
                 @php
                     $rowspanPrincipal = $cliente['totalProductos'];
+                    $inicioBusqueda = 0;
+                    $comparacionTasa = 0;
+                    $rowSpanGlobal = 0;
                 @endphp
                 <tr>
                     <td rowspan="{{$rowspanPrincipal}}">{{$cliente['cliente']}}</td>
@@ -63,18 +66,44 @@
                         @endif
                         <td rowspan="{{$rowspanSecundario}}">{{$fardo['numero']}}</td>
                         @foreach ($fardo['productos'] as $keyProducto => $producto)
+                            @php
+                                $comparacionTasa++;
+                            @endphp
                             @if ($keyProducto > 0)
                                 <tr>
                             @endif
                             <td>{{$producto['cantidad']}}</td>
                             <td>{{$producto['nombreProducto']}}</td>
                             <td>{{$producto['presentacion']}}</td>
-                            @if ($key === 0 && $keyProducto === 0)
-                                <td rowspan="{{$rowspanPrincipal}}">{{$cliente['totalKilaje']}}</td>
-                                <td rowspan="{{$rowspanPrincipal}}">{{$cliente['tasa']}}</td>
-                                <td rowspan="{{$rowspanPrincipal}}"></td>
-                                <td rowspan="{{$rowspanPrincipal}}"></td>
-                                <td rowspan="{{$rowspanPrincipal}}"></td>
+                            @if ($inicioBusqueda === 0 || (($rowSpanGlobal + 1) === $comparacionTasa))
+                                @php
+                                    if($inicioBusqueda > 0){
+                                        $comparacionTasa = 1;
+                                    }
+                                    $rowspanAcumulado = 0;
+                                    $tasaInicial = null;
+                                    $kilajeAcumulado = 0;
+                                    $recorrerClientesFardos = $cliente['fardos'];
+                                @endphp
+                                @for ($i = $inicioBusqueda; $i < count($recorrerClientesFardos); $i++)
+                                    @php
+                                        $tasaInicial = $recorrerClientesFardos[$i]['tasa'];
+                                        $rowspanAcumulado = $rowspanAcumulado + count($recorrerClientesFardos[$i]['productos']);
+                                        $kilajeAcumulado += $recorrerClientesFardos[$i]['kilaje'];
+                                    @endphp
+                                    @if(!isset($recorrerClientesFardos[$i + 1]) || ($recorrerClientesFardos[$i + 1]['tasa']!==$tasaInicial))
+                                        <td rowspan="{{$rowspanAcumulado}}">{{$kilajeAcumulado}}</td>
+                                        <td rowspan="{{$rowspanAcumulado}}">{{$tasaInicial}}</td>
+                                        <td rowspan="{{$rowspanAcumulado}}"></td>
+                                        <td rowspan="{{$rowspanAcumulado}}"></td>
+                                        <td rowspan="{{$rowspanAcumulado}}"></td>
+                                        @php
+                                            $inicioBusqueda = $i + 1;
+                                            $rowSpanGlobal = $rowspanAcumulado;
+                                            break;
+                                        @endphp
+                                    @endif
+                                @endfor
                             @endif
                             </tr>
                         @endforeach
