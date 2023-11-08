@@ -339,6 +339,20 @@ class Kardex extends Controller
             if($columnaActualizar == 'id_proveedor'){
                 $this->filtrarProveedores($kardex->id);
             }
+            if($columnaActualizar == 'id_producto'){
+                $producto = Productos::find($request->valor);
+                $kardexCliente = KardexCliente::where(['id_kardex' => $kardex->id,'id_cliente' => $request->cliente])->first();
+                $categoriaProducto = $producto->categoria;
+                if(KardexClienteCategoria::where(['id_kardex_cliente' => $kardexCliente->id,'id_categoria' => $categoriaProducto->id])->count() === 0){
+                    $clienteTasa = ClientesTasas::where(['id_cliente' => $request->cliente,'id_categoria' => $categoriaProducto->id])->first();
+                    KardexClienteCategoria::create(['id_kardex_cliente' => $kardexCliente->id,'id_categoria' => $categoriaProducto->id,'tasa' => empty($clienteTasa) ?  $categoriaProducto->tasaCategoria : $clienteTasa->tasa]);
+                }
+                $kardexFardo = KardexFardo::where(['id_kardex' => $kardex->id,'id_cliente' => $request->cliente])->get()->toArray();
+                $idKardexFardos = array_column($kardexFardo,'id');
+                $kadexClienteCategoria = KardexClienteCategoria::where(['id_kardex_cliente' => $kardexCliente->id])->get();
+                $listaCategorias = array_column($kadexClienteCategoria->toArray(),'id_categoria');
+                $this->eliminarCategoriasKardex($idKardexFardos,$listaCategorias,$kardexCliente->id);
+            }
             if($columnaActualizar == 'cantidad' || $columnaActualizar == 'kilaje' || $columnaActualizar == 'precio'){
                 list($totalImporte,$cantidad,$kilaje) = $this->calcularImporteKardex($kardex->id);
                 $kardex->update(['nroFardoActivo' => null,'cantidad' => $cantidad,'kilaje' => $kilaje,'importe' => $totalImporte]);
@@ -397,7 +411,6 @@ class Kardex extends Controller
         $fardos = $kardex->fardos()->where('id_cliente',$cliente)->get();
         $kardexCliente = KardexCliente::where(['id_kardex' => $kardex->id,'id_cliente' => $cliente])->first();
         $categorias = KardexClienteCategoria::where(['id_kardex_cliente' => $kardexCliente->id])->get();
-        // dd($categorias);
         return Pdf::loadView("kardex.reportesPdf.kardexCliente",compact("fardos","kardexCliente","kardex","categorias"))->stream("kardex_cliente_" . $kardex->id . '_' . $cliente .'.pdf');
     }
     public function cerrarFardo(Request $request){
@@ -477,13 +490,13 @@ class Kardex extends Controller
             }
             $kardexFardo = KardexFardo::where(['id_kardex' => $kardex->id,'id_cliente' => $request->cliente]);
             $kardexCliente = KardexCliente::where(['id_kardex' => $kardex->id,'id_cliente' => $request->cliente])->first();
-            $kadexClienteCategoria = KardexClienteCategoria::where(['id_kardex_cliente' => $kardexCliente->id])->get();
+            $kadexClienteCategoria = KardexClienteCategoria::where(['id_kardex_cliente' => $kardexCliente->id]);
             if(!$kardexFardo->count()){
                 $kadexClienteCategoria->delete();
                 $kardexCliente->delete();
             }else{
                 $idKardexFardos = array_column($kardexFardo->get()->toArray(),'id');
-                $listaCategorias = array_column($kadexClienteCategoria->toArray(),'id_categoria');
+                $listaCategorias = array_column($kadexClienteCategoria->get()->toArray(),'id_categoria');
                 $this->eliminarCategoriasKardex($idKardexFardos,$listaCategorias,$kardexCliente->id);
             }
             $this->filtrarProveedores($kardex->id);
@@ -650,8 +663,8 @@ class Kardex extends Controller
             }
             $categoriaProducto = $producto->categoria;
             if(KardexClienteCategoria::where(['id_kardex_cliente' => $kardexCliente->id,'id_categoria' => $categoriaProducto->id])->count() === 0){
-                $clienteTasa = ClientesTasas::where(['id_cliente' => $request->cliente,'id_categoria' => $categoriaProducto->id]);
-                KardexClienteCategoria::create(['id_kardex_cliente' => $kardexCliente->id,'id_categoria' => $categoriaProducto->id,'tasa' => empty($clienteTasa) ? $clienteTasa->tasa : $categoriaProducto->tasaCategoria]);
+                $clienteTasa = ClientesTasas::where(['id_cliente' => $request->cliente,'id_categoria' => $categoriaProducto->id])->first();
+                KardexClienteCategoria::create(['id_kardex_cliente' => $kardexCliente->id,'id_categoria' => $categoriaProducto->id,'tasa' => empty($clienteTasa) ?  $categoriaProducto->tasaCategoria : $clienteTasa->tasa]);
             }
             $nroFardo = $kardex->nroFardoActivo;
             if(empty($nroFardo)){
